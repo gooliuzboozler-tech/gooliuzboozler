@@ -1,10 +1,16 @@
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const seasonPriceId = 'price_1TYwPfIzVbZI7suaxHy2ScZ3'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+
+  if (!stripeSecretKey) {
+    return res.status(500).json({ error: 'Stripe is not configured yet.' })
   }
 
   const { priceId } = req.body
@@ -13,8 +19,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing priceId' })
   }
 
-  // Determine if one-time or recurring based on price ID
-  const seasonPriceId = 'price_1TYwPfIzVbZI7suaxHy2ScZ3'
+  const stripe = new Stripe(stripeSecretKey)
   const isOneTime = priceId === seasonPriceId
 
   try {
