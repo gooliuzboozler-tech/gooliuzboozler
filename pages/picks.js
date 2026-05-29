@@ -161,33 +161,18 @@ export default function Picks() {
   const [filter, setFilter] = useState('All')
   const [lastUpdated, setLastUpdated] = useState(null)
 
-  useEffect(() => {
-    // Check for Stripe session in URL (just paid) or stored token
-    const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    const stored = localStorage.getItem('gb_access')
+   const [memberPassword, setMemberPassword] = useState('')
+  const [loginError, setLoginError] = useState(null)
 
-    if (sessionId) {
-      // Verify session with our API
-      fetch(`/api/verify-session?session_id=${sessionId}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.valid) {
-            localStorage.setItem('gb_access', 'true')
-            setStatus('authorized')
-            window.history.replaceState({}, '', '/picks')
-          } else {
-            setStatus('unauthorized')
-          }
-        })
-        .catch(() => setStatus('unauthorized'))
-    } else if (stored === 'true') {
+  useEffect(() => {
+    const stored = localStorage.getItem('gb_member_access')
+
+    if (stored === 'true') {
       setStatus('authorized')
     } else {
       setStatus('unauthorized')
     }
 
-    // Load picks data
     fetch('/api/picks')
       .then(r => r.json())
       .then(data => {
@@ -196,6 +181,26 @@ export default function Picks() {
       })
       .catch(() => {})
   }, [])
+
+  async function handleMemberLogin(e) {
+    e.preventDefault()
+    setLoginError(null)
+
+    const res = await fetch('/api/member-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: memberPassword }),
+    })
+
+    const data = await res.json()
+
+    if (data.success) {
+      localStorage.setItem('gb_member_access', 'true')
+      setStatus('authorized')
+    } else {
+      setLoginError('Wrong password')
+    }
+  }
 
   const filtered = filter === 'All' ? plays : plays.filter(p => p.Trust === filter)
   const counts = {
