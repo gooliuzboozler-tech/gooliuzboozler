@@ -40,26 +40,65 @@ export default function Admin() {
   }
 
   function parseCSV(text) {
-    const lines = text.trim().split('\n')
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
-    return lines.slice(1)
-      .map(line => {
-        // Handle quoted commas
-        const vals = []
-        let cur = '', inQ = false
-        for (let i = 0; i < line.length; i++) {
-          if (line[i] === '"') { inQ = !inQ }
-          else if (line[i] === ',' && !inQ) { vals.push(cur.trim()); cur = '' }
-          else { cur += line[i] }
-        }
-        vals.push(cur.trim())
-        const obj = {}
-        headers.forEach((h, i) => { obj[h] = vals[i] || '' })
-        return obj
+    const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
+    
+    // Find the filterable board section
+    let headerIdx = -1
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('Pitcher,Opponent,')) {
+        headerIdx = i
+        break
+      }
+    }
+    if (headerIdx === -1) return []
+    
+    const headers = lines[headerIdx].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+    
+    const plays = []
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const line = lines[i]
+      if (!line.trim()) break
+      
+      const vals = []
+      let cur = '', inQ = false
+      for (let j = 0; j < line.length; j++) {
+        if (line[j] === '"') { inQ = !inQ }
+        else if (line[j] === ',' && !inQ) { vals.push(cur.trim()); cur = '' }
+        else { cur += line[j] }
+      }
+      vals.push(cur.trim())
+      
+      const row = {}
+      headers.forEach((h, idx) => { row[h] = vals[idx] || '' })
+      
+      if (!row['Pitcher']) break
+      if (row['Parlay Bets'] === 'Pass' || row['Model 1 Best Bet'] === 'Pass' || !row['Model 1 Best Bet']) continue
+      
+      // Normalize to display format
+      plays.push({
+        Pitcher: row['Pitcher'].split('.')[0],
+        Opponent: row['Opponent'],
+        'Game Time': row['Game Time'] || '',
+        Side: row['Side'] || '',
+        Trust: row['Trust'] || 'Likely',
+        'Best Bet': row['Model 1 Best Bet'],
+        'Conservative Bet': row['Model 2 Best Bet'] || '',
+        'Best Prob': row['Model 1 Best Prob'],
+        'Conservative Prob': row['Model 2 Prob'] || '',
+        'Best Edge': row['Model 1 Best Edge'] || '',
+        'Model K': row['Model 1 K'] || '',
+        'K Edge': row['Model 1 K Edge'] || '',
+        'Individual BvP K%': row['Individual BvP K%'] || '',
+        'Individual BvP PA': row['Individual BvP PA'] || '',
+        'Individual BvP Standouts': row['Individual BvP Standouts'] || '',
+        'Opp K Rank': row['Opp K Rank'] || '',
+        'Recent Last 2 K/G': row['K/G'] || '',
+        'Bullpen Data': row['Bullpen Data'] || '',
+        'Kalshi Lines': row['Projected Kalshi Lines'] || '',
       })
-      .filter(p => p.Pitcher && p.Pitcher !== '' && p.Trust !== 'Pass')
+    }
+    return plays
   }
-
   async function handleUpload() {
     if (!file) return
     setStatus('uploading')
