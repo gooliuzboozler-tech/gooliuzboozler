@@ -179,7 +179,7 @@ export default function Home() {
             ['01', 'Win-First Optimizer', 'Every projection runs through the highest-win-rate config first. 247-69 active record. The model optimizes for winning bets, not just projecting Ks.'],
             ['02', 'Trust Tiers', 'Every play is graded Strong, Playable, Thin, or Pass. Only Strong and Playable plays are included in the daily email. No garbage plays.'],
             ['03', 'Three Bet Options', 'Best Bet (highest probability), Conservative Bet (one line safer), Risky Bet (tighter landing zone). You pick your risk tolerance.'],
-            ['04', 'BvP Active Roster Splits', 'Every pitcher's projection includes real hitter-vs-pitcher K% splits for the current active opposing roster — not career aggregates.'],
+            ['04', 'BvP Active Roster Splits', 'Every pitcher\'s projection includes real hitter-vs-pitcher K% splits for the current active opposing roster — not career aggregates.'],
             ['05', 'K Edge Score', 'The gap between the Model K and the betting line. Targets 0.5–1.5 K cushion. The higher the edge, the more confident the projection.'],
             ['06', 'Full Changelog', 'Every model update is logged with a reason and before/after backtest impact. You always know what changed and why.'],
           ].map(([num, title, desc]) => (
