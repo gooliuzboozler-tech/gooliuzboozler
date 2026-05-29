@@ -227,47 +227,50 @@ export default function Picks() {
     </div>
   )
 
-  if (status === 'unauthorized') return (
+    if (status === 'unauthorized') return (
     <>
-      <Head><title>Members Board — GooliuzBoozler</title></Head>
+      <Head><title>Today&apos;s Bets — GooliuzBoozler</title></Head>
       <nav style={navStyle}>
         <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
-        <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', border: 'none', padding: '0.65rem 1.5rem', cursor: 'pointer' }}>
+        <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '0.65rem 1.5rem' }}>
           Subscribe
         </Link>
       </nav>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center', paddingTop: '80px' }}>
-        {/* Blurred preview */}
-        <div style={{ width: '100%', maxWidth: 800, marginBottom: '2.5rem', position: 'relative' }}>
-          <div style={{ filter: 'blur(6px)', opacity: 0.4, pointerEvents: 'none' }}>
-            {[
-              ['Gerrit Cole', 'vs BOS', 'No 9+', '87%', '+0.37'],
-              ['Spencer Strider', 'vs NYM', 'Yes 8+', '84%', '+0.34'],
-              ['Zack Wheeler', 'vs ATL', 'No 7+', '82%', '+0.32'],
-            ].map((row, i) => (
-              <div key={i} style={{ background: '#0e0e0c', border: '1px solid rgba(242,237,227,0.07)', padding: '1rem 1.25rem', marginBottom: 1, display: 'flex', justifyContent: 'space-between', fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>
-                <span>{row[0]}</span><span style={{ color: '#5A5448' }}>{row[1]}</span><span style={{ color: '#22C55E' }}>{row[2]}</span><span>{row[3]}</span><span style={{ color: '#22C55E' }}>{row[4]}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448', letterSpacing: '0.18em', background: '#0A0A08', padding: '0.5rem 1rem', border: '1px solid rgba(242,237,227,0.08)' }}>
-              🔒 MEMBERS ONLY
-            </div>
-          </div>
-        </div>
 
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '3rem', letterSpacing: '0.04em', marginBottom: '1rem' }}>
-          TODAY'S FULL BOARD IS <span style={{ color: '#C8180A' }}>LOCKED</span>
-        </div>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', color: '#BFB090', fontWeight: 300, maxWidth: 440, lineHeight: 1.7, marginBottom: '2rem' }}>
-          Subscribe to access all Strong + Playable plays, BvP callouts, three bet options per pitcher, and the full K Edge breakdown.
-        </p>
-        <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '1rem 2.5rem', cursor: 'pointer', display: 'inline-block' }}>
-          Get Access — From $19/week
-        </Link>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', paddingTop: '80px' }}>
+        <form onSubmit={handleMemberLogin} style={{ width: '100%', maxWidth: 420, background: '#0e0e0c', border: '1px solid rgba(242,237,227,0.08)', padding: '2rem' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8180A', marginBottom: '0.75rem' }}>
+            // Members Only
+          </div>
+
+          <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2.5rem', letterSpacing: '0.04em', marginBottom: '1rem' }}>
+            Today&apos;s Bets
+          </h1>
+
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.95rem', color: '#BFB090', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+            Enter the member password to unlock today&apos;s full board.
+          </p>
+
+          <input
+            type="password"
+            value={memberPassword}
+            onChange={e => setMemberPassword(e.target.value)}
+            placeholder="Member password"
+            style={{ width: '100%', background: '#111', border: '1px solid #222', color: '#F2EDE3', fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', padding: '0.85rem 1rem', outline: 'none', marginBottom: '0.85rem' }}
+          />
+
+          {loginError && (
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#EF4444', marginBottom: '0.85rem' }}>
+              {loginError}
+            </div>
+          )}
+
+          <button type="submit" style={{ width: '100%', background: '#C8180A', border: 'none', color: '#F2EDE3', fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1rem', cursor: 'pointer' }}>
+            Unlock Board
+          </button>
+        </form>
       </div>
     </>
   )
