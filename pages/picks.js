@@ -189,7 +189,7 @@ function LoginGate({ onLogin }) {
           </button>
 
           <div style={{ textAlign: 'center', marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#3a3a3a', letterSpacing: '0.08em' }}>
-            Not a member? <Link href="/#pricing" style={{ color: '#C8180A' }}>Subscribe from $19/week</Link>
+            Not a member? <Link href="/#pricing" style={{ color: '#C8180A' }}>Subscribe from $9.99/week</Link>
           </div>
         </div>
       </div>
