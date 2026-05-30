@@ -135,7 +135,7 @@ export default function Home() {
         </div>
 
         <div className="stat-card fade-up">
-          <div className="stat-card-label">// // All-Time Backtest — Weighted K Model
+          <div className="stat-card-label">// All-Time Backtest — Weighted K Model</div>
           <div className="stat-grid">
             <div>
               <div className="stat-val g">247-69</div>
