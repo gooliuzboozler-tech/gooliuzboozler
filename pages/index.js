@@ -2,8 +2,8 @@ import Head from 'next/head'
 import { useEffect, useState } from 'react'
 
 const PRICES = {
-  weekly:  { id: 'price_1TYwNoIzVbZI7suaeiqXo9Ws', amount: '$19', period: 'per week — billed weekly' },
-  monthly: { id: 'price_1TYwOlIzVbZI7suaEGEbXxia', amount: '$49', period: 'per month — billed monthly' },
+  weekly:  { id: 'price_1TYwNoIzVbZI7suaeiqXo9Ws', amount: '$9.99', period: 'per week — billed weekly' },
+  monthly: { id: 'price_1TYwOlIzVbZI7suaEGEbXxia', amount: '$24.99', period: 'per month — billed monthly' },
   season:  { id: 'price_1TYwPfIzVbZI7suaxHy2ScZ3', amount: '$149', period: 'full 2026 season — one time' },
 }
 
