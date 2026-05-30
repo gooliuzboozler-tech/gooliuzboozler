@@ -172,19 +172,45 @@ export default function Home() {
       {/* HOW IT WORKS */}
       <section id="model" style={{background:'rgba(242,237,227,0.015)', borderTop:'1px solid var(--border)', borderBottom:'1px solid var(--border)'}}>
         <div className="eyebrow">// What Makes This Different</div>
-        <h2 className="section-title">Built on DINER.<br />Sharpened by Backtest.</h2>
+        <h2 className="section-title">Built on Weighted Inputs.<br />Checked Against the Line.</h2>
         <p className="section-sub">
-          Every play has a Trust tier, three bet options (Best, Conservative, Risky),
-          BvP active roster splits, and a K Edge score. No black box.
+          Every board is built from Model 1 and Model 2 projections, probability thresholds,
+          K-edge scoring, market lines, BvP data, opponent strikeout profile, recent form,
+          and bullpen context. No generic picks. Just the numbers that moved the board.
         </p>
+
         <div className="features-grid" style={{marginTop:'3.5rem'}}>
           {[
-            ['01', 'Win-First Optimizer', 'Every projection runs through the highest-win-rate config first. 247-69 active record. The model optimizes for winning bets, not just projecting Ks.'],
-            ['02', 'Trust Tiers', 'Every play is graded Strong, Playable, Thin, or Pass. Only Strong and Playable plays are included in the daily email. No garbage plays.'],
-            ['03', 'Three Bet Options', 'Best Bet (highest probability), Conservative Bet (one line safer), Risky Bet (tighter landing zone). You pick your risk tolerance.'],
-            ['04', 'BvP Active Roster Splits', 'Every pitcher\'s projection includes real hitter-vs-pitcher K% splits for the current active opposing roster — not career aggregates.'],
-            ['05', 'K Edge Score', 'The gap between the Model K and the betting line. Targets 0.5–1.5 K cushion. The higher the edge, the more confident the projection.'],
-            ['06', 'Full Changelog', 'Every model update is logged with a reason and before/after backtest impact. You always know what changed and why.'],
+            [
+              '01',
+              'Model 1 Probability Tiers',
+              'Model 1 Best Prob drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. The board shows every Model 1 bet with its probability.'
+            ],
+            [
+              '02',
+              'Model 1 vs. Model 2',
+              'Model 1 identifies the primary bet and probability. Model 2 provides a second look when the board has another playable angle. Members can compare both instead of relying on one blind projection.'
+            ],
+            [
+              '03',
+              'Weighted Projection Inputs',
+              'The projection blends pitcher baseline, recent K/G, opponent K rank, active-roster matchup, projected Kalshi lines, model K, K edge, and probability edge. The final play is based on the full weighted profile.'
+            ],
+            [
+              '04',
+              'Active Roster BvP Context',
+              'BvP is checked against active opposing hitters, not stale roster assumptions. The board includes individual BvP K%, plate appearances, and standout matchup notes where the sample is useful.'
+            ],
+            [
+              '05',
+              'K Edge and Market Cushion',
+              'K Edge measures the gap between the model strikeout projection and the available market threshold. Higher cushion means the model has more room before the line catches up.'
+            ],
+            [
+              '06',
+              'Bullpen and Game Context',
+              'The board adds game-time context, opponent, side, bullpen data, recent pitcher form, and available lines so members can see why a play is Strong, Playable, Thin, or Pass.'
+            ],
           ].map(([num, title, desc]) => (
             <div key={num} className="feature fade-up">
               <div className="feat-num">{num}</div>
