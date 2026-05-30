@@ -95,7 +95,7 @@ export default function Home() {
       <div className="ticker-wrap">
         <div className="ticker-inner">
           {[
-            'PITCHER K DINER — 2026 SEASON LIVE',
+            'PITCHER K MODEL — 2026 SEASON LIVE — 2026 SEASON LIVE',
             '247-69 ALL-TIME RECORD',
             '78.16% WIN RATE',
             '40.79% ROI',
@@ -103,7 +103,7 @@ export default function Home() {
             'DAILY PICKS — EVERY MLB STARTER',
             'BvP SPLITS — ACTIVE ROSTER',
             'FULL BACKTEST TRANSPARENCY',
-            'PITCHER K DINER — 2026 SEASON LIVE',
+            'PITCHER K MODEL — 2026 SEASON LIVE — 2026 SEASON LIVE',
             '247-69 ALL-TIME RECORD',
             '78.16% WIN RATE',
             '40.79% ROI',
@@ -124,9 +124,9 @@ export default function Home() {
           <div className="hero-eyebrow">2026 Season — Live Now</div>
           <h1>The <em>K</em> Board<br />Built to<br />Beat the Line.</h1>
           <p className="hero-sub">
-            Sharp MLB strikeout projections powered by the Pitcher K DINER model.
-            Daily picks delivered to your inbox — Strong plays, BvP splits, full
-            edge breakdown. No fluff. Just the number.
+            Sharp MLB strikeout projections powered by weighted Model 1 and Model 2 outputs.
+            Members get the full board with probabilities, K edge, BvP context,
+            opponent profile, recent form, bullpen notes, and market-line data.
           </p>
           <div className="hero-actions">
             <a href="#pricing" className="btn-primary">Get Access Now</a>
@@ -135,7 +135,7 @@ export default function Home() {
         </div>
 
         <div className="stat-card fade-up">
-          <div className="stat-card-label">// All-Time Backtest — Win-First Optimizer</div>
+          <div className="stat-card-label">// // All-Time Backtest — Weighted K Model
           <div className="stat-grid">
             <div>
               <div className="stat-val g">247-69</div>
@@ -269,7 +269,7 @@ export default function Home() {
               { yes: true, text: 'Everything in Monthly' },
               { yes: true, text: 'Full board — all 26 plays daily' },
               { yes: true, text: 'K Edge + model variable breakdown' },
-              { yes: true, text: 'DINER changelog access' },
+              { yes: true, text: 'Model notes and weighted-input breakdown' },
               { yes: true, text: '2027 early-access pricing' },
               { yes: true, text: 'One-time payment, no renewal' },
             ]}
@@ -284,7 +284,7 @@ export default function Home() {
         <div className="faq-list">
           {[
             ['How are picks delivered?', 'By email, before first pitch each day. You get a formatted picks sheet with every Strong and Playable play, bet options, probabilities, and BvP callouts.'],
-            ['What is the DINER model?', 'DINER is the projection framework: Defense-adjusted lineup K%, Innings context, Normalized park factor, Umpire tendency, Rest/fatigue adjustment. Every component is weighted and documented in the changelog.'],
+            ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The email always specifies.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
