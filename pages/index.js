@@ -80,16 +80,16 @@ export default function Home() {
       </Head>
 
       {/* NAV */}
-      <nav className="nav">
-        <div>
-          <span className="nav-logo">GOOLIUZ<em>BOOZLER</em></span>
-          <span className="nav-tag">MLB K Props</span>
-        </div>
-        <div style={{display:'flex', gap:'0.75rem', alignItems:'center'}}>
-  <a href="/picks" style={{fontFamily:'DM Mono, monospace', fontSize:'0.7rem', letterSpacing:'0.12em', textTransform:'uppercase', background:'transparent', color:'#F2EDE3', border:'1px solid rgba(242,237,227,0.25)', padding:'0.65rem 1.5rem', cursor:'pointer', textDecoration:'none', transition:'all 0.15s'}}>Today&apos;s Picks</a>
-  <a href="#pricing" className="nav-cta">Get Access</a>
-</div>
-      </nav>
+<nav className="nav">
+  <div>
+    <span className="nav-logo">GOOLIUZ<em>BOOZLER</em></span>
+    <span className="nav-tag">MLB K Props</span>
+  </div>
+  <div style={{display:'flex', gap:'0.75rem', alignItems:'center'}}>
+    <a href="/picks" style={{fontFamily:'DM Mono, monospace', fontSize:'0.7rem', letterSpacing:'0.12em', textTransform:'uppercase', background:'transparent', color:'#F2EDE3', border:'1px solid rgba(242,237,227,0.25)', padding:'0.65rem 1.5rem', cursor:'pointer', textDecoration:'none'}}>Today&#39;s Picks</a>
+    <a href="#pricing" className="nav-cta">Get Access</a>
+  </div>
+</nav>
 
       {/* TICKER */}
       <div className="ticker-wrap">
