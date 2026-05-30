@@ -284,7 +284,7 @@ export default function Home() {
         <div className="faq-list">
           {[
             ['How are picks delivered?', 'By email, before first pitch each day. You get a formatted picks sheet with every Strong and Playable play, bet options, probabilities, and BvP callouts.'],
-            ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more'],
+            ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The email always specifies.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
