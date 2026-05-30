@@ -99,21 +99,30 @@ function PickCard({ play }) {
 
 function LoginGate({ onLogin }) {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [checking, setChecking] = useState(false)
   const [error, setError] = useState(null)
 
   async function handleCheck() {
-    if (!email.trim()) return
+    if (!email.trim() || !password.trim()) return
+
     setChecking(true)
     setError(null)
+
     try {
-      const res = await fetch(`/api/verify-session?email=${encodeURIComponent(email.trim())}`)
+      const res = await fetch('/api/member-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      })
+
       const data = await res.json()
+
       if (data.valid) {
-        localStorage.setItem('gb_email', email.trim().toLowerCase())
-        onLogin(email.trim().toLowerCase())
+        localStorage.setItem('gb_email', data.email)
+        onLogin(data.email)
       } else {
-        setError('No active subscription found for that email. Subscribe below to get access.')
+        setError(data.error || 'Could not unlock picks.')
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -131,32 +140,20 @@ function LoginGate({ onLogin }) {
         <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
-        <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', border: 'none', padding: '0.65rem 1.5rem', cursor: 'pointer', display: 'inline-block' }}>
+        <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '0.65rem 1.5rem' }}>
           Subscribe
         </Link>
       </nav>
 
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: '#0A0A08' }}>
-        {/* Blurred preview */}
-        <div style={{ width: '100%', maxWidth: 700, marginBottom: '2.5rem', position: 'relative' }}>
-          <div style={{ filter: 'blur(5px)', opacity: 0.35, pointerEvents: 'none' }}>
-            {[['Carlos Rodón', 'vs ATH', 'No 7+', '92%', '+0.31'], ['Shota Imanaga', 'vs STL', 'Yes 5+', '84%', '+0.24'], ['Zack Wheeler', 'vs LAD', 'No 7+', '75%', '+0.14']].map((row, i) => (
-              <div key={i} style={{ background: '#0e0e0c', border: '1px solid rgba(242,237,227,0.07)', padding: '1rem 1.25rem', marginBottom: 1, display: 'flex', justifyContent: 'space-between', fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>
-                <span style={{ flex: 2 }}>{row[0]}</span><span style={{ color: '#5A5448', flex: 1 }}>{row[1]}</span><span style={{ color: '#22C55E', flex: 1 }}>{row[2]}</span><span style={{ flex: 1 }}>{row[3]}</span><span style={{ color: '#22C55E', flex: 1 }}>{row[4]}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448', letterSpacing: '0.18em', background: '#0A0A08', padding: '0.5rem 1rem', border: '1px solid rgba(242,237,227,0.08)' }}>🔒 MEMBERS ONLY</div>
-          </div>
-        </div>
-
         <div style={{ width: '100%', maxWidth: 420 }}>
           <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2.5rem', letterSpacing: '0.04em', marginBottom: '0.5rem', textAlign: 'center' }}>
             MEMBER <span style={{ color: '#C8180A' }}>ACCESS</span>
           </div>
+
           <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448', textAlign: 'center', marginBottom: '2rem', lineHeight: 1.7, letterSpacing: '0.05em' }}>
-            Enter the email you used to subscribe.<br />Already a member — no password needed.
+            Enter your subscriber email and password.<br />
+            First time here? Pick a password now.
           </p>
 
           <input
@@ -165,24 +162,34 @@ function LoginGate({ onLogin }) {
             placeholder="your@email.com"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleCheck()}
             autoFocus
           />
 
+          <input
+            style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', color: '#F2EDE3', fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', padding: '0.85rem 1rem', outline: 'none', marginBottom: '0.75rem', boxSizing: 'border-box' }}
+            type="password"
+            placeholder="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleCheck()}
+          />
+
           {error && (
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#EF4444', marginBottom: '0.75rem', lineHeight: 1.6 }}>{error}</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#EF4444', marginBottom: '0.75rem', lineHeight: 1.6 }}>
+              {error}
+            </div>
           )}
 
           <button
             style={{ width: '100%', background: checking ? '#333' : '#C8180A', border: 'none', color: '#F2EDE3', fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.9rem', cursor: checking ? 'not-allowed' : 'pointer' }}
             onClick={handleCheck}
-            disabled={checking || !email.trim()}
+            disabled={checking || !email.trim() || !password.trim()}
           >
-            {checking ? '◌ Checking...' : 'Access My Picks →'}
+            {checking ? 'Checking...' : 'Access My Picks'}
           </button>
 
           <div style={{ textAlign: 'center', marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#3a3a3a', letterSpacing: '0.08em' }}>
-            Not a member? <Link href="/#pricing" style={{ color: '#C8180A' }}>Subscribe from $19/week →</Link>
+            Not a member? <Link href="/#pricing" style={{ color: '#C8180A' }}>Subscribe from $19/week</Link>
           </div>
         </div>
       </div>
