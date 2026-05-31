@@ -51,7 +51,8 @@ function formatRoundedNumber(value, { signed = false } = {}) {
 }
 
 function formatProbability(value) {
-  return formatRoundedNumber(value)
+  const prob = parseProbability(value)
+  return prob ? `${prob.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%` : '-'
 }
 
 function formatEdge(value) {
