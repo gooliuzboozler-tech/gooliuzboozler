@@ -41,43 +41,24 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* SMOKE OVERLAY */
+/* SMOKE PLUME */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image:
-    url('/purple-smoke.png'),
-    url('/purple-smoke.png');
+  background-image: url('/purple-smoke-plume.png');
   background-repeat: no-repeat;
-  background-position:
-    50% 16%,
-    18% 72%;
-  background-size:
-    min(760px, 78vw) auto,
-    min(520px, 58vw) auto;
-  filter: saturate(1.12) blur(0.2px);
+  background-position: 50% 0;
+  background-size: min(520px, 58vw) auto;
+  filter: saturate(1.04) brightness(0.82);
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.74;
+  opacity: 0.62;
 }
 
 body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    url('/purple-smoke.png');
-  background-repeat: no-repeat;
-  background-position: 88% 58%;
-  background-size: min(620px, 66vw) auto;
-  filter: blur(10px) saturate(1.25);
-  transform: scaleX(-1) rotate(-7deg);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.32;
+  content: none;
 }
 
 /* NAV */
