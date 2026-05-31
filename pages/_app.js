@@ -11,9 +11,9 @@ function SmokeBackground() {
   }, [])
 
   return (
-    <div className="smoke-video-bg" aria-hidden="true">
-      <video ref={videoRef} autoPlay muted loop playsInline preload="auto">
-        <source src="/smoke-bg.mp4" type="video/mp4" />
+      <div className="smoke-video-bg" aria-hidden="true">
+        <video ref={videoRef} autoPlay muted loop playsInline preload="auto">
+        <source src="/smoke-vertical-purple.mp4" type="video/mp4" />
       </video>
     </div>
   )
