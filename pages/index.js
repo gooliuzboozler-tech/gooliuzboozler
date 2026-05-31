@@ -217,9 +217,9 @@ export default function Home() {
           <div className="hero-eyebrow">2026 Season — Live Now</div>
           <h1>The <em>K</em> Board<br />Built to<br />Beat the Line.</h1>
           <p className="hero-sub">
-            Sharp MLB strikeout projections powered by weighted Model 1 and Model 2 outputs.
+            Sharp MLB strikeout projections powered by weighted Model 1, Model 2, and Model 3 outputs.
             Members get plan-based access to the picks board, with higher tiers unlocking
-            Model 2, K Edge, BvP context, market lines, and full-board data.
+            Model 2, Model 3, parlay picks, K Edge, BvP context, market lines, and full-board data.
           </p>
           <div className="hero-actions">
             <a href="#pricing" className="btn-primary">Get Access Now</a>
@@ -281,7 +281,7 @@ export default function Home() {
         <div className="eyebrow">// What Makes This Different</div>
         <h2 className="section-title">Built on Weighted Inputs.<br />Checked Against the Line.</h2>
         <p className="section-sub">
-          Every board is built from Model 1 and Model 2 projections, probability thresholds,
+          Every board is built from Model 1, Model 2, and Model 3 projections, probability thresholds,
           K-edge scoring, market lines, BvP data, opponent strikeout profile, recent form,
           and bullpen context. No generic picks. Just the numbers that moved the board.
         </p>
@@ -295,13 +295,13 @@ export default function Home() {
             ],
             [
               '02',
-              'Model 1 vs. Model 2',
-              'Model 1 identifies the primary bet and probability. Model 2 provides a second look when the board has another playable angle. Monthly and Season members can compare both instead of relying on one blind projection.'
+              'Models 1, 2, and 3',
+              'Model 1 identifies the primary bet and probability. Model 2 and Model 3 provide extra comparison angles when the board has another playable route. Monthly and Season members can compare all three instead of relying on one blind projection.'
             ],
             [
               '03',
               'Weighted Projection Inputs',
-              'The projection blends pitcher baseline, recent K/G, opponent K rank, active-roster matchup, projected Kalshi lines, model K, K edge, and probability edge. The final play is based on the full weighted profile.'
+              'The projection blends pitcher baseline, recent K/G, opponent K rank, active-roster matchup, projected Kalshi lines, model K, K edge, probability edge, and model agreement. The final play is based on the full weighted profile.'
             ],
             [
               '04',
@@ -331,7 +331,7 @@ export default function Home() {
       {/* PRICING */}
       <section id="pricing">
         <div className="eyebrow">// Pricing</div>
-        <h2 className="section-title">One Model.<br />Three Ways In.</h2>
+        <h2 className="section-title">Three Models.<br />Three Ways In.</h2>
         <p className="section-sub">
           Members get access to today&apos;s picks board before first pitch. Cancel anytime.
         </p>
@@ -346,9 +346,9 @@ export default function Home() {
               { yes: true,  text: "Today's picks board access" },
               { yes: true,  text: 'Strong + Playable plays' },
               { yes: true,  text: 'Model 1 best bet per pitcher' },
-              { yes: false, text: 'Model 2 comparison plays' },
+              { yes: false, text: 'Model 2 + Model 3 comparison plays' },
+              { yes: false, text: 'Best parlay pick per pitcher' },
               { yes: false, text: 'BvP standout callouts' },
-              { yes: false, text: 'Full board variable breakdown' },
             ]}
           />
           <PriceCard
@@ -360,7 +360,8 @@ export default function Home() {
             features={[
               { yes: true, text: "Today's picks board access" },
               { yes: true, text: 'Strong + Playable plays' },
-              { yes: true, text: 'Model 1 + Model 2 plays' },
+              { yes: true, text: 'Model 1 + Model 2 + Model 3 plays' },
+              { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'BvP standout callouts' },
               { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: false, text: 'Full board access (all plays)' },
@@ -375,7 +376,8 @@ export default function Home() {
             features={[
               { yes: true, text: 'Everything in Monthly' },
               { yes: true, text: 'Full board — all posted plays daily' },
-              { yes: true, text: 'Model 1 + Model 2 across full board' },
+              { yes: true, text: 'Model 1 + Model 2 + Model 3 across full board' },
+              { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: true, text: 'Thin plays + weighted-input data' },
               { yes: true, text: 'One-time payment, no renewal' },
@@ -390,12 +392,12 @@ export default function Home() {
         <h2 className="section-title">Common Questions.</h2>
         <div className="faq-list">
           {[
-            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable Model 1 plays. Monthly adds Model 2, K Edge, BvP, and context. Season adds the full board, including Thin plays."],
-            ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
+            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable Model 1 plays. Monthly adds Model 2, Model 3, parlay picks, K Edge, BvP, and context. Season adds the full board, including Thin plays."],
+            ['What are Models 1, 2, and 3?', 'Models 1, 2, and 3 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
-            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, Model 1 and Model 2 outputs, K Edge, BvP context, market lines, and weighted-input data. One payment, no recurring charges.'],
+            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, Model 1, Model 2, Model 3, best parlay picks, K Edge, BvP context, market lines, and weighted-input data. One payment, no recurring charges.'],
           ].map(([q, a]) => (
             <div key={q} className="faq-item">
               <div className="faq-q">{q}</div>

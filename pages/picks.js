@@ -71,6 +71,10 @@ function planHasModel2(plan) {
   return plan === 'monthly' || plan === 'season'
 }
 
+function planHasModel3(plan) {
+  return plan === 'monthly' || plan === 'season'
+}
+
 function planHasFullBoard(plan) {
   return plan === 'season'
 }
@@ -104,7 +108,13 @@ function PickCard({ play, plan }) {
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
   const model2Bet = play['Model 2 Bet'] || legacyModel2Bet
   const model2Prob = play['Model 2 Prob'] || legacyModel2Prob
+  const model3Bet = play['Model 3 Bet'] || ''
+  const model3Prob = play['Model 3 Prob'] || ''
+  const model3Edge = play['Model 3 Edge'] || ''
+  const parlayPick = play['Parlay Pick'] || ''
   const showModel2 = planHasModel2(plan)
+  const showModel3 = planHasModel3(plan)
+  const modelCardCount = 1 + (showModel2 ? 1 : 0) + (showModel3 ? 1 : 0)
 
   return (
     <div style={{ background: '#0e0e0c', border: `1px solid ${expanded ? ts.border : 'rgba(242,237,227,0.07)'}`, marginBottom: 1, transition: 'border-color 0.2s' }}>
@@ -131,7 +141,7 @@ function PickCard({ play, plan }) {
 
       {expanded && (
         <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(242,237,227,0.05)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: showModel2 ? 'repeat(2, 1fr)' : '1fr', gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${modelCardCount}, minmax(0, 1fr))`, gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
@@ -144,7 +154,23 @@ function PickCard({ play, plan }) {
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{formatProbability(model2Prob)} prob</div>
               </div>
             )}
+            {showModel3 && (
+              <div style={{ background: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', padding: '0.85rem' }}>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#C084FC', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 3 BEST BET</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model3Bet || '—'}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
+                  {formatProbability(model3Prob)} prob{model3Edge ? ` · ${formatEdge(model3Edge)} edge` : ''}
+                </div>
+              </div>
+            )}
           </div>
+
+          {showModel2 && parlayPick && parlayPick.toLowerCase() !== 'pass' && (
+            <div style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', padding: '0.85rem', marginBottom: '0.75rem' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>BEST PARLAY PICK</div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{parlayPick}</div>
+            </div>
+          )}
 
           {showModel2 && (
             <>

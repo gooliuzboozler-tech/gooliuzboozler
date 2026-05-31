@@ -66,10 +66,9 @@ export default function Admin() {
 
       if (!row['Pitcher']) break
 
-      // Skip pass plays
-      const parlayBets = (row['Parlay Bets'] || '').toLowerCase()
+      // Keep Model 1 plays even when the parlay column says Pass.
       const model1Bet = row['Model 1 Best Bet'] || ''
-      if (parlayBets === 'pass' || model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
+      if (model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
 
       plays.push({
         Pitcher: row['Pitcher'].includes('.') ? row['Pitcher'].split('.')[0] : row['Pitcher'],
@@ -79,9 +78,13 @@ export default function Admin() {
         Trust: row['Trust'] || 'Likely',
         'Best Bet': model1Bet,
         'Model 2 Bet': row['Model 2 Best Bet'] || '',
+        'Model 3 Bet': row['Model 3 Best Bet'] || row['Model 3 Bet'] || row['Model 3'] || '',
+        'Parlay Pick': row['Best Parlay Pick'] || row['Parlay Pick'] || row['Parlay Bets'] || '',
         'Best Prob': row['Model 1 Best Prob'] || '',
         'Model 2 Prob': row['Model 2 Prob'] || '',
+        'Model 3 Prob': row['Model 3 Best Prob'] || row['Model 3 Prob'] || row['Model 3 Probability'] || '',
         'Best Edge': row['Model 1 Best Edge'] || '',
+        'Model 3 Edge': row['Model 3 Best Edge'] || row['Model 3 Edge'] || '',
         'Model K': row['Model 1 K'] || '',
         'K Edge': row['Model 1 K Edge'] || '',
         'Individual BvP K%': row['Individual BvP K%'] || '',
