@@ -7,6 +7,20 @@ const PRICES = {
   season:  { id: 'price_1TYwPfIzVbZI7suaxHy2ScZ3', amount: '$149', period: 'full 2026 season — one time' },
 }
 
+const MLB_TEAM_IDS = {
+  ARI: 109, AZ: 109, ATL: 144, BAL: 110, BOS: 111, CHC: 112, CIN: 113,
+  CLE: 114, COL: 115, CWS: 145, CHW: 145, DET: 116, HOU: 117, KC: 118,
+  KCR: 118, LAA: 108, LAD: 119, MIA: 146, MIL: 158, MIN: 142, NYM: 121,
+  NYY: 147, ATH: 133, OAK: 133, PHI: 143, PIT: 134, SD: 135, SDP: 135,
+  SEA: 136, SF: 137, SFG: 137, STL: 138, TB: 139, TBR: 139, TEX: 140,
+  TOR: 141, WSH: 120, WSN: 120,
+}
+
+function teamLogoUrl(team) {
+  const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
+  return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
+}
+
 function PriceCard({ tier, price, featured, features, loading, onSubscribe }) {
   return (
     <div className={`price-card${featured ? ' featured' : ''}`}>
@@ -88,12 +102,17 @@ function FreePickCard({ pick, lastUpdated }) {
     )
   }
 
+  const teamLogo = teamLogoUrl(pick['Pitcher Team'])
+
   return (
     <div className="free-pick-card">
       <div className="free-pick-kicker">// Public Free Pick</div>
       <div className="free-pick-topline">
         <div>
-          <h3 className="free-pick-gold-name">{pick.Pitcher}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {teamLogo && <img src={teamLogo} alt={`${pick['Pitcher Team']} logo`} style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }} />}
+            <h3 className="free-pick-gold-name">{pick.Pitcher}</h3>
+          </div>
           <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
         </div>
         <div className="free-pick-prob">{formatProbability(pick['Best Prob'])}</div>

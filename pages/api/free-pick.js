@@ -20,6 +20,7 @@ function publicPick(play) {
 
   return {
     Pitcher: play.Pitcher || '',
+    'Pitcher Team': play['Pitcher Team'] || '',
     Opponent: play.Opponent || '',
     'Game Time': play['Game Time'] || '',
     Side: play.Side || '',

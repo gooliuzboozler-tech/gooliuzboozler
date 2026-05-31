@@ -308,12 +308,17 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
     )
   }
 
+  const teamLogo = teamLogoUrl(pick['Pitcher Team'])
+
   return (
     <div style={{ background: 'rgba(7,7,7,0.94)', border: '1px solid rgba(242,237,227,0.16)', borderLeft: '3px solid #EAB308', padding: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)', marginBottom: '1.5rem' }}>
       <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.2em', color: '#EAB308', textTransform: 'uppercase', marginBottom: '1rem' }}>// Public Free Pick</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div>
-          <div className="free-pick-gold-name" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', lineHeight: 0.95, letterSpacing: '0.04em' }}>{pick.Pitcher}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {teamLogo && <img src={teamLogo} alt={`${pick['Pitcher Team']} logo`} style={{ width: 44, height: 44, objectFit: 'contain', flexShrink: 0 }} />}
+            <div className="free-pick-gold-name" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', lineHeight: 0.95, letterSpacing: '0.04em' }}>{pick.Pitcher}</div>
+          </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#5A5448', letterSpacing: '0.08em', marginTop: '0.35rem' }}>
             vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}
           </div>
