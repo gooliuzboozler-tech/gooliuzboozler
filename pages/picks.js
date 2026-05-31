@@ -111,6 +111,10 @@ function trustFromProbability(value) {
   return 'Pass'
 }
 
+function getPlayTrust(play) {
+  return trustFromProbability(play['Best Prob'])
+}
+
 function planHasModel2(plan) {
   return plan === 'monthly' || plan === 'season'
 }
@@ -124,12 +128,12 @@ function planHasFullBoard(plan) {
 }
 
 function isCorePlay(play) {
-  return ['Strong', 'Likely', 'Playable'].includes(play.Trust || 'Likely')
+  return ['Strong', 'Playable'].includes(getPlayTrust(play))
 }
 
 function filterByTrust(play, filter) {
-  const trust = play.Trust || 'Likely'
-  if (filter === 'Likely') return trust === 'Strong' || trust === 'Likely'
+  const trust = getPlayTrust(play)
+  if (filter === 'Likely') return trust === 'Strong'
   return trust === filter
 }
 
@@ -146,7 +150,7 @@ function TrustBadge({ trust }) {
 
 function PickCard({ play, plan }) {
   const [expanded, setExpanded] = useState(false)
-  const trust = play.Trust || 'Likely'
+  const trust = getPlayTrust(play)
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
   const legacyModel2Bet = play[['Conserv', 'ative Bet'].join('')] || ''
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
@@ -569,9 +573,9 @@ export default function Picks() {
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
   const filtered = filter === 'All' ? visiblePlays : visiblePlays.filter(p => filterByTrust(p, filter))
   const counts = {
-    Strong: visiblePlays.filter(p => p.Trust === 'Strong' || p.Trust === 'Likely').length,
-    Playable: visiblePlays.filter(p => p.Trust === 'Playable').length,
-    Thin: visiblePlays.filter(p => p.Trust === 'Thin').length,
+    Strong: visiblePlays.filter(p => getPlayTrust(p) === 'Strong').length,
+    Playable: visiblePlays.filter(p => getPlayTrust(p) === 'Playable').length,
+    Thin: visiblePlays.filter(p => getPlayTrust(p) === 'Thin').length,
   }
 
   const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }

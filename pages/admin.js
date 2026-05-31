@@ -32,6 +32,17 @@ export default function Admin() {
     setFile(f); setFileLabel(f.name); setStatus(null); setResult(null)
   }
 
+  function trustFromProbability(value) {
+    const raw = String(value || '').replace('%', '').trim()
+    const num = Number.parseFloat(raw)
+    if (!Number.isFinite(num)) return 'Pass'
+    const prob = num <= 1 ? num * 100 : num
+    if (prob >= 80) return 'Strong'
+    if (prob >= 70) return 'Playable'
+    if (prob >= 60) return 'Thin'
+    return 'Pass'
+  }
+
   function parseCSV(text) {
     const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
 
@@ -68,6 +79,7 @@ export default function Admin() {
 
       // Keep Model 1 plays even when the parlay column says Pass.
       const model1Bet = row['Model 1 Best Bet'] || ''
+      const model1Prob = row['Model 1 Best Prob'] || ''
       if (model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
 
       plays.push({
@@ -75,12 +87,12 @@ export default function Admin() {
         Opponent: row['Opponent'] || '',
         'Game Time': row['Game Time'] || '',
         Side: row['Side'] || '',
-        Trust: row['Trust'] || 'Likely',
+        Trust: trustFromProbability(model1Prob),
         'Best Bet': model1Bet,
         'Model 2 Bet': row['Model 2 Best Bet'] || '',
         'Model 3 Bet': row['Model 3 Best Bet'] || row['Model 3 Bet'] || row['Model 3'] || '',
         'Parlay Pick': row['Best Parlay Pick'] || row['Parlay Pick'] || row['Parlay Bets'] || '',
-        'Best Prob': row['Model 1 Best Prob'] || '',
+        'Best Prob': model1Prob,
         'Model 2 Prob': row['Model 2 Prob'] || '',
         'Model 3 Prob': row['Model 3 Best Prob'] || row['Model 3 Prob'] || row['Model 3 Probability'] || '',
         'Best Edge': row['Model 1 Best Edge'] || '',
