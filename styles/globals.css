@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 
 :root {
-  --ink: #050505;
+  --ink: #130919;
   --cream: #F2EDE3;
   --red: #C8180A;
   --red-dim: rgba(200,24,10,0.12);
@@ -18,17 +18,18 @@
 html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
-  background: var(--ink);
+  background:
+    linear-gradient(118deg, rgba(100,45,145,0.62) 0%, rgba(36,15,52,0.92) 36%, rgba(20,8,29,0.95) 100%),
+    linear-gradient(242deg, rgba(132,58,176,0.44) 0%, rgba(24,9,36,0.16) 48%),
+    radial-gradient(circle at 78% 18%, rgba(101,45,148,0.35), rgba(20,8,29,0) 35%),
+    radial-gradient(circle at 18% 72%, rgba(78,32,120,0.12), rgba(20,8,29,0) 30%),
+    repeating-linear-gradient(108deg, rgba(180,126,230,0.044) 0 1px, transparent 1px 8px),
+    var(--ink);
   background-attachment: fixed;
   color: var(--cream);
   font-family: 'DM Sans', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-}
-
-#__next {
-  position: relative;
-  z-index: 1;
 }
 
 /* scrollbar */
@@ -41,63 +42,18 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* SMOKE VIDEO */
-.smoke-video-bg {
+/* NOISE OVERLAY */
+body::before {
+  content: '';
   position: fixed;
   inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background: #050505;
-}
-
-.smoke-video-bg video {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: max(170vh, 110vw);
-  height: auto;
-  transform: translate3d(-50%, 115vh, 0) rotate(-90deg) scale(1.1, 1.95);
-  filter: invert(1) sepia(1) saturate(7) hue-rotate(235deg) contrast(1.48) brightness(0.78);
-  opacity: 0.7;
+  background-image:
+    linear-gradient(180deg, rgba(121,62,178,0.17), rgba(20,8,29,0.055)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%238249bd' filter='url(%23noise)' opacity='0.09'/%3E%3C/svg%3E");
   mix-blend-mode: screen;
-  animation: smoke-video-up 24s linear infinite;
-  will-change: transform;
-}
-
-@keyframes smoke-video-up {
-  from {
-    transform: translate3d(-50%, 115vh, 0) rotate(-90deg) scale(1.1, 1.95);
-  }
-  to {
-    transform: translate3d(-50%, -145vh, 0) rotate(-90deg) scale(1.1, 1.95);
-  }
-}
-
-.smoke-video-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: rgba(112, 28, 255, 0.7);
-  mix-blend-mode: color;
-}
-
-.smoke-video-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background:
-    radial-gradient(ellipse at center, transparent 0%, transparent 36%, rgba(5,5,5,0.68) 72%, #050505 100%),
-    linear-gradient(90deg, #050505 0%, transparent 16%, transparent 84%, #050505 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .smoke-video-bg video {
-    display: none;
-    animation: none;
-  }
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.69;
 }
 
 /* NAV */
@@ -264,9 +220,8 @@ a { color: inherit; text-decoration: none; }
 
 /* STAT CARD */
 .stat-card {
-  background: rgba(7,7,7,0.92);
-  border: 1px solid rgba(242,237,227,0.16);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+  background: rgba(242,237,227,0.03);
+  border: 1px solid var(--border);
   padding: 2.25rem;
   position: relative;
 }
@@ -403,10 +358,9 @@ section { padding: 6rem 2.5rem; }
   border-top: 1px solid var(--border);
 }
 .free-pick-card {
-  background: rgba(7,7,7,0.94);
-  border: 1px solid rgba(242,237,227,0.16);
+  background: rgba(242,237,227,0.03);
+  border: 1px solid var(--border);
   border-left: 3px solid var(--green);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.55);
   padding: 2rem;
   position: relative;
 }
@@ -476,12 +430,12 @@ section { padding: 6rem 2.5rem; }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
-  background: rgba(242,237,227,0.14);
-  border: 1px solid rgba(242,237,227,0.14);
+  background: var(--border);
+  border: 1px solid var(--border);
   margin-bottom: 1rem;
 }
 .free-pick-grid div {
-  background: rgba(10,10,10,0.96);
+  background: var(--ink);
   padding: 0.85rem;
   font-family: 'DM Mono', monospace;
   font-size: 0.78rem;
