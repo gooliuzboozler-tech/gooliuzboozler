@@ -29,6 +29,35 @@ function PriceCard({ tier, price, featured, features, loading, onSubscribe }) {
   )
 }
 
+function parseProbability(value) {
+  const raw = String(value || '').replace('%', '').trim()
+  const num = Number.parseFloat(raw)
+  if (!Number.isFinite(num)) return null
+  return num <= 1 ? num * 100 : num
+}
+
+function formatProbability(value) {
+  const prob = parseProbability(value)
+  if (prob === null) return '-'
+  return `${prob.toFixed(1)}%`
+}
+
+function formatEdge(value) {
+  const raw = String(value || '').replace('%', '').trim()
+  const num = Number.parseFloat(raw)
+  if (!Number.isFinite(num)) return '-'
+  return num <= 1 ? `+${(num * 100).toFixed(1)}%` : `+${num.toFixed(2)}`
+}
+
+function trustFromProbability(value) {
+  const prob = parseProbability(value)
+  if (prob === null) return 'Top Pick'
+  if (prob >= 80) return 'Strong'
+  if (prob >= 70) return 'Playable'
+  if (prob >= 60) return 'Thin'
+  return 'Pass'
+}
+
 function FreePickCard({ pick, lastUpdated }) {
   if (!pick) {
     return (
@@ -49,12 +78,12 @@ function FreePickCard({ pick, lastUpdated }) {
           <h3>{pick.Pitcher}</h3>
           <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
         </div>
-        <div className="free-pick-prob">{pick['Best Prob']}</div>
+        <div className="free-pick-prob">{formatProbability(pick['Best Prob'])}</div>
       </div>
       <div className="free-pick-bet">{pick['Best Bet']}</div>
       <div className="free-pick-grid">
-        <div><span>Trust</span>{pick.Trust || 'Top Pick'}</div>
-        <div><span>Edge</span>{pick['Best Edge'] || '-'}</div>
+        <div><span>Trust</span>{trustFromProbability(pick['Best Prob'])}</div>
+        <div><span>Edge</span>{formatEdge(pick['Best Edge'])}</div>
         <div><span>Model K</span>{pick['Model K'] || '-'}</div>
         <div><span>K Edge</span>{pick['K Edge'] || '-'}</div>
       </div>
