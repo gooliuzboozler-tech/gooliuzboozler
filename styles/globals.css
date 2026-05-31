@@ -45,123 +45,50 @@ a { color: inherit; text-decoration: none; }
 body::before {
   content: '';
   position: fixed;
-  inset: -12vh 0;
-  background-image:
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png');
+  inset: -18vh 0;
+  background-image: url('/purple-smoke-single.png');
   background-repeat: no-repeat;
-  background-position:
-    50% 10vh,
-    46% 74vh,
-    54% 138vh;
-  background-size:
-    min(520px, 58vw) auto,
-    min(460px, 52vw) auto,
-    min(560px, 62vw) auto;
-  filter: saturate(1.02) brightness(0.78) blur(0.3px);
+  background-position: 50% 48vh;
+  background-size: min(560px, 62vw) auto;
+  filter: saturate(1.02) brightness(0.74) blur(0.4px);
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.58;
-  animation: smoke-drift 34s linear infinite;
-  will-change: background-position, filter, opacity;
+  opacity: 0.6;
+  transform-origin: 50% 54%;
+  animation: smoke-breathe 18s ease-in-out infinite;
+  will-change: transform, filter, opacity;
 }
 
 body::after {
-  content: '';
-  position: fixed;
-  inset: -18vh 0;
-  background-image:
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png');
-  background-repeat: no-repeat;
-  background-position:
-    58% 34vh,
-    42% 122vh;
-  background-size:
-    min(660px, 72vw) auto,
-    min(600px, 66vw) auto;
-  filter: saturate(0.95) brightness(0.62) blur(12px);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.34;
-  animation: smoke-haze 49s linear infinite;
-  will-change: background-position, transform, opacity;
+  content: none;
 }
 
-@keyframes smoke-drift {
+@keyframes smoke-breathe {
   0% {
-    background-position:
-      50% 10vh,
-      46% 74vh,
-      54% 138vh;
-    filter: saturate(1.02) brightness(0.78) blur(0.3px);
-    opacity: 0.56;
+    transform: translate3d(0, 8vh, 0) scaleX(0.96) scaleY(1.03) rotate(-1deg) skewX(0deg);
+    filter: saturate(1.0) brightness(0.7) blur(0.8px);
+    opacity: 0.48;
   }
-  28% {
-    background-position:
-      53% -24vh,
-      48% 42vh,
-      51% 106vh;
-    filter: saturate(1.08) brightness(0.82) blur(0.8px);
-    opacity: 0.62;
+  22% {
+    transform: translate3d(2.8vw, 0, 0) scaleX(1.04) scaleY(1.08) rotate(1.5deg) skewX(-2deg);
+    filter: saturate(1.08) brightness(0.8) blur(0.25px);
+    opacity: 0.64;
   }
-  58% {
-    background-position:
-      47% -62vh,
-      54% 4vh,
-      49% 68vh;
-    filter: saturate(0.98) brightness(0.74) blur(0.4px);
-    opacity: 0.52;
+  48% {
+    transform: translate3d(-2.2vw, -10vh, 0) scaleX(0.9) scaleY(1.15) rotate(-2deg) skewX(2.5deg);
+    filter: saturate(0.96) brightness(0.72) blur(1.1px);
+    opacity: 0.54;
   }
-  82% {
-    background-position:
-      51% -92vh,
-      44% -28vh,
-      55% 36vh;
-    filter: saturate(1.06) brightness(0.8) blur(1px);
+  74% {
+    transform: translate3d(1.3vw, -18vh, 0) scaleX(1.08) scaleY(1.06) rotate(1deg) skewX(-1.5deg);
+    filter: saturate(1.04) brightness(0.78) blur(0.45px);
     opacity: 0.6;
   }
   100% {
-    background-position:
-      50% -128vh,
-      46% -64vh,
-      54% 0vh;
-    filter: saturate(1.02) brightness(0.78) blur(0.3px);
-    opacity: 0.56;
-  }
-}
-
-@keyframes smoke-haze {
-  0% {
-    background-position:
-      58% 34vh,
-      42% 122vh;
-    transform: scaleX(1) skewX(0deg);
-    opacity: 0.28;
-  }
-  35% {
-    background-position:
-      43% -18vh,
-      57% 70vh;
-    transform: scaleX(1.08) skewX(-4deg);
-    opacity: 0.38;
-  }
-  68% {
-    background-position:
-      60% -70vh,
-      39% 18vh;
-    transform: scaleX(0.95) skewX(5deg);
-    opacity: 0.31;
-  }
-  100% {
-    background-position:
-      58% -118vh,
-      42% -30vh;
-    transform: scaleX(1) skewX(0deg);
-    opacity: 0.28;
+    transform: translate3d(0, 8vh, 0) scaleX(0.96) scaleY(1.03) rotate(-1deg) skewX(0deg);
+    filter: saturate(1.0) brightness(0.7) blur(0.8px);
+    opacity: 0.48;
   }
 }
 
