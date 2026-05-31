@@ -6,13 +6,13 @@ function SmokeBackground() {
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.playbackRate = 0.45
+      videoRef.current.playbackRate = 0.32
     }
   }, [])
 
   return (
-      <div className="smoke-video-bg" aria-hidden="true">
-        <video ref={videoRef} autoPlay muted loop playsInline preload="auto">
+    <div className="smoke-video-bg" aria-hidden="true">
+      <video ref={videoRef} autoPlay muted loop playsInline preload="auto">
         <source src="/smoke-vertical-purple.mp4" type="video/mp4" />
       </video>
     </div>
