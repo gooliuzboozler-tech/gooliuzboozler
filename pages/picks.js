@@ -59,6 +59,14 @@ function formatEdge(value) {
   return formatRoundedNumber(value, { signed: true })
 }
 
+function oppKRankColor(value) {
+  const rank = Number.parseInt(String(value || '').replace(/[^0-9-]/g, ''), 10)
+  if (!Number.isFinite(rank)) return '#F2EDE3'
+  if (rank <= 10) return '#EF4444'
+  if (rank <= 20) return '#EAB308'
+  return '#22C55E'
+}
+
 function trustFromProbability(value) {
   const prob = parseProbability(value)
   if (prob >= 80) return 'Strong'
@@ -108,6 +116,7 @@ function PickCard({ play, plan }) {
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
   const model2Bet = play['Model 2 Bet'] || legacyModel2Bet
   const model2Prob = play['Model 2 Prob'] || legacyModel2Prob
+  const model2Edge = play['Model 2 Edge'] || ''
   const model3Bet = play['Model 3 Bet'] || ''
   const model3Prob = play['Model 3 Prob'] || ''
   const model3Edge = play['Model 3 Edge'] || ''
@@ -151,7 +160,9 @@ function PickCard({ play, plan }) {
               <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{formatProbability(model2Prob)} prob</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
+                  {formatProbability(model2Prob)} prob{model2Edge ? ` · ${formatEdge(model2Edge)} edge` : ''}
+                </div>
               </div>
             )}
             {showModel3 && (
@@ -178,7 +189,7 @@ function PickCard({ play, plan }) {
                 {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
                   <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatRoundedNumber(val)}</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>{formatRoundedNumber(val)}</div>
                   </div>
                 ))}
               </div>
