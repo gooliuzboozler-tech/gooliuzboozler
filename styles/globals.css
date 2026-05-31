@@ -47,13 +47,13 @@ body::before {
   position: fixed;
   inset: -12vh 0;
   background-image:
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png');
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png');
   background-repeat: no-repeat;
   background-position:
     50% 10vh,
@@ -87,12 +87,12 @@ body::after {
   position: fixed;
   inset: -18vh 0;
   background-image:
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png'),
-    url('/purple-smoke-plume.png');
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png'),
+    url('/deep-purple-smoke-plume.png');
   background-repeat: no-repeat;
   background-position:
     58% 34vh,
