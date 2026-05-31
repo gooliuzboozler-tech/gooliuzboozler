@@ -46,19 +46,45 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url('/purple-smoke-plume.png');
+  background-image:
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png');
   background-repeat: no-repeat;
-  background-position: 50% 0;
-  background-size: min(520px, 58vw) auto;
+  background-position:
+    50% 18vh,
+    50% 132vh;
+  background-size:
+    min(520px, 58vw) auto,
+    min(520px, 58vw) auto;
   filter: saturate(1.04) brightness(0.82);
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 0;
   opacity: 0.62;
+  animation: smoke-rise 26s linear infinite;
 }
 
 body::after {
   content: none;
+}
+
+@keyframes smoke-rise {
+  from {
+    background-position:
+      50% 18vh,
+      50% 132vh;
+  }
+  to {
+    background-position:
+      50% -96vh,
+      50% 18vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
 }
 
 /* NAV */
