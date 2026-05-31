@@ -65,9 +65,9 @@ body::after {
   left: 50%;
   width: max(150vh, 92vw);
   height: auto;
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.28, 1.78);
-  filter: invert(1) hue-rotate(94deg) saturate(2.35) contrast(1.38) brightness(0.68);
-  opacity: 0.66;
+  transform: translate(-50%, -50%) rotate(-90deg) scale(1.28, 1.78);
+  filter: invert(1) hue-rotate(112deg) saturate(3.15) contrast(1.45) brightness(0.74);
+  opacity: 0.72;
   mix-blend-mode: screen;
 }
 
