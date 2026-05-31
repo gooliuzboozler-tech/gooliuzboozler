@@ -22,6 +22,20 @@ const PRICES = {
   season:  { id: 'price_1TYwPfIzVbZI7suaxHy2ScZ3', amount: '$149', period: 'Full season pass' },
 }
 
+const MLB_TEAM_IDS = {
+  ARI: 109, AZ: 109, ATL: 144, BAL: 110, BOS: 111, CHC: 112, CIN: 113,
+  CLE: 114, COL: 115, CWS: 145, CHW: 145, DET: 116, HOU: 117, KC: 118,
+  KCR: 118, LAA: 108, LAD: 119, MIA: 146, MIL: 158, MIN: 142, NYM: 121,
+  NYY: 147, ATH: 133, OAK: 133, PHI: 143, PIT: 134, SD: 135, SDP: 135,
+  SEA: 136, SF: 137, SFG: 137, STL: 138, TB: 139, TBR: 139, TEX: 140,
+  TOR: 141, WSH: 120, WSN: 120,
+}
+
+function teamLogoUrl(team) {
+  const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
+  return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
+}
+
 function parseProbability(value) {
   const raw = String(value || '').replace('%', '').trim()
   const num = Number.parseFloat(raw)
@@ -168,6 +182,7 @@ function PickCard({ play, plan }) {
   const model3Prob = play['Model 3 Prob'] || ''
   const model3Edge = play['Model 3 Edge'] || ''
   const parlayPick = play['Parlay Pick'] || ''
+  const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const showModel2 = planHasModel2(plan)
   const showModel3 = planHasModel3(plan)
   const modelCardCount = 1 + (showModel2 ? 1 : 0) + (showModel3 ? 1 : 0)
@@ -176,7 +191,16 @@ function PickCard({ play, plan }) {
     <div style={{ background: '#0e0e0c', border: `1px solid ${expanded ? ts.border : 'rgba(242,237,227,0.07)'}`, marginBottom: 1, transition: 'border-color 0.2s' }}>
       <div onClick={() => setExpanded(!expanded)} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr 1fr 1fr', gap: '0.5rem', padding: '1rem 1.25rem', cursor: 'pointer', alignItems: 'center' }}>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3', letterSpacing: '0.04em' }}>{play.Pitcher}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3', letterSpacing: '0.04em' }}>
+            {teamLogo && (
+              <img
+                src={teamLogo}
+                alt={`${play['Pitcher Team']} logo`}
+                style={{ width: 22, height: 22, objectFit: 'contain', flexShrink: 0 }}
+              />
+            )}
+            <span>{play.Pitcher}</span>
+          </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>vs {play.Opponent} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
         </div>
         <TrustBadge trust={trust} />

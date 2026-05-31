@@ -43,6 +43,16 @@ export default function Admin() {
     return 'Pass'
   }
 
+  function parsePitcher(rawPitcher) {
+    const raw = String(rawPitcher || '').trim()
+    const [namePart, metaPart = ''] = raw.split('.')
+    const teamMatch = metaPart.match(/^([A-Z]{2,3})/)
+    return {
+      name: namePart || raw,
+      team: teamMatch ? teamMatch[1] : '',
+    }
+  }
+
   function parseCSV(text) {
     const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
 
@@ -80,10 +90,12 @@ export default function Admin() {
       // Keep Model 1 plays even when the parlay column says Pass.
       const model1Bet = row['Model 1 Best Bet'] || ''
       const model1Prob = row['Model 1 Best Prob'] || ''
+      const pitcher = parsePitcher(row['Pitcher'])
       if (model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
 
       plays.push({
-        Pitcher: row['Pitcher'].includes('.') ? row['Pitcher'].split('.')[0] : row['Pitcher'],
+        Pitcher: pitcher.name,
+        'Pitcher Team': pitcher.team,
         Opponent: row['Opponent'] || '',
         'Game Time': row['Game Time'] || '',
         Side: row['Side'] || '',
