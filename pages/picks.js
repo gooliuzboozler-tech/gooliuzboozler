@@ -29,16 +29,33 @@ function parseProbability(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function formatRoundedNumber(value, { signed = false } = {}) {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw === '—' || raw === '-') return '-'
+
+  const hasPercent = raw.includes('%')
+  const num = Number.parseFloat(raw.replace(/[%,$]/g, '').replace(/,/g, ''))
+  if (!Number.isFinite(num)) return raw
+
+  const rounded = Number(num.toFixed(2))
+  let formatted = rounded.toFixed(2)
+
+  if (Math.abs(rounded) < 1 && rounded !== 0) {
+    formatted = formatted.replace(/^(-?)0\./, '$1.')
+  } else {
+    formatted = formatted.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
+  }
+
+  if (signed && rounded > 0) formatted = `+${formatted}`
+  return `${formatted}${hasPercent ? '%' : ''}`
+}
+
 function formatProbability(value) {
-  const prob = parseProbability(value)
-  return prob ? `${prob.toFixed(1)}%` : '-'
+  return formatRoundedNumber(value)
 }
 
 function formatEdge(value) {
-  const raw = String(value || '').replace('%', '').trim()
-  const num = Number.parseFloat(raw)
-  if (!Number.isFinite(num)) return '-'
-  return num <= 1 ? `+${(num * 100).toFixed(1)}%` : `+${num.toFixed(2)}`
+  return formatRoundedNumber(value, { signed: true })
 }
 
 function trustFromProbability(value) {
@@ -101,11 +118,11 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Best Bet</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{play['Best Prob']}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(play['Best Prob'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{play['Best Edge']}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['Best Edge'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Edge</div>
         </div>
         <div style={{ textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448' }}>{expanded ? '▲' : '▼'}</div>
@@ -117,13 +134,13 @@ function PickCard({ play, plan }) {
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{play['Best Prob']} prob · {play['Best Edge']} edge</div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{formatProbability(play['Best Prob'])} prob · {formatEdge(play['Best Edge'])} edge</div>
             </div>
             {showModel2 && (
               <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{model2Prob || '—'} prob</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{formatProbability(model2Prob)} prob</div>
               </div>
             )}
           </div>
@@ -134,7 +151,7 @@ function PickCard({ play, plan }) {
                 {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
                   <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{val || '—'}</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatRoundedNumber(val)}</div>
                   </div>
                 ))}
               </div>
@@ -199,8 +216,8 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
         {[
           ['Trust', trustFromProbability(pick['Best Prob'])],
           ['Edge', formatEdge(pick['Best Edge'])],
-          ['Model K', pick['Model K'] || '-'],
-          ['K Edge', pick['K Edge'] || '-'],
+          ['Model K', formatRoundedNumber(pick['Model K'])],
+          ['K Edge', formatRoundedNumber(pick['K Edge'])],
         ].map(([label, value]) => (
           <div key={label} style={{ background: 'rgba(10,10,10,0.96)', padding: '0.85rem', fontFamily: 'DM Mono, monospace', fontSize: '0.78rem', color: '#F2EDE3' }}>
             <span style={{ display: 'block', fontSize: '0.55rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.35rem' }}>{label}</span>

@@ -36,17 +36,33 @@ function parseProbability(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function formatRoundedNumber(value, { signed = false } = {}) {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw === '—' || raw === '-') return '-'
+
+  const hasPercent = raw.includes('%')
+  const num = Number.parseFloat(raw.replace(/[%,$]/g, '').replace(/,/g, ''))
+  if (!Number.isFinite(num)) return raw
+
+  const rounded = Number(num.toFixed(2))
+  let formatted = rounded.toFixed(2)
+
+  if (Math.abs(rounded) < 1 && rounded !== 0) {
+    formatted = formatted.replace(/^(-?)0\./, '$1.')
+  } else {
+    formatted = formatted.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
+  }
+
+  if (signed && rounded > 0) formatted = `+${formatted}`
+  return `${formatted}${hasPercent ? '%' : ''}`
+}
+
 function formatProbability(value) {
-  const prob = parseProbability(value)
-  if (prob === null) return '-'
-  return `${prob.toFixed(1)}%`
+  return formatRoundedNumber(value)
 }
 
 function formatEdge(value) {
-  const raw = String(value || '').replace('%', '').trim()
-  const num = Number.parseFloat(raw)
-  if (!Number.isFinite(num)) return '-'
-  return num <= 1 ? `+${(num * 100).toFixed(1)}%` : `+${num.toFixed(2)}`
+  return formatRoundedNumber(value, { signed: true })
 }
 
 function trustFromProbability(value) {
@@ -84,8 +100,8 @@ function FreePickCard({ pick, lastUpdated }) {
       <div className="free-pick-grid">
         <div><span>Trust</span>{trustFromProbability(pick['Best Prob'])}</div>
         <div><span>Edge</span>{formatEdge(pick['Best Edge'])}</div>
-        <div><span>Model K</span>{pick['Model K'] || '-'}</div>
-        <div><span>K Edge</span>{pick['K Edge'] || '-'}</div>
+        <div><span>Model K</span>{formatRoundedNumber(pick['Model K'])}</div>
+        <div><span>K Edge</span>{formatRoundedNumber(pick['K Edge'])}</div>
       </div>
       {lastUpdated && <div className="free-pick-updated">Updated: {lastUpdated}</div>}
       <a href="/picks" className="free-pick-link">Unlock Today&apos;s Full Board</a>
