@@ -16,6 +16,39 @@ const PLAN_LABELS = {
   season: 'Season Pass',
 }
 
+const PRICES = {
+  weekly:  { id: 'price_1TYwNoIzVbZI7suaeiqXo9Ws', amount: '$9.99', period: 'Weekly access' },
+  monthly: { id: 'price_1TYwOlIzVbZI7suaEGEbXxia', amount: '$24.99', period: 'Monthly access' },
+  season:  { id: 'price_1TYwPfIzVbZI7suaxHy2ScZ3', amount: '$149', period: 'Full season pass' },
+}
+
+function parseProbability(value) {
+  const raw = String(value || '').replace('%', '').trim()
+  const num = Number.parseFloat(raw)
+  if (!Number.isFinite(num)) return 0
+  return num <= 1 ? num * 100 : num
+}
+
+function formatProbability(value) {
+  const prob = parseProbability(value)
+  return prob ? `${prob.toFixed(1)}%` : '-'
+}
+
+function formatEdge(value) {
+  const raw = String(value || '').replace('%', '').trim()
+  const num = Number.parseFloat(raw)
+  if (!Number.isFinite(num)) return '-'
+  return num <= 1 ? `+${(num * 100).toFixed(1)}%` : `+${num.toFixed(2)}`
+}
+
+function trustFromProbability(value) {
+  const prob = parseProbability(value)
+  if (prob >= 80) return 'Strong'
+  if (prob >= 70) return 'Playable'
+  if (prob >= 60) return 'Thin'
+  return 'Pass'
+}
+
 function planHasModel2(plan) {
   return plan === 'monthly' || plan === 'season'
 }
@@ -132,6 +165,129 @@ function PickCard({ play, plan }) {
   )
 }
 
+function getFreePick(plays) {
+  return [...plays]
+    .filter(play => play.Pitcher && play['Best Bet'] && play['Best Bet'] !== 'Pass')
+    .sort((a, b) => parseProbability(b['Best Prob']) - parseProbability(a['Best Prob']))[0] || null
+}
+
+function PublicFreePick({ pick, lastUpdated, onUnlock }) {
+  if (!pick) {
+    return (
+      <div style={{ background: 'rgba(7,7,7,0.94)', border: '1px solid rgba(242,237,227,0.16)', borderLeft: '3px solid #EAB308', padding: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)', marginBottom: '1.5rem' }}>
+        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.2em', color: '#EAB308', textTransform: 'uppercase', marginBottom: '1rem' }}>// Public Free Pick</div>
+        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2.5rem', letterSpacing: '0.04em' }}>No free pick posted yet.</div>
+        <p style={{ fontFamily: 'DM Sans, sans-serif', color: '#BFB090', marginTop: '0.5rem', lineHeight: 1.7 }}>Check back after today's board is uploaded.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ background: 'rgba(7,7,7,0.94)', border: '1px solid rgba(242,237,227,0.16)', borderLeft: '3px solid #EAB308', padding: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)', marginBottom: '1.5rem' }}>
+      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.2em', color: '#EAB308', textTransform: 'uppercase', marginBottom: '1rem' }}>// Public Free Pick</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div>
+          <div className="free-pick-gold-name" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', lineHeight: 0.95, letterSpacing: '0.04em' }}>{pick.Pitcher}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#5A5448', letterSpacing: '0.08em', marginTop: '0.35rem' }}>
+            vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}
+          </div>
+        </div>
+        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: '#22C55E', lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
+      </div>
+      <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>{pick['Best Bet']}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'rgba(242,237,227,0.14)', border: '1px solid rgba(242,237,227,0.14)', marginTop: '1rem' }}>
+        {[
+          ['Trust', trustFromProbability(pick['Best Prob'])],
+          ['Edge', formatEdge(pick['Best Edge'])],
+          ['Model K', pick['Model K'] || '-'],
+          ['K Edge', pick['K Edge'] || '-'],
+        ].map(([label, value]) => (
+          <div key={label} style={{ background: 'rgba(10,10,10,0.96)', padding: '0.85rem', fontFamily: 'DM Mono, monospace', fontSize: '0.78rem', color: '#F2EDE3' }}>
+            <span style={{ display: 'block', fontSize: '0.55rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.35rem' }}>{label}</span>
+            {value}
+          </div>
+        ))}
+      </div>
+      {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: '#5A5448', marginTop: '1rem' }}>Updated: {lastUpdated}</div>}
+      <button onClick={onUnlock} style={{ width: '100%', marginTop: '1.25rem', background: '#C8180A', border: 'none', color: '#F2EDE3', fontFamily: 'DM Mono, monospace', fontSize: '0.78rem', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '1rem', cursor: 'pointer' }}>
+        Cheat the system with me
+      </button>
+    </div>
+  )
+}
+
+function MembershipChoices({ loading, onSubscribe }) {
+  return (
+    <div style={{ background: 'rgba(7,7,7,0.96)', border: '1px solid rgba(242,237,227,0.16)', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)' }}>
+      <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2rem', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>Pick Your Access</div>
+      <p style={{ fontFamily: 'DM Sans, sans-serif', color: '#BFB090', lineHeight: 1.7, marginBottom: '1.25rem' }}>Choose a membership and checkout opens in Stripe.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.75rem' }}>
+        {Object.entries(PRICES).map(([plan, price]) => (
+          <button key={plan} onClick={() => onSubscribe(price.id)} disabled={loading === price.id} style={{ background: plan === 'monthly' ? '#C8180A' : 'rgba(242,237,227,0.04)', border: plan === 'monthly' ? '1px solid #C8180A' : '1px solid rgba(242,237,227,0.14)', color: '#F2EDE3', padding: '1rem', cursor: loading === price.id ? 'not-allowed' : 'pointer', textAlign: 'left' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: plan === 'season' ? '#EAB308' : '#BFB090', marginBottom: '0.55rem' }}>{PLAN_LABELS[plan]}</div>
+            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2.4rem', lineHeight: 1 }}>{price.amount}</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', color: '#5A5448', letterSpacing: '0.06em' }}>{loading === price.id ? 'Redirecting...' : price.period}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function BlurredPickPreview({ plays }) {
+  const preview = plays.slice(0, 5)
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ filter: 'blur(6px)', opacity: 0.42, pointerEvents: 'none' }}>
+        {preview.map((play, i) => (
+          <PickCard key={i} play={play} plan="season" />
+        ))}
+      </div>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#BFB090', background: 'rgba(5,5,5,0.92)', border: '1px solid rgba(242,237,227,0.14)', padding: '0.8rem 1.2rem' }}>Members unlock the full board</div>
+      </div>
+    </div>
+  )
+}
+
+function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginClick }) {
+  const [showPlans, setShowPlans] = useState(false)
+  const freePick = getFreePick(plays)
+  const blurredPlays = plays.filter(play => play !== freePick)
+  const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
+
+  return (
+    <>
+      <Head><title>Free Pick — GooliuzBoozler</title></Head>
+      <nav style={navStyle}>
+        <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
+          GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
+        </Link>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button onClick={onLoginClick} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#F2EDE3', border: '1px solid rgba(242,237,227,0.22)', padding: '0.65rem 1.5rem', cursor: 'pointer' }}>
+            Member Login
+          </button>
+          <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '0.65rem 1.5rem' }}>
+            Get Access
+          </Link>
+        </div>
+      </nav>
+      <div style={{ paddingTop: '80px', minHeight: '100vh', padding: '80px 2.5rem 4rem', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#EAB308', marginBottom: '0.5rem' }}>// Free Pick</div>
+          <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3.5rem', letterSpacing: '0.04em', lineHeight: 1 }}>Today&apos;s Public Play</h1>
+        </div>
+        <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
+        {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr 1fr 1fr', gap: '0.5rem', padding: '0.5rem 1.25rem', fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#5A5448', borderBottom: '1px solid rgba(242,237,227,0.06)', marginBottom: 1 }}>
+          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>Edge</span><span></span>
+        </div>
+        <BlurredPickPreview plays={blurredPlays} />
+      </div>
+    </>
+  )
+}
+
 function LoginGate({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -240,6 +396,8 @@ export default function Picks() {
   const [lastUpdated, setLastUpdated] = useState(null)
   const [memberEmail, setMemberEmail] = useState(null)
   const [memberPlan, setMemberPlan] = useState('weekly')
+  const [checkoutLoading, setCheckoutLoading] = useState(null)
+  const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -320,13 +478,42 @@ export default function Picks() {
 
   const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
 
+  async function handleSubscribe(priceId) {
+    setCheckoutLoading(priceId)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else throw new Error(data.error)
+    } catch {
+      alert('Something went wrong. Please try again.')
+      setCheckoutLoading(null)
+    }
+  }
+
   if (status === 'loading') return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0A0A08' }}>
       <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448', letterSpacing: '0.2em' }}>LOADING...</div>
     </div>
   )
 
-  if (status === 'unauthorized') return <LoginGate onLogin={(email, plan) => { setMemberEmail(email); setMemberPlan(plan || 'weekly'); setStatus('authorized') }} />
+  if (status === 'unauthorized' && showLogin) {
+    return <LoginGate onLogin={(email, plan) => { setMemberEmail(email); setMemberPlan(plan || 'weekly'); setStatus('authorized') }} />
+  }
+
+  if (status === 'unauthorized') return (
+    <PublicPicksPreview
+      plays={plays}
+      lastUpdated={lastUpdated}
+      loading={checkoutLoading}
+      onSubscribe={handleSubscribe}
+      onLoginClick={() => setShowLogin(true)}
+    />
+  )
 
   return (
     <>

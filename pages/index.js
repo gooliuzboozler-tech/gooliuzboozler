@@ -161,6 +161,7 @@ export default function Home() {
   </div>
   <div style={{display:'flex', gap:'0.75rem', alignItems:'center'}}>
     <a href="/picks" style={{fontFamily:'DM Mono, monospace', fontSize:'0.7rem', letterSpacing:'0.12em', textTransform:'uppercase', background:'transparent', color:'#F2EDE3', border:'1px solid rgba(242,237,227,0.25)', padding:'0.65rem 1.5rem', cursor:'pointer', textDecoration:'none'}}>Today&#39;s Picks</a>
+    <a href="/picks" style={{fontFamily:'DM Mono, monospace', fontSize:'0.7rem', letterSpacing:'0.12em', textTransform:'uppercase', background:'linear-gradient(100deg, #7A4A10 0%, #E7AD2B 28%, #FFF2A8 48%, #C8841E 70%, #FFD96F 100%)', color:'#080706', border:'1px solid rgba(255,217,111,0.65)', padding:'0.65rem 1.5rem', cursor:'pointer', textDecoration:'none', fontWeight:700, boxShadow:'0 0 24px rgba(255,203,82,0.2)'}}>Free Pick</a>
     <a href="#pricing" className="nav-cta">Get Access</a>
   </div>
 </nav>
