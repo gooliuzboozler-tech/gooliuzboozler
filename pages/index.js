@@ -148,7 +148,7 @@ export default function Home() {
     <>
       <Head>
         <title>GooliuzBoozler — MLB Strikeout Projections</title>
-        <meta name="description" content="Sharp MLB strikeout projections. 247-69 all-time, 78.16% win rate, 40.79% ROI. Daily picks via email." />
+        <meta name="description" content="Sharp MLB strikeout projections. 247-69 all-time, 78.16% win rate, 40.79% ROI. Members get access to today's picks board." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -314,7 +314,7 @@ export default function Home() {
         <div className="eyebrow">// Pricing</div>
         <h2 className="section-title">One Model.<br />Three Ways In.</h2>
         <p className="section-sub">
-          Daily picks delivered to your inbox before first pitch. Cancel anytime.
+          Members get access to today&apos;s picks board before first pitch. Cancel anytime.
         </p>
         <div className="pricing-grid">
           <PriceCard
@@ -324,12 +324,12 @@ export default function Home() {
             loading={loading}
             onSubscribe={handleSubscribe}
             features={[
-              { yes: true,  text: 'Daily K picks email' },
+              { yes: true,  text: "Today's picks board access" },
               { yes: true,  text: 'Strong + Playable plays' },
-              { yes: true,  text: 'Best Bet per pitcher' },
-              { yes: false, text: 'Conservative + Risky Bets' },
+              { yes: true,  text: 'Model 1 best bet per pitcher' },
+              { yes: false, text: 'Model 2 comparison plays' },
               { yes: false, text: 'BvP standout callouts' },
-              { yes: false, text: 'Weekly recap + ROI tracker' },
+              { yes: false, text: 'Full board variable breakdown' },
             ]}
           />
           <PriceCard
@@ -339,11 +339,11 @@ export default function Home() {
             loading={loading}
             onSubscribe={handleSubscribe}
             features={[
-              { yes: true, text: 'Daily K picks email' },
+              { yes: true, text: "Today's picks board access" },
               { yes: true, text: 'Strong + Playable plays' },
-              { yes: true, text: 'All 3 bet options per pitcher' },
+              { yes: true, text: 'Model 1 + Model 2 plays' },
               { yes: true, text: 'BvP standout callouts' },
-              { yes: true, text: 'Weekly recap + ROI tracker' },
+              { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: false, text: 'Full board access (all plays)' },
             ]}
           />
@@ -371,9 +371,9 @@ export default function Home() {
         <h2 className="section-title">Common Questions.</h2>
         <div className="faq-list">
           {[
-            ['How are picks delivered?', 'By email, before first pitch each day. You get a formatted picks sheet with every Strong and Playable play, bet options, probabilities, and BvP callouts.'],
+            ['How do I access picks?', "Members log in to the Today's Picks board on the website. The board shows the current plays, probabilities, Model 1 and Model 2 angles, K Edge, and BvP callouts."],
             ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
-            ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The email always specifies.'],
+            ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
             ['What does the Season Pass include?', 'Full 2026 season access — every play, every variable, the full board including Thin plays and model notes. One payment, no recurring charges. Includes 2027 early-access pricing.'],

@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       billing_address_collection: 'auto',
       custom_text: {
         submit: {
-          message: 'Daily picks delivered to your inbox before first pitch. Cancel anytime.',
+          message: "Members get access to today's picks board before first pitch. Cancel anytime.",
         },
       },
     })
