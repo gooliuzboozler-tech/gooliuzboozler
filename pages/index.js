@@ -199,8 +199,8 @@ export default function Home() {
           <h1>The <em>K</em> Board<br />Built to<br />Beat the Line.</h1>
           <p className="hero-sub">
             Sharp MLB strikeout projections powered by weighted Model 1 and Model 2 outputs.
-            Members get the full board with probabilities, K edge, BvP context,
-            opponent profile, recent form, bullpen notes, and market-line data.
+            Members get plan-based access to the picks board, with higher tiers unlocking
+            Model 2, K Edge, BvP context, market lines, and full-board data.
           </p>
           <div className="hero-actions">
             <a href="#pricing" className="btn-primary">Get Access Now</a>
@@ -272,12 +272,12 @@ export default function Home() {
             [
               '01',
               'Model 1 Probability Tiers',
-              'Model 1 Best Prob drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. The board shows every Model 1 bet with its probability.'
+              'Model 1 Best Prob drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. Weekly and Monthly members see Strong and Playable plays; Season members see the full board.'
             ],
             [
               '02',
               'Model 1 vs. Model 2',
-              'Model 1 identifies the primary bet and probability. Model 2 provides a second look when the board has another playable angle. Members can compare both instead of relying on one blind projection.'
+              'Model 1 identifies the primary bet and probability. Model 2 provides a second look when the board has another playable angle. Monthly and Season members can compare both instead of relying on one blind projection.'
             ],
             [
               '03',
@@ -287,7 +287,7 @@ export default function Home() {
             [
               '04',
               'Active Roster BvP Context',
-              'BvP is checked against active opposing hitters, not stale roster assumptions. The board includes individual BvP K%, plate appearances, and standout matchup notes where the sample is useful.'
+              'BvP is checked against active opposing hitters, not stale roster assumptions. Monthly and Season members get individual BvP K%, plate appearances, and standout matchup notes where the sample is useful.'
             ],
             [
               '05',
@@ -297,7 +297,7 @@ export default function Home() {
             [
               '06',
               'Bullpen and Game Context',
-              'The board adds game-time context, opponent, side, bullpen data, recent pitcher form, and available lines so members can see why a play is Strong, Playable, Thin, or Pass.'
+              'Higher-tier board access adds game-time context, opponent, side, bullpen data, recent pitcher form, and available lines so members can inspect the play context.'
             ],
           ].map(([num, title, desc]) => (
             <div key={num} className="feature fade-up">
@@ -355,10 +355,10 @@ export default function Home() {
             onSubscribe={handleSubscribe}
             features={[
               { yes: true, text: 'Everything in Monthly' },
-              { yes: true, text: 'Full board — all 26 plays daily' },
+              { yes: true, text: 'Full board — all posted plays daily' },
+              { yes: true, text: 'Model 1 + Model 2 across full board' },
               { yes: true, text: 'K Edge + model variable breakdown' },
-              { yes: true, text: 'Model notes and weighted-input breakdown' },
-              { yes: true, text: '2027 early-access pricing' },
+              { yes: true, text: 'Thin plays + weighted-input data' },
               { yes: true, text: 'One-time payment, no renewal' },
             ]}
           />
@@ -371,12 +371,12 @@ export default function Home() {
         <h2 className="section-title">Common Questions.</h2>
         <div className="faq-list">
           {[
-            ['How do I access picks?', "Members log in to the Today's Picks board on the website. The board shows the current plays, probabilities, Model 1 and Model 2 angles, K Edge, and BvP callouts."],
+            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable Model 1 plays. Monthly adds Model 2, K Edge, BvP, and context. Season adds the full board, including Thin plays."],
             ['What are Models 1 & 2?', 'Models 1 & 2 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
-            ['What does the Season Pass include?', 'Full 2026 season access — every play, every variable, the full board including Thin plays and model notes. One payment, no recurring charges. Includes 2027 early-access pricing.'],
+            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, Model 1 and Model 2 outputs, K Edge, BvP context, market lines, and weighted-input data. One payment, no recurring charges.'],
           ].map(([q, a]) => (
             <div key={q} className="faq-item">
               <div className="faq-q">{q}</div>

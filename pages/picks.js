@@ -10,6 +10,30 @@ const TRUST_STYLES = {
   Pass:     { bg: 'rgba(239,68,68,0.08)',  color: '#EF4444', border: 'rgba(239,68,68,0.2)'  },
 }
 
+const PLAN_LABELS = {
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  season: 'Season Pass',
+}
+
+function planHasModel2(plan) {
+  return plan === 'monthly' || plan === 'season'
+}
+
+function planHasFullBoard(plan) {
+  return plan === 'season'
+}
+
+function isCorePlay(play) {
+  return ['Strong', 'Likely', 'Playable'].includes(play.Trust || 'Likely')
+}
+
+function filterByTrust(play, filter) {
+  const trust = play.Trust || 'Likely'
+  if (filter === 'Likely') return trust === 'Strong' || trust === 'Likely'
+  return trust === filter
+}
+
 function TrustBadge({ trust }) {
   const style = TRUST_STYLES[trust] || TRUST_STYLES.Likely
   return (
@@ -21,12 +45,15 @@ function TrustBadge({ trust }) {
   )
 }
 
-function PickCard({ play }) {
+function PickCard({ play, plan }) {
   const [expanded, setExpanded] = useState(false)
   const trust = play.Trust || 'Likely'
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
-  const model2Bet = play['Model 2 Bet'] || ''
-  const model2Prob = play['Model 2 Prob'] || ''
+  const legacyModel2Bet = play[['Conserv', 'ative Bet'].join('')] || ''
+  const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
+  const model2Bet = play['Model 2 Bet'] || legacyModel2Bet
+  const model2Prob = play['Model 2 Prob'] || legacyModel2Prob
+  const showModel2 = planHasModel2(plan)
 
   return (
     <div style={{ background: '#0e0e0c', border: `1px solid ${expanded ? ts.border : 'rgba(242,237,227,0.07)'}`, marginBottom: 1, transition: 'border-color 0.2s' }}>
@@ -53,45 +80,51 @@ function PickCard({ play }) {
 
       {expanded && (
         <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(242,237,227,0.05)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: showModel2 ? 'repeat(2, 1fr)' : '1fr', gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{play['Best Prob']} prob · {play['Best Edge']} edge</div>
             </div>
-            <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{model2Prob || '—'} prob</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
-              <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{val || '—'}</div>
+            {showModel2 && (
+              <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{model2Prob || '—'} prob</div>
               </div>
-            ))}
+            )}
           </div>
 
-          {play['Individual BvP Standouts'] && play['Individual BvP Standouts'] !== '—' && play['Individual BvP Standouts'] !== 'No direct MLB hitter-vs-pitcher plate appearances found for active opposing hitters' && (
-            <div style={{ background: 'rgba(242,237,227,0.02)', border: '1px solid rgba(242,237,227,0.06)', padding: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>BVP STANDOUTS</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#BFB090', lineHeight: 1.6 }}>{play['Individual BvP Standouts']}</div>
-            </div>
-          )}
+          {showModel2 && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
+                  <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{val || '—'}</div>
+                  </div>
+                ))}
+              </div>
 
-          {play['Kalshi Lines'] && (
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448', lineHeight: 1.8 }}>
-              <span style={{ color: '#F97316' }}>Lines: </span>{play['Kalshi Lines']}
-            </div>
-          )}
+              {play['Individual BvP Standouts'] && play['Individual BvP Standouts'] !== '—' && play['Individual BvP Standouts'] !== 'No direct MLB hitter-vs-pitcher plate appearances found for active opposing hitters' && (
+                <div style={{ background: 'rgba(242,237,227,0.02)', border: '1px solid rgba(242,237,227,0.06)', padding: '0.75rem', marginBottom: '0.5rem' }}>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>BVP STANDOUTS</div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#BFB090', lineHeight: 1.6 }}>{play['Individual BvP Standouts']}</div>
+                </div>
+              )}
 
-          {play['Bullpen Data'] && play['Bullpen Data'] !== 'none' && (
-            <div style={{ marginTop: '0.5rem', fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448' }}>
-              <span style={{ color: '#F97316' }}>⚡ Bullpen: </span>{play['Bullpen Data']}
-            </div>
+              {play['Kalshi Lines'] && (
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448', lineHeight: 1.8 }}>
+                  <span style={{ color: '#F97316' }}>Lines: </span>{play['Kalshi Lines']}
+                </div>
+              )}
+
+              {play['Bullpen Data'] && play['Bullpen Data'] !== 'none' && (
+                <div style={{ marginTop: '0.5rem', fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448' }}>
+                  <span style={{ color: '#F97316' }}>⚡ Bullpen: </span>{play['Bullpen Data']}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -122,7 +155,8 @@ function LoginGate({ onLogin }) {
 
       if (data.valid) {
         localStorage.setItem('gb_email', data.email)
-        onLogin(data.email)
+        localStorage.setItem('gb_plan', data.plan || 'weekly')
+        onLogin(data.email, data.plan || 'weekly')
       } else {
         setError(data.error || 'Could not unlock picks.')
       }
@@ -205,6 +239,7 @@ export default function Picks() {
   const [filter, setFilter] = useState('All')
   const [lastUpdated, setLastUpdated] = useState(null)
   const [memberEmail, setMemberEmail] = useState(null)
+  const [memberPlan, setMemberPlan] = useState('weekly')
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -222,7 +257,9 @@ export default function Picks() {
         .then(data => {
           if (data.valid && data.email) {
             localStorage.setItem('gb_email', data.email)
+            localStorage.setItem('gb_plan', data.plan || 'weekly')
             setMemberEmail(data.email)
+            setMemberPlan(data.plan || 'weekly')
             setStatus('authorized')
             window.history.replaceState({}, '', '/picks')
           } else {
@@ -237,15 +274,19 @@ export default function Picks() {
         .then(data => {
           if (data.valid) {
             setMemberEmail(storedEmail)
+            setMemberPlan(data.plan || localStorage.getItem('gb_plan') || 'weekly')
+            localStorage.setItem('gb_plan', data.plan || localStorage.getItem('gb_plan') || 'weekly')
             setStatus('authorized')
           } else {
             localStorage.removeItem('gb_email')
+            localStorage.removeItem('gb_plan')
             setStatus('unauthorized')
           }
         })
         .catch(() => {
           // If check fails, let them in anyway if they have stored email
           setMemberEmail(storedEmail)
+          setMemberPlan(localStorage.getItem('gb_plan') || 'weekly')
           setStatus('authorized')
         })
     } else {
@@ -262,12 +303,19 @@ export default function Picks() {
       .catch(() => {})
   }, [])
 
-  const trustOrder = ['Strong', 'Likely', 'Playable', 'Thin']
-  const filtered = filter === 'All' ? plays : plays.filter(p => p.Trust === filter)
+  useEffect(() => {
+    if (!planHasFullBoard(memberPlan) && filter === 'Thin') {
+      setFilter('All')
+    }
+  }, [memberPlan, filter])
+
+  const visiblePlays = planHasFullBoard(memberPlan) ? plays : plays.filter(isCorePlay)
+  const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
+  const filtered = filter === 'All' ? visiblePlays : visiblePlays.filter(p => filterByTrust(p, filter))
   const counts = {
-    Strong: plays.filter(p => p.Trust === 'Strong' || p.Trust === 'Likely').length,
-    Playable: plays.filter(p => p.Trust === 'Playable').length,
-    Thin: plays.filter(p => p.Trust === 'Thin').length,
+    Strong: visiblePlays.filter(p => p.Trust === 'Strong' || p.Trust === 'Likely').length,
+    Playable: visiblePlays.filter(p => p.Trust === 'Playable').length,
+    Thin: visiblePlays.filter(p => p.Trust === 'Thin').length,
   }
 
   const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
@@ -278,7 +326,7 @@ export default function Picks() {
     </div>
   )
 
-  if (status === 'unauthorized') return <LoginGate onLogin={(email) => { setMemberEmail(email); setStatus('authorized') }} />
+  if (status === 'unauthorized') return <LoginGate onLogin={(email, plan) => { setMemberEmail(email); setMemberPlan(plan || 'weekly'); setStatus('authorized') }} />
 
   return (
     <>
@@ -292,8 +340,9 @@ export default function Picks() {
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {memberEmail && <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', letterSpacing: '0.08em' }}>{memberEmail}</span>}
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#EAB308', border: '1px solid rgba(234,179,8,0.3)', padding: '0.3rem 0.7rem' }}>{PLAN_LABELS[memberPlan] || 'Weekly'}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)', padding: '0.3rem 0.7rem' }}>● MEMBER</div>
-          <button onClick={() => { localStorage.removeItem('gb_email'); window.location.reload() }} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em' }}>Sign out</button>
+          <button onClick={() => { localStorage.removeItem('gb_email'); localStorage.removeItem('gb_plan'); window.location.reload() }} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em' }}>Sign out</button>
         </div>
       </nav>
 
@@ -305,16 +354,20 @@ export default function Picks() {
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {[['Likely/Strong', counts.Strong, '#22C55E'], ['Playable', counts.Playable, '#EAB308'], ['Thin', counts.Thin, '#F97316']].map(([label, count, color]) => (
+            {[
+              ['Likely/Strong', counts.Strong, '#22C55E'],
+              ['Playable', counts.Playable, '#EAB308'],
+              ...(planHasFullBoard(memberPlan) ? [['Thin', counts.Thin, '#F97316']] : []),
+            ].map(([label, count, color]) => (
               <div key={label} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em', padding: '0.35rem 0.75rem', background: 'rgba(242,237,227,0.04)', border: '1px solid rgba(242,237,227,0.08)', color }}>{count} {label}</div>
             ))}
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 1, marginBottom: '1.5rem', background: 'rgba(242,237,227,0.04)', padding: 1 }}>
-          {['All', 'Likely', 'Playable', 'Thin'].map(f => (
+          {tabs.map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.55rem 1.25rem', border: 'none', cursor: 'pointer', background: filter === f ? '#C8180A' : 'transparent', color: filter === f ? '#F2EDE3' : '#5A5448', transition: 'all 0.15s' }}>
-              {f} {f === 'All' ? `(${plays.length})` : f === 'Likely' ? `(${counts.Strong})` : f === 'Playable' ? `(${counts.Playable})` : `(${counts.Thin})`}
+              {f} {f === 'All' ? `(${visiblePlays.length})` : f === 'Likely' ? `(${counts.Strong})` : f === 'Playable' ? `(${counts.Playable})` : `(${counts.Thin})`}
             </button>
           ))}
         </div>
@@ -328,7 +381,7 @@ export default function Picks() {
             NO PLAYS POSTED YET — CHECK BACK BEFORE FIRST PITCH
           </div>
         ) : (
-          filtered.map((play, i) => <PickCard key={i} play={play} />)
+          filtered.map((play, i) => <PickCard key={i} play={play} plan={memberPlan} />)
         )}
 
         <div style={{ marginTop: '2rem', fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: 'rgba(90,84,72,0.5)', lineHeight: 1.7, borderTop: '1px solid rgba(242,237,227,0.04)', paddingTop: '1.5rem' }}>

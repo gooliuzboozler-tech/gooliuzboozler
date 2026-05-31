@@ -1,7 +1,15 @@
 import { Redis } from '@upstash/redis'
 import crypto from 'crypto'
+import Stripe from 'stripe'
 
 const redis = Redis.fromEnv()
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+const PLAN_BY_PRICE = {
+  price_1TYwNoIzVbZI7suaeiqXo9Ws: 'weekly',
+  price_1TYwOlIzVbZI7suaEGEbXxia: 'monthly',
+  price_1TYwPfIzVbZI7suaxHy2ScZ3: 'season',
+}
 
 function parseMember(data) {
   if (!data) return null
@@ -13,6 +21,32 @@ function hashPassword(password, salt) {
   return crypto
     .pbkdf2Sync(password, salt, 100000, 64, 'sha512')
     .toString('hex')
+}
+
+function planFromSession(session) {
+  const metadataPlan = session.metadata?.plan || session.subscription?.metadata?.plan
+  if (metadataPlan) return metadataPlan
+
+  const priceId = session.line_items?.data?.[0]?.price?.id
+  return PLAN_BY_PRICE[priceId] || (session.mode === 'payment' ? 'season' : 'weekly')
+}
+
+function isKnownPlan(plan) {
+  return ['weekly', 'monthly', 'season'].includes(plan)
+}
+
+async function resolveMemberPlan(member) {
+  if (isKnownPlan(member?.plan)) return member.plan
+  if (!member?.sessionId) return 'weekly'
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(member.sessionId, {
+      expand: ['line_items', 'subscription'],
+    })
+    return planFromSession(session)
+  } catch {
+    return 'weekly'
+  }
 }
 
 export default async function handler(req, res) {
@@ -38,6 +72,8 @@ export default async function handler(req, res) {
     return res.status(401).json({ valid: false, error: 'No active membership found for that email' })
   }
 
+  const plan = await resolveMemberPlan(member)
+
   if (!member.passwordHash || !member.passwordSalt) {
     const passwordSalt = crypto.randomBytes(16).toString('hex')
     const passwordHash = hashPassword(password, passwordSalt)
@@ -45,18 +81,32 @@ export default async function handler(req, res) {
     await redis.set(key, {
       ...member,
       email,
+      plan,
       passwordSalt,
       passwordHash,
       passwordCreatedAt: new Date().toISOString(),
     })
 
-    return res.status(200).json({ valid: true, email, createdPassword: true })
+    return res.status(200).json({
+      valid: true,
+      email,
+      plan,
+      createdPassword: true,
+    })
   }
 
   const attemptedHash = hashPassword(password, member.passwordSalt)
 
   if (attemptedHash === member.passwordHash) {
-    return res.status(200).json({ valid: true, email })
+    if (member.plan !== plan) {
+      await redis.set(key, {
+        ...member,
+        plan,
+        updatedAt: new Date().toISOString(),
+      })
+    }
+
+    return res.status(200).json({ valid: true, email, plan })
   }
 
   return res.status(401).json({ valid: false, error: 'Wrong password' })
