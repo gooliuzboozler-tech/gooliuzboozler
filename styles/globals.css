@@ -45,44 +45,129 @@ a { color: inherit; text-decoration: none; }
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -12vh 0;
+  background-image:
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png');
+  background-repeat: no-repeat;
+  background-position:
+    50% 10vh,
+    46% 74vh,
+    54% 138vh;
+  background-size:
+    min(520px, 58vw) auto,
+    min(460px, 52vw) auto,
+    min(560px, 62vw) auto;
+  filter: saturate(1.02) brightness(0.78) blur(0.3px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.58;
+  animation: smoke-drift 34s linear infinite;
+  will-change: background-position, filter, opacity;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: -18vh 0;
   background-image:
     url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png');
   background-repeat: no-repeat;
   background-position:
-    50% 18vh,
-    50% 132vh;
+    58% 34vh,
+    42% 122vh;
   background-size:
-    min(520px, 58vw) auto,
-    min(520px, 58vw) auto;
-  filter: saturate(1.04) brightness(0.82);
+    min(660px, 72vw) auto,
+    min(600px, 66vw) auto;
+  filter: saturate(0.95) brightness(0.62) blur(12px);
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.62;
-  animation: smoke-rise 26s linear infinite;
+  opacity: 0.34;
+  animation: smoke-haze 49s linear infinite;
+  will-change: background-position, transform, opacity;
 }
 
-body::after {
-  content: none;
-}
-
-@keyframes smoke-rise {
-  from {
+@keyframes smoke-drift {
+  0% {
     background-position:
-      50% 18vh,
-      50% 132vh;
+      50% 10vh,
+      46% 74vh,
+      54% 138vh;
+    filter: saturate(1.02) brightness(0.78) blur(0.3px);
+    opacity: 0.56;
   }
-  to {
+  28% {
     background-position:
-      50% -96vh,
-      50% 18vh;
+      53% -24vh,
+      48% 42vh,
+      51% 106vh;
+    filter: saturate(1.08) brightness(0.82) blur(0.8px);
+    opacity: 0.62;
+  }
+  58% {
+    background-position:
+      47% -62vh,
+      54% 4vh,
+      49% 68vh;
+    filter: saturate(0.98) brightness(0.74) blur(0.4px);
+    opacity: 0.52;
+  }
+  82% {
+    background-position:
+      51% -92vh,
+      44% -28vh,
+      55% 36vh;
+    filter: saturate(1.06) brightness(0.8) blur(1px);
+    opacity: 0.6;
+  }
+  100% {
+    background-position:
+      50% -128vh,
+      46% -64vh,
+      54% 0vh;
+    filter: saturate(1.02) brightness(0.78) blur(0.3px);
+    opacity: 0.56;
+  }
+}
+
+@keyframes smoke-haze {
+  0% {
+    background-position:
+      58% 34vh,
+      42% 122vh;
+    transform: scaleX(1) skewX(0deg);
+    opacity: 0.28;
+  }
+  35% {
+    background-position:
+      43% -18vh,
+      57% 70vh;
+    transform: scaleX(1.08) skewX(-4deg);
+    opacity: 0.38;
+  }
+  68% {
+    background-position:
+      60% -70vh,
+      39% 18vh;
+    transform: scaleX(0.95) skewX(5deg);
+    opacity: 0.31;
+  }
+  100% {
+    background-position:
+      58% -118vh,
+      42% -30vh;
+    transform: scaleX(1) skewX(0deg);
+    opacity: 0.28;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::before {
+  body::before,
+  body::after {
     animation: none;
   }
 }
