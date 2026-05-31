@@ -41,227 +41,48 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* SMOKE PLUME */
+/* SMOKE VIDEO */
 body::before {
-  content: '';
-  position: fixed;
-  inset: -12vh 0;
-  background-image:
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png');
-  background-repeat: no-repeat;
-  background-position:
-    50% 10vh,
-    46% 74vh,
-    56% 108vh,
-    41% 32vh,
-    60% 58vh,
-    48% 126vh,
-    54% 138vh;
-  background-size:
-    min(520px, 58vw) auto,
-    min(460px, 52vw) auto,
-    min(360px, 42vw) auto,
-    min(320px, 38vw) auto,
-    min(390px, 45vw) auto,
-    min(300px, 35vw) auto,
-    min(560px, 62vw) auto;
-  filter: saturate(1.02) brightness(0.78) blur(0.3px);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.58;
-  transform-origin: 50% 52%;
-  transform-style: preserve-3d;
-  animation: smoke-drift 34s linear infinite, smoke-twist-front 22s ease-in-out infinite;
-  will-change: background-position, filter, opacity, transform;
+  content: none;
 }
 
 body::after {
-  content: '';
+  content: none;
+}
+
+.smoke-video-bg {
   position: fixed;
-  inset: -18vh 0;
-  background-image:
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png'),
-    url('/deep-purple-smoke-horizontal.png');
-  background-repeat: no-repeat;
-  background-position:
-    58% 34vh,
-    50% 82vh,
-    64% 8vh,
-    36% 62vh,
-    57% 104vh,
-    42% 122vh;
-  background-size:
-    min(660px, 72vw) auto,
-    min(440px, 50vw) auto,
-    min(520px, 58vw) auto,
-    min(360px, 42vw) auto,
-    min(480px, 54vw) auto,
-    min(600px, 66vw) auto;
-  filter: saturate(0.95) brightness(0.62) blur(12px);
-  mix-blend-mode: screen;
-  pointer-events: none;
+  inset: 0;
   z-index: 0;
-  opacity: 0.34;
-  transform-origin: 50% 50%;
-  transform-style: preserve-3d;
-  animation: smoke-haze 49s linear infinite, smoke-twist-back 32s ease-in-out infinite;
-  will-change: background-position, transform, opacity;
+  pointer-events: none;
+  overflow: hidden;
+  background: #050505;
 }
 
-@keyframes smoke-drift {
-  0% {
-    background-position:
-      50% 10vh,
-      46% 74vh,
-      56% 108vh,
-      41% 32vh,
-      60% 58vh,
-      48% 126vh,
-      54% 138vh;
-    filter: saturate(1.02) brightness(0.78) blur(0.3px);
-    opacity: 0.56;
-  }
-  28% {
-    background-position:
-      53% -24vh,
-      48% 42vh,
-      51% 76vh,
-      58% -2vh,
-      40% 24vh,
-      56% 94vh,
-      51% 106vh;
-    filter: saturate(1.08) brightness(0.82) blur(0.8px);
-    opacity: 0.62;
-  }
-  58% {
-    background-position:
-      47% -62vh,
-      54% 4vh,
-      45% 40vh,
-      43% -38vh,
-      61% -12vh,
-      46% 54vh,
-      49% 68vh;
-    filter: saturate(0.98) brightness(0.74) blur(0.4px);
-    opacity: 0.52;
-  }
-  82% {
-    background-position:
-      51% -92vh,
-      44% -28vh,
-      57% 4vh,
-      59% -68vh,
-      42% -44vh,
-      55% 18vh,
-      55% 36vh;
-    filter: saturate(1.06) brightness(0.8) blur(1px);
-    opacity: 0.6;
-  }
-  100% {
-    background-position:
-      50% -128vh,
-      46% -64vh,
-      56% -30vh,
-      41% -106vh,
-      60% -80vh,
-      48% -12vh,
-      54% 0vh;
-    filter: saturate(1.02) brightness(0.78) blur(0.3px);
-    opacity: 0.56;
-  }
+.smoke-video-bg video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(980px, 96vw);
+  height: auto;
+  transform: translate(-50%, -50%) scale(1.18);
+  filter: invert(1) hue-rotate(92deg) saturate(2.15) contrast(1.32) brightness(0.72);
+  opacity: 0.62;
+  mix-blend-mode: screen;
 }
 
-@keyframes smoke-haze {
-  0% {
-    background-position:
-      58% 34vh,
-      50% 82vh,
-      64% 8vh,
-      36% 62vh,
-      57% 104vh,
-      42% 122vh;
-    opacity: 0.28;
-  }
-  35% {
-    background-position:
-      43% -18vh,
-      54% 30vh,
-      39% -42vh,
-      61% 8vh,
-      44% 54vh,
-      57% 70vh;
-    opacity: 0.38;
-  }
-  68% {
-    background-position:
-      60% -70vh,
-      45% -20vh,
-      63% -94vh,
-      38% -44vh,
-      59% 0vh,
-      39% 18vh;
-    opacity: 0.31;
-  }
-  100% {
-    background-position:
-      58% -118vh,
-      50% -70vh,
-      64% -144vh,
-      36% -92vh,
-      57% -48vh,
-      42% -30vh;
-    opacity: 0.28;
-  }
-}
-
-@keyframes smoke-twist-front {
-  0% {
-    transform: perspective(1000px) translateZ(28px) rotateY(0deg) rotateX(0deg) scaleX(1) skewX(0deg);
-  }
-  25% {
-    transform: perspective(1000px) translateZ(42px) rotateY(96deg) rotateX(5deg) scaleX(0.86) skewX(-2deg);
-  }
-  50% {
-    transform: perspective(1000px) translateZ(18px) rotateY(184deg) rotateX(-3deg) scaleX(1.08) skewX(2deg);
-  }
-  75% {
-    transform: perspective(1000px) translateZ(38px) rotateY(278deg) rotateX(4deg) scaleX(0.9) skewX(-1deg);
-  }
-  100% {
-    transform: perspective(1000px) translateZ(28px) rotateY(360deg) rotateX(0deg) scaleX(1) skewX(0deg);
-  }
-}
-
-@keyframes smoke-twist-back {
-  0% {
-    transform: perspective(1200px) translateZ(-90px) rotateY(360deg) rotateX(0deg) scaleX(1.08) skewX(0deg);
-  }
-  33% {
-    transform: perspective(1200px) translateZ(-120px) rotateY(238deg) rotateX(-6deg) scaleX(0.92) skewX(4deg);
-  }
-  66% {
-    transform: perspective(1200px) translateZ(-70px) rotateY(116deg) rotateX(4deg) scaleX(1.16) skewX(-5deg);
-  }
-  100% {
-    transform: perspective(1200px) translateZ(-90px) rotateY(0deg) rotateX(0deg) scaleX(1.08) skewX(0deg);
-  }
+.smoke-video-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 0%, transparent 34%, rgba(5,5,5,0.72) 70%, #050505 100%),
+    linear-gradient(90deg, #050505 0%, transparent 18%, transparent 82%, #050505 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::before,
-  body::after {
-    animation: none;
+  .smoke-video-bg video {
+    display: none;
   }
 }
 
