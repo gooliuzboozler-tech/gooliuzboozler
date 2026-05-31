@@ -32,107 +32,65 @@ export default function Admin() {
     setFile(f); setFileLabel(f.name); setStatus(null); setResult(null)
   }
 
-  function splitRow(line, delimiter) {
-    const vals = []
-    let cur = '', inQ = false
-    for (let i = 0; i < line.length; i++) {
-      if (line[i] === '"') {
-        if (inQ && line[i + 1] === '"') {
-          cur += '"'
-          i++
-        } else {
-          inQ = !inQ
-        }
-      } else if (line[i] === delimiter && !inQ) {
-        vals.push(cur.trim().replace(/^"|"$/g, ''))
-        cur = ''
-      } else {
-        cur += line[i]
-      }
-    }
-    vals.push(cur.trim().replace(/^"|"$/g, ''))
-    return vals
-  }
-
-  function parseProbability(value) {
-    const raw = String(value || '').replace('%', '').trim()
-    const num = Number.parseFloat(raw)
-    if (!Number.isFinite(num)) return null
-    return num <= 1 ? num * 100 : num
-  }
-
-  function trustFromProbability(value) {
-    const prob = parseProbability(value)
-    if (prob === null) return 'Likely'
-    if (prob >= 80) return 'Strong'
-    if (prob >= 70) return 'Playable'
-    if (prob >= 60) return 'Thin'
-    return 'Pass'
-  }
-
-  function pick(row, names) {
-    for (const name of names) {
-      if (row[name] !== undefined && row[name] !== '') return row[name]
-    }
-    return ''
-  }
-
   function parseCSV(text) {
-    const cleanText = text.replace(/^\uFEFF/, '')
-    const delimiter = cleanText.split('\n').slice(0, 20).join('\n').includes('\t') ? '\t' : ','
-    const lines = cleanText.split('\n').map(l => l.replace(/\r$/, ''))
+    const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
 
+    // Find the filterable board section header
     let headerIdx = -1
-    let headers = []
     for (let i = 0; i < lines.length; i++) {
-      const cols = splitRow(lines[i], delimiter).map(h => h.trim())
-      const lower = cols.map(h => h.toLowerCase())
-      const hasPitcher = lower.includes('pitcher')
-      const hasOpponent = lower.includes('opponent') || lower.includes('opp')
-      const hasBet = lower.some(h => h.includes('model 1') && h.includes('bet')) || lower.includes('best bet')
-      if (hasPitcher && hasOpponent && hasBet) {
+      if (lines[i].startsWith('Pitcher,Opponent,')) {
         headerIdx = i
-        headers = cols
         break
       }
     }
     if (headerIdx === -1) return []
+
+    const headers = lines[headerIdx].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
 
     const plays = []
     for (let i = headerIdx + 1; i < lines.length; i++) {
       const line = lines[i]
       if (!line.trim() || line.startsWith(',,,')) break
 
-      const vals = splitRow(line, delimiter)
+      const vals = []
+      let cur = '', inQ = false
+      for (let j = 0; j < line.length; j++) {
+        if (line[j] === '"') { inQ = !inQ }
+        else if (line[j] === ',' && !inQ) { vals.push(cur.trim()); cur = '' }
+        else { cur += line[j] }
+      }
+      vals.push(cur.trim())
+
       const row = {}
       headers.forEach((h, idx) => { row[h] = vals[idx] || '' })
 
       if (!row['Pitcher']) break
 
-      const model1Bet = pick(row, ['Model 1 Best Bet', 'Best Bet', 'Model 1 Bet'])
-      const model1Prob = pick(row, ['Model 1 Best Prob', 'Best Prob', 'Model 1 Prob', 'Probability'])
-      if (!model1Bet) continue
+      // Skip pass plays
+      const parlayBets = (row['Parlay Bets'] || '').toLowerCase()
+      const model1Bet = row['Model 1 Best Bet'] || ''
+      if (parlayBets === 'pass' || model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
 
       plays.push({
         Pitcher: row['Pitcher'].includes('.') ? row['Pitcher'].split('.')[0] : row['Pitcher'],
-        Opponent: pick(row, ['Opponent', 'Opp']) || '',
-        'Game Time': pick(row, ['Game Time', 'Time']) || '',
-        Side: pick(row, ['Side']) || '',
-        Trust: trustFromProbability(model1Prob),
+        Opponent: row['Opponent'] || '',
+        'Game Time': row['Game Time'] || '',
+        Side: row['Side'] || '',
+        Trust: row['Trust'] || 'Likely',
         'Best Bet': model1Bet,
-        'Model 2 Bet': pick(row, ['Model 2 Best Bet', 'Model 2 Bet']) || '',
-        'Best Prob': model1Prob,
-        'Model 2 Prob': pick(row, ['Model 2 Prob', 'Model 2 Best Prob']) || '',
-        'Best Edge': pick(row, ['Model 1 Best Edge', 'Best Edge', 'Model 1 Edge']) || '',
-        'Model K': pick(row, ['Model 1 K', 'Model K']) || '',
-        'K Edge': pick(row, ['Model 1 K Edge', 'K Edge']) || '',
-        'Individual BvP K%': pick(row, ['Individual BvP K%', 'BvP K%']) || '',
-        'Individual BvP PA': pick(row, ['Individual BvP PA', 'BvP PA']) || '',
-        'Individual BvP Standouts': pick(row, ['Individual BvP Standouts', 'BvP Standouts']) || '',
-        'Opp K Rank': pick(row, ['Opp K Rank', 'Opponent K Rank']) || '',
-        'Recent Last 2 K/G': pick(row, ['K/G', 'Recent Last 2 K/G']) || '',
-        'Bullpen Data': pick(row, ['Bullpen Data']) || '',
-        'Kalshi Lines': pick(row, ['Projected Kalshi Lines', 'Kalshi Lines']) || '',
+        'Model 2 Bet': row['Model 2 Best Bet'] || '',
+        'Best Prob': row['Model 1 Best Prob'] || '',
+        'Model 2 Prob': row['Model 2 Prob'] || '',
+        'Best Edge': row['Model 1 Best Edge'] || '',
+        'Model K': row['Model 1 K'] || '',
+        'K Edge': row['Model 1 K Edge'] || '',
+        'Individual BvP K%': row['Individual BvP K%'] || '',
+        'Individual BvP PA': row['Individual BvP PA'] || '',
+        'Individual BvP Standouts': row['Individual BvP Standouts'] || '',
+        'Opp K Rank': row['Opp K Rank'] || '',
+        'Recent Last 2 K/G': row['K/G'] || '',
+        'Bullpen Data': row['Bullpen Data'] || '',
+        'Kalshi Lines': row['Projected Kalshi Lines'] || '',
       })
     }
     return plays
@@ -204,7 +162,7 @@ export default function Admin() {
           </div>
 
           <div style={s.dropzone(!!fileLabel)} onClick={() => fileRef.current?.click()} onDragOver={e => e.preventDefault()} onDrop={handleFileDrop}>
-            <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{ display: 'none' }} onChange={handleFileDrop} />
+            <input ref={fileRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileDrop} />
             {fileLabel ? (
               <div><div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>✓</div><div style={{ fontSize: '0.75rem', color: '#22C55E' }}>{fileLabel}</div><div style={{ fontSize: '0.6rem', color: '#3a5a3a', marginTop: '0.3rem' }}>Click to replace</div></div>
             ) : (

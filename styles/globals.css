@@ -41,62 +41,6 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* SMOKE VIDEO */
-body::before {
-  content: none;
-}
-
-body::after {
-  content: none;
-}
-
-.smoke-video-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background: #050505;
-}
-
-.smoke-video-bg video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: max(170vh, 105vw);
-  height: auto;
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.18, 1.9);
-  filter: invert(1) sepia(1) saturate(7) hue-rotate(235deg) contrast(1.55) brightness(0.82);
-  opacity: 0.72;
-  mix-blend-mode: screen;
-}
-
-.smoke-video-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(112, 28, 255, 0.82);
-  mix-blend-mode: color;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.smoke-video-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background:
-    radial-gradient(ellipse at center, transparent 0%, transparent 34%, rgba(5,5,5,0.72) 70%, #050505 100%),
-    linear-gradient(90deg, #050505 0%, transparent 18%, transparent 82%, #050505 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .smoke-video-bg video {
-    display: none;
-  }
-}
-
 /* NAV */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
