@@ -67,6 +67,15 @@ function oppKRankColor(value) {
   return '#22C55E'
 }
 
+function firstValue(source, keys) {
+  for (const key of keys) {
+    if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== '') {
+      return source[key]
+    }
+  }
+  return ''
+}
+
 function trustFromProbability(value) {
   const prob = parseProbability(value)
   if (prob >= 80) return 'Strong'
@@ -114,9 +123,16 @@ function PickCard({ play, plan }) {
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
   const legacyModel2Bet = play[['Conserv', 'ative Bet'].join('')] || ''
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
+  const legacyModel2Edge = play[['Conserv', 'ative Edge'].join('')] || ''
   const model2Bet = play['Model 2 Bet'] || legacyModel2Bet
   const model2Prob = play['Model 2 Prob'] || legacyModel2Prob
-  const model2Edge = play['Model 2 Edge'] || ''
+  const model2Edge = firstValue(play, [
+    'Model 2 Edge',
+    'Model 2 Best Edge',
+    'Model 2 K Edge',
+    'Model 2 Best K Edge',
+    legacyModel2Edge ? ['Conserv', 'ative Edge'].join('') : '',
+  ])
   const model3Bet = play['Model 3 Bet'] || ''
   const model3Prob = play['Model 3 Prob'] || ''
   const model3Edge = play['Model 3 Edge'] || ''

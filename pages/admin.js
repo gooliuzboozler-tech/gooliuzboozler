@@ -84,7 +84,7 @@ export default function Admin() {
         'Model 2 Prob': row['Model 2 Prob'] || '',
         'Model 3 Prob': row['Model 3 Best Prob'] || row['Model 3 Prob'] || row['Model 3 Probability'] || '',
         'Best Edge': row['Model 1 Best Edge'] || '',
-        'Model 2 Edge': row['Model 2 Best Edge'] || row['Model 2 Edge'] || '',
+        'Model 2 Edge': row['Model 2 Best Edge'] || row['Model 2 Edge'] || row['Model 2 K Edge'] || row['Model 2 Best K Edge'] || '',
         'Model 3 Edge': row['Model 3 Best Edge'] || row['Model 3 Edge'] || '',
         'Model K': row['Model 1 K'] || '',
         'K Edge': row['Model 1 K Edge'] || '',
