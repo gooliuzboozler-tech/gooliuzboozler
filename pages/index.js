@@ -29,8 +29,45 @@ function PriceCard({ tier, price, featured, features, loading, onSubscribe }) {
   )
 }
 
+function FreePickCard({ pick, lastUpdated }) {
+  if (!pick) {
+    return (
+      <div className="free-pick-card">
+        <div className="free-pick-kicker">// Public Free Pick</div>
+        <h3>Today&apos;s free pick posts after the board is uploaded.</h3>
+        <p>Check back before first pitch, or get member access for the full daily board.</p>
+        <a href="#pricing" className="free-pick-link">Get Full Access</a>
+      </div>
+    )
+  }
+
+  return (
+    <div className="free-pick-card">
+      <div className="free-pick-kicker">// Public Free Pick</div>
+      <div className="free-pick-topline">
+        <div>
+          <h3>{pick.Pitcher}</h3>
+          <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
+        </div>
+        <div className="free-pick-prob">{pick['Best Prob']}</div>
+      </div>
+      <div className="free-pick-bet">{pick['Best Bet']}</div>
+      <div className="free-pick-grid">
+        <div><span>Trust</span>{pick.Trust || 'Top Pick'}</div>
+        <div><span>Edge</span>{pick['Best Edge'] || '-'}</div>
+        <div><span>Model K</span>{pick['Model K'] || '-'}</div>
+        <div><span>K Edge</span>{pick['K Edge'] || '-'}</div>
+      </div>
+      {lastUpdated && <div className="free-pick-updated">Updated: {lastUpdated}</div>}
+      <a href="/picks" className="free-pick-link">Unlock Today&apos;s Full Board</a>
+    </div>
+  )
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(null)
+  const [freePick, setFreePick] = useState(null)
+  const [freePickUpdated, setFreePickUpdated] = useState(null)
 
   useEffect(() => {
     // Fade-up observer
@@ -49,6 +86,14 @@ export default function Home() {
     setTimeout(() => {
       document.querySelector('.stat-card')?.classList.add('visible')
     }, 400)
+
+    fetch('/api/free-pick')
+      .then(res => res.json())
+      .then(data => {
+        setFreePick(data.pick || null)
+        setFreePickUpdated(data.lastUpdated || null)
+      })
+      .catch(() => {})
 
     return () => obs.disconnect()
   }, [])
@@ -130,6 +175,7 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <a href="#pricing" className="btn-primary">Get Access Now</a>
+            <a href="#free-pick" className="btn-ghost">Free Pick</a>
             <a href="#model" className="btn-ghost">See the Model</a>
           </div>
         </div>
@@ -167,6 +213,19 @@ export default function Home() {
             <div className="bar-track"><div className="bar-fill" style={{width:'72.88%', animationDelay:'0.4s'}}></div></div>
           </div>
         </div>
+      </section>
+
+      {/* FREE PICK */}
+      <section id="free-pick" className="free-pick-section">
+        <div>
+          <div className="eyebrow">// Free Pick</div>
+          <h2 className="section-title">Today&apos;s Top<br />Probability Play.</h2>
+          <p className="section-sub">
+            The public free pick is automatically pulled from the highest Model 1 probability
+            on the current board. The rest of the card stays members-only.
+          </p>
+        </div>
+        <FreePickCard pick={freePick} lastUpdated={freePickUpdated} />
       </section>
 
       {/* HOW IT WORKS */}
