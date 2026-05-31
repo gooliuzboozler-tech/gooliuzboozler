@@ -25,6 +25,8 @@ function PickCard({ play }) {
   const [expanded, setExpanded] = useState(false)
   const trust = play.Trust || 'Likely'
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
+  const model2Bet = play['Model 2 Bet'] || ''
+  const model2Prob = play['Model 2 Prob'] || ''
 
   return (
     <div style={{ background: '#0e0e0c', border: `1px solid ${expanded ? ts.border : 'rgba(242,237,227,0.07)'}`, marginBottom: 1, transition: 'border-color 0.2s' }}>
@@ -59,8 +61,8 @@ function PickCard({ play }) {
             </div>
             <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Conservative Bet'] || '—'}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{play['Conservative Prob']} prob</div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{model2Prob || '—'} prob</div>
             </div>
           </div>
 

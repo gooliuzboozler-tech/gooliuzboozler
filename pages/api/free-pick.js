@@ -15,6 +15,23 @@ function pickHighestProbability(plays) {
     .sort((a, b) => parseProbability(b['Best Prob']) - parseProbability(a['Best Prob']))[0] || null
 }
 
+function publicPick(play) {
+  if (!play) return null
+
+  return {
+    Pitcher: play.Pitcher || '',
+    Opponent: play.Opponent || '',
+    'Game Time': play['Game Time'] || '',
+    Side: play.Side || '',
+    Trust: play.Trust || '',
+    'Best Bet': play['Best Bet'] || '',
+    'Best Prob': play['Best Prob'] || '',
+    'Best Edge': play['Best Edge'] || '',
+    'Model K': play['Model K'] || '',
+    'K Edge': play['K Edge'] || '',
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -26,7 +43,7 @@ export default async function handler(req, res) {
     const freePick = pickHighestProbability(plays)
 
     return res.status(200).json({
-      pick: freePick,
+      pick: publicPick(freePick),
       lastUpdated: data?.lastUpdated || null,
     })
   } catch (err) {
