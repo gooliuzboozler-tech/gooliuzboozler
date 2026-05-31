@@ -81,6 +81,30 @@ function formatEdge(value) {
   return formatRoundedNumber(value, { signed: true })
 }
 
+function oddsFromMarket(bet, lines) {
+  const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  if (!betMatch || !lines) return ''
+
+  const side = betMatch[1].toLowerCase()
+  const threshold = betMatch[2]
+  const escapedThreshold = threshold.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const lineRegex = new RegExp(`${escapedThreshold}\\+:\\s*Yes\\s*\\$?([0-9.]+)\\s*/\\s*No\\s*\\$?([0-9.]+)`, 'i')
+  const lineMatch = String(lines).match(lineRegex)
+  if (!lineMatch) return ''
+
+  const odds = Number.parseFloat(side === 'yes' ? lineMatch[1] : lineMatch[2])
+  return Number.isFinite(odds) && odds > 0 ? `$${odds.toFixed(2).replace(/\.00$/, '')}` : ''
+}
+
+function formatOdds(value, bet, lines) {
+  const explicit = String(value || '').trim()
+  if (explicit) {
+    const num = Number.parseFloat(explicit.replace(/[$,]/g, ''))
+    return Number.isFinite(num) ? `$${num.toFixed(2).replace(/\.00$/, '')}` : explicit
+  }
+  return oddsFromMarket(bet, lines)
+}
+
 function trustFromProbability(value) {
   const prob = parseProbability(value)
   if (prob === null) return 'Top Pick'
@@ -103,6 +127,7 @@ function FreePickCard({ pick, lastUpdated }) {
   }
 
   const teamLogo = teamLogoUrl(pick['Pitcher Team'])
+  const odds = formatOdds(pick['Best Odds'], pick['Best Bet'], pick['Kalshi Lines'])
 
   return (
     <div className="free-pick-card">
@@ -117,12 +142,12 @@ function FreePickCard({ pick, lastUpdated }) {
         </div>
         <div className="free-pick-prob">{formatProbability(pick['Best Prob'])}</div>
       </div>
-      <div className="free-pick-bet">{pick['Best Bet']}</div>
+      <div className="free-pick-bet">{pick['Best Bet']}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}</div>
       <div className="free-pick-grid">
         <div><span>Trust</span>{trustFromProbability(pick['Best Prob'])}</div>
+        <div><span>Odds</span>{odds || '-'}</div>
         <div><span>Edge</span>{formatEdge(pick['Best Edge'])}</div>
         <div><span>Model K</span>{formatRoundedNumber(pick['Model K'])}</div>
-        <div><span>K Edge</span>{formatRoundedNumber(pick['K Edge'])}</div>
       </div>
       {lastUpdated && <div className="free-pick-updated">Updated: {lastUpdated}</div>}
       <a href="/picks" className="free-pick-link">Unlock Today&apos;s Full Board</a>

@@ -117,6 +117,34 @@ function impliedEdgeFromMarket(probability, bet, lines) {
   return prob - (1 / odds)
 }
 
+function oddsFromMarket(bet, lines) {
+  const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  if (!betMatch || !lines) return ''
+
+  const side = betMatch[1].toLowerCase()
+  const threshold = betMatch[2]
+  const escapedThreshold = threshold.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const lineRegex = new RegExp(`${escapedThreshold}\\+:\\s*Yes\\s*\\$?([0-9.]+)\\s*/\\s*No\\s*\\$?([0-9.]+)`, 'i')
+  const lineMatch = String(lines).match(lineRegex)
+  if (!lineMatch) return ''
+
+  const yesOdds = Number.parseFloat(lineMatch[1])
+  const noOdds = Number.parseFloat(lineMatch[2])
+  const odds = side === 'yes' ? yesOdds : noOdds
+  if (!Number.isFinite(odds) || odds <= 0) return ''
+
+  return `$${odds.toFixed(2).replace(/\.00$/, '')}`
+}
+
+function formatOdds(value, bet, lines) {
+  const explicit = String(value || '').trim()
+  if (explicit) {
+    const num = Number.parseFloat(explicit.replace(/[$,]/g, ''))
+    return Number.isFinite(num) ? `$${num.toFixed(2).replace(/\.00$/, '')}` : explicit
+  }
+  return oddsFromMarket(bet, lines)
+}
+
 function trustFromProbability(value) {
   const prob = parseProbability(value)
   if (prob >= 80) return 'Strong'
@@ -181,6 +209,9 @@ function PickCard({ play, plan }) {
   const model3Bet = play['Model 3 Bet'] || ''
   const model3Prob = play['Model 3 Prob'] || ''
   const model3Edge = play['Model 3 Edge'] || ''
+  const model1Odds = formatOdds(play['Best Odds'], play['Best Bet'], play['Kalshi Lines'])
+  const model2Odds = formatOdds(play['Model 2 Odds'], model2Bet, play['Kalshi Lines'])
+  const model3Odds = formatOdds(play['Model 3 Odds'], model3Bet, play['Kalshi Lines'])
   const parlayPick = play['Parlay Pick'] || ''
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const showModel2 = planHasModel2(plan)
@@ -206,7 +237,9 @@ function PickCard({ play, plan }) {
         <TrustBadge trust={trust} />
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: ts.color }}>{play['Best Bet']}</div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Best Bet</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
+            Best Bet{model1Odds ? ` · ${model1Odds}` : ''}
+          </div>
         </div>
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(play['Best Prob'])}</div>
@@ -225,14 +258,16 @@ function PickCard({ play, plan }) {
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>{formatProbability(play['Best Prob'])} prob · {formatEdge(play['Best Edge'])} edge</div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
+                {formatProbability(play['Best Prob'])} prob{model1Odds ? ` · ${model1Odds} odds` : ''} · {formatEdge(play['Best Edge'])} edge
+              </div>
             </div>
             {showModel2 && (
               <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                  {formatProbability(model2Prob)} prob{model2Edge ? ` · ${formatEdge(model2Edge)} edge` : ''}
+                  {formatProbability(model2Prob)} prob{model2Odds ? ` · ${model2Odds} odds` : ''}{model2Edge ? ` · ${formatEdge(model2Edge)} edge` : ''}
                 </div>
               </div>
             )}
@@ -241,7 +276,7 @@ function PickCard({ play, plan }) {
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#C084FC', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 3 BEST BET</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model3Bet || '—'}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                  {formatProbability(model3Prob)} prob{model3Edge ? ` · ${formatEdge(model3Edge)} edge` : ''}
+                  {formatProbability(model3Prob)} prob{model3Odds ? ` · ${model3Odds} odds` : ''}{model3Edge ? ` · ${formatEdge(model3Edge)} edge` : ''}
                 </div>
               </div>
             )}
@@ -309,6 +344,7 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
   }
 
   const teamLogo = teamLogoUrl(pick['Pitcher Team'])
+  const odds = formatOdds(pick['Best Odds'], pick['Best Bet'], pick['Kalshi Lines'])
 
   return (
     <div style={{ background: 'rgba(7,7,7,0.94)', border: '1px solid rgba(242,237,227,0.16)', borderLeft: '3px solid #EAB308', padding: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)', marginBottom: '1.5rem' }}>
@@ -325,13 +361,15 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
         </div>
         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: '#22C55E', lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
       </div>
-      <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>{pick['Best Bet']}</div>
+      <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>
+        {pick['Best Bet']}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
+      </div>
       <div className="public-free-pick-grid">
         {[
           ['Trust', trustFromProbability(pick['Best Prob'])],
+          ['Odds', odds || '-'],
           ['Edge', formatEdge(pick['Best Edge'])],
           ['Model K', formatRoundedNumber(pick['Model K'])],
-          ['K Edge', formatRoundedNumber(pick['K Edge'])],
         ].map(([label, value]) => (
           <div key={label} style={{ background: 'rgba(10,10,10,0.96)', padding: '0.85rem', fontFamily: 'DM Mono, monospace', fontSize: '0.78rem', color: '#F2EDE3' }}>
             <span style={{ display: 'block', fontSize: '0.55rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.35rem' }}>{label}</span>

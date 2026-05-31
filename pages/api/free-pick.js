@@ -28,8 +28,10 @@ function publicPick(play) {
     'Best Bet': play['Best Bet'] || '',
     'Best Prob': play['Best Prob'] || '',
     'Best Edge': play['Best Edge'] || '',
+    'Best Odds': play['Best Odds'] || '',
     'Model K': play['Model K'] || '',
     'K Edge': play['K Edge'] || '',
+    'Kalshi Lines': play['Kalshi Lines'] || '',
   }
 }
 
