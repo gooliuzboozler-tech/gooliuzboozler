@@ -75,7 +75,7 @@ function FreePickCard({ pick, lastUpdated }) {
       <div className="free-pick-kicker">// Public Free Pick</div>
       <div className="free-pick-topline">
         <div>
-          <h3>{pick.Pitcher}</h3>
+          <h3><span className="free-pick-gold-name">{pick.Pitcher}</span></h3>
           <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
         </div>
         <div className="free-pick-prob">{formatProbability(pick['Best Prob'])}</div>
