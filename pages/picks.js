@@ -29,6 +29,13 @@ function parseProbability(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function parseProbabilityDecimal(value) {
+  const raw = String(value || '').replace('%', '').trim()
+  const num = Number.parseFloat(raw)
+  if (!Number.isFinite(num)) return null
+  return num > 1 ? num / 100 : num
+}
+
 function formatRoundedNumber(value, { signed = false } = {}) {
   const raw = String(value ?? '').trim()
   if (!raw || raw === '—' || raw === '-') return '-'
@@ -74,6 +81,26 @@ function firstValue(source, keys) {
     }
   }
   return ''
+}
+
+function impliedEdgeFromMarket(probability, bet, lines) {
+  const prob = parseProbabilityDecimal(probability)
+  const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  if (prob === null || !betMatch || !lines) return ''
+
+  const side = betMatch[1].toLowerCase()
+  const threshold = betMatch[2]
+  const escapedThreshold = threshold.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const lineRegex = new RegExp(`${escapedThreshold}\\+:\\s*Yes\\s*\\$([0-9.]+)\\s*/\\s*No\\s*\\$([0-9.]+)`, 'i')
+  const lineMatch = String(lines).match(lineRegex)
+  if (!lineMatch) return ''
+
+  const yesOdds = Number.parseFloat(lineMatch[1])
+  const noOdds = Number.parseFloat(lineMatch[2])
+  const odds = side === 'yes' ? yesOdds : noOdds
+  if (!Number.isFinite(odds) || odds <= 0) return ''
+
+  return prob - (1 / odds)
 }
 
 function trustFromProbability(value) {
@@ -132,7 +159,7 @@ function PickCard({ play, plan }) {
     'Model 2 K Edge',
     'Model 2 Best K Edge',
     legacyModel2Edge ? ['Conserv', 'ative Edge'].join('') : '',
-  ])
+  ]) || impliedEdgeFromMarket(model2Prob, model2Bet, play['Kalshi Lines'])
   const model3Bet = play['Model 3 Bet'] || ''
   const model3Prob = play['Model 3 Prob'] || ''
   const model3Edge = play['Model 3 Edge'] || ''
