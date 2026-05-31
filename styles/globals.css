@@ -50,17 +50,26 @@ body::before {
     url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png');
   background-repeat: no-repeat;
   background-position:
     50% 10vh,
     46% 74vh,
     56% 108vh,
+    41% 32vh,
+    60% 58vh,
+    48% 126vh,
     54% 138vh;
   background-size:
     min(520px, 58vw) auto,
     min(460px, 52vw) auto,
     min(360px, 42vw) auto,
+    min(320px, 38vw) auto,
+    min(390px, 45vw) auto,
+    min(300px, 35vw) auto,
     min(560px, 62vw) auto;
   filter: saturate(1.02) brightness(0.78) blur(0.3px);
   mix-blend-mode: screen;
@@ -80,15 +89,24 @@ body::after {
   background-image:
     url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
+    url('/purple-smoke-plume.png'),
     url('/purple-smoke-plume.png');
   background-repeat: no-repeat;
   background-position:
     58% 34vh,
     50% 82vh,
+    64% 8vh,
+    36% 62vh,
+    57% 104vh,
     42% 122vh;
   background-size:
     min(660px, 72vw) auto,
     min(440px, 50vw) auto,
+    min(520px, 58vw) auto,
+    min(360px, 42vw) auto,
+    min(480px, 54vw) auto,
     min(600px, 66vw) auto;
   filter: saturate(0.95) brightness(0.62) blur(12px);
   mix-blend-mode: screen;
@@ -107,6 +125,9 @@ body::after {
       50% 10vh,
       46% 74vh,
       56% 108vh,
+      41% 32vh,
+      60% 58vh,
+      48% 126vh,
       54% 138vh;
     filter: saturate(1.02) brightness(0.78) blur(0.3px);
     opacity: 0.56;
@@ -116,6 +137,9 @@ body::after {
       53% -24vh,
       48% 42vh,
       51% 76vh,
+      58% -2vh,
+      40% 24vh,
+      56% 94vh,
       51% 106vh;
     filter: saturate(1.08) brightness(0.82) blur(0.8px);
     opacity: 0.62;
@@ -125,6 +149,9 @@ body::after {
       47% -62vh,
       54% 4vh,
       45% 40vh,
+      43% -38vh,
+      61% -12vh,
+      46% 54vh,
       49% 68vh;
     filter: saturate(0.98) brightness(0.74) blur(0.4px);
     opacity: 0.52;
@@ -134,6 +161,9 @@ body::after {
       51% -92vh,
       44% -28vh,
       57% 4vh,
+      59% -68vh,
+      42% -44vh,
+      55% 18vh,
       55% 36vh;
     filter: saturate(1.06) brightness(0.8) blur(1px);
     opacity: 0.6;
@@ -143,6 +173,9 @@ body::after {
       50% -128vh,
       46% -64vh,
       56% -30vh,
+      41% -106vh,
+      60% -80vh,
+      48% -12vh,
       54% 0vh;
     filter: saturate(1.02) brightness(0.78) blur(0.3px);
     opacity: 0.56;
@@ -154,6 +187,9 @@ body::after {
     background-position:
       58% 34vh,
       50% 82vh,
+      64% 8vh,
+      36% 62vh,
+      57% 104vh,
       42% 122vh;
     opacity: 0.28;
   }
@@ -161,6 +197,9 @@ body::after {
     background-position:
       43% -18vh,
       54% 30vh,
+      39% -42vh,
+      61% 8vh,
+      44% 54vh,
       57% 70vh;
     opacity: 0.38;
   }
@@ -168,6 +207,9 @@ body::after {
     background-position:
       60% -70vh,
       45% -20vh,
+      63% -94vh,
+      38% -44vh,
+      59% 0vh,
       39% 18vh;
     opacity: 0.31;
   }
@@ -175,6 +217,9 @@ body::after {
     background-position:
       58% -118vh,
       50% -70vh,
+      64% -144vh,
+      36% -92vh,
+      57% -48vh,
       42% -30vh;
     opacity: 0.28;
   }
