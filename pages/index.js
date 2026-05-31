@@ -197,8 +197,8 @@ export default function Home() {
     <span className="nav-tag">MLB K Props</span>
   </div>
   <div className="nav-actions">
-    <a href="/picks" className="nav-link neon-purple">Today&#39;s Picks</a>
-    <a href="/yesterday" className="nav-link neon-green">Yesterday&#39;s Picks</a>
+    <a href="/picks" className="nav-link neon-green">Today&#39;s Picks</a>
+    <a href="/yesterday" className="nav-link neon-purple">Yesterday&#39;s Picks</a>
     <a href="/picks" className="nav-link gold">Free Pick</a>
     <a href="#pricing" className="nav-cta">Get Access</a>
   </div>

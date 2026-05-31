@@ -393,7 +393,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/yesterday" className="nav-link neon-green">
+          <Link href="/yesterday" className="nav-link neon-purple">
             Yesterday&apos;s Picks
           </Link>
           <button onClick={onLoginClick} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#F2EDE3', border: '1px solid rgba(242,237,227,0.22)', padding: '0.65rem 1.5rem', cursor: 'pointer' }}>
@@ -463,7 +463,7 @@ function LoginGate({ onLogin }) {
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/yesterday" className="nav-link neon-green">Yesterday&apos;s Picks</Link>
+          <Link href="/yesterday" className="nav-link neon-purple">Yesterday&apos;s Picks</Link>
           <Link href="/#pricing" className="nav-cta">
             Subscribe
           </Link>
@@ -657,7 +657,7 @@ export default function Picks() {
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/yesterday" className="nav-link neon-green">Yesterday&apos;s Picks</Link>
+          <Link href="/yesterday" className="nav-link neon-purple">Yesterday&apos;s Picks</Link>
           {memberEmail && <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', letterSpacing: '0.08em' }}>{memberEmail}</span>}
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#EAB308', border: '1px solid rgba(234,179,8,0.3)', padding: '0.3rem 0.7rem' }}>{PLAN_LABELS[memberPlan] || 'Weekly'}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)', padding: '0.3rem 0.7rem' }}>● MEMBER</div>
