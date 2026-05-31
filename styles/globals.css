@@ -63,18 +63,29 @@ body::after {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: max(150vh, 92vw);
+  width: max(170vh, 105vw);
   height: auto;
-  transform: translate(-50%, -50%) rotate(-90deg) scale(1.28, 1.78);
-  filter: invert(1) hue-rotate(112deg) saturate(3.15) contrast(1.45) brightness(0.74);
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.18, 1.9);
+  filter: invert(1) sepia(1) saturate(7) hue-rotate(235deg) contrast(1.55) brightness(0.82);
   opacity: 0.72;
   mix-blend-mode: screen;
+}
+
+.smoke-video-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(112, 28, 255, 0.82);
+  mix-blend-mode: color;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .smoke-video-bg::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     radial-gradient(ellipse at center, transparent 0%, transparent 34%, rgba(5,5,5,0.72) 70%, #050505 100%),
     linear-gradient(90deg, #050505 0%, transparent 18%, transparent 82%, #050505 100%);
