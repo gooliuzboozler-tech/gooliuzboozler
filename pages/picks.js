@@ -399,7 +399,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           <button onClick={onLoginClick} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#F2EDE3', border: '1px solid rgba(242,237,227,0.22)', padding: '0.65rem 1.5rem', cursor: 'pointer' }}>
             Member Login
           </button>
-          <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '0.65rem 1.5rem' }}>
+          <Link href="/#pricing" className="nav-cta">
             Get Access
           </Link>
         </div>
@@ -464,7 +464,7 @@ function LoginGate({ onLogin }) {
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/yesterday" className="nav-link neon-green">Yesterday&apos;s Picks</Link>
-          <Link href="/#pricing" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', background: '#C8180A', color: '#F2EDE3', padding: '0.65rem 1.5rem' }}>
+          <Link href="/#pricing" className="nav-cta">
             Subscribe
           </Link>
         </div>

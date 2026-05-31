@@ -189,7 +189,7 @@ export default function Yesterday() {
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/picks" className="nav-link">Today&apos;s Picks</Link>
+          <Link href="/picks" className="nav-link neon-purple">Today&apos;s Picks</Link>
           <Link href="/#pricing" className="nav-cta">Get Access</Link>
         </div>
       </nav>
