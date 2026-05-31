@@ -188,8 +188,8 @@ function PickCard({ play, plan }) {
   const modelCardCount = 1 + (showModel2 ? 1 : 0) + (showModel3 ? 1 : 0)
 
   return (
-    <div style={{ background: '#0e0e0c', border: `1px solid ${expanded ? ts.border : 'rgba(242,237,227,0.07)'}`, marginBottom: 1, transition: 'border-color 0.2s' }}>
-      <div onClick={() => setExpanded(!expanded)} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr 1fr 1fr', gap: '0.5rem', padding: '1rem 1.25rem', cursor: 'pointer', alignItems: 'center' }}>
+    <div className="pick-card" style={{ borderColor: expanded ? ts.border : 'rgba(242,237,227,0.07)' }}>
+      <div onClick={() => setExpanded(!expanded)} className="pick-row">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3', letterSpacing: '0.04em' }}>
             {teamLogo && (
@@ -216,12 +216,12 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['Best Edge'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Edge</div>
         </div>
-        <div style={{ textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448' }}>{expanded ? '▲' : '▼'}</div>
+        <div className="pick-toggle">{expanded ? '▲' : '▼'}</div>
       </div>
 
       {expanded && (
         <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(242,237,227,0.05)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${modelCardCount}, minmax(0, 1fr))`, gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
+          <div className="model-cards" style={{ '--model-card-count': modelCardCount }}>
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
@@ -256,7 +256,7 @@ function PickCard({ play, plan }) {
 
           {showModel2 && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <div className="pick-stats-grid">
                 {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
                   <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
@@ -326,7 +326,7 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: '#22C55E', lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
       </div>
       <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>{pick['Best Bet']}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'rgba(242,237,227,0.14)', border: '1px solid rgba(242,237,227,0.14)', marginTop: '1rem' }}>
+      <div className="public-free-pick-grid">
         {[
           ['Trust', trustFromProbability(pick['Best Prob'])],
           ['Edge', formatEdge(pick['Best Edge'])],
@@ -352,7 +352,7 @@ function MembershipChoices({ loading, onSubscribe }) {
     <div style={{ background: 'rgba(7,7,7,0.96)', border: '1px solid rgba(242,237,227,0.16)', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 24px 80px rgba(0,0,0,0.55)' }}>
       <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2rem', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>Pick Your Access</div>
       <p style={{ fontFamily: 'DM Sans, sans-serif', color: '#BFB090', lineHeight: 1.7, marginBottom: '1.25rem' }}>Choose a membership and checkout opens in Stripe.</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.75rem' }}>
+      <div className="membership-choice-grid">
         {Object.entries(PRICES).map(([plan, price]) => (
           <button key={plan} onClick={() => onSubscribe(price.id)} disabled={loading === price.id} style={{ background: plan === 'monthly' ? '#C8180A' : 'rgba(242,237,227,0.04)', border: plan === 'monthly' ? '1px solid #C8180A' : '1px solid rgba(242,237,227,0.14)', color: '#F2EDE3', padding: '1rem', cursor: loading === price.id ? 'not-allowed' : 'pointer', textAlign: 'left' }}>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: plan === 'season' ? '#EAB308' : '#BFB090', marginBottom: '0.55rem' }}>{PLAN_LABELS[plan]}</div>
@@ -385,12 +385,10 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
   const [showPlans, setShowPlans] = useState(false)
   const freePick = getFreePick(plays)
   const blurredPlays = plays.filter(play => play !== freePick)
-  const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
-
   return (
     <>
       <Head><title>Free Pick — GooliuzBoozler</title></Head>
-      <nav style={navStyle}>
+      <nav className="picks-nav">
         <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
@@ -403,14 +401,14 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           </Link>
         </div>
       </nav>
-      <div style={{ paddingTop: '80px', minHeight: '100vh', padding: '80px 2.5rem 4rem', maxWidth: 1100, margin: '0 auto' }}>
+      <div className="picks-shell">
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#EAB308', marginBottom: '0.5rem' }}>// Free Pick</div>
           <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3.5rem', letterSpacing: '0.04em', lineHeight: 1 }}>Today&apos;s Public Play</h1>
         </div>
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
         {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr 1fr 1fr', gap: '0.5rem', padding: '0.5rem 1.25rem', fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#5A5448', borderBottom: '1px solid rgba(242,237,227,0.06)', marginBottom: 1 }}>
+        <div className="pick-header-row">
           <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>Edge</span><span></span>
         </div>
         <BlurredPickPreview plays={blurredPlays} />
@@ -454,12 +452,10 @@ function LoginGate({ onLogin }) {
     }
   }
 
-  const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
-
   return (
     <>
       <Head><title>Members Board — GooliuzBoozler</title></Head>
-      <nav style={navStyle}>
+      <nav className="picks-nav">
         <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
@@ -607,8 +603,6 @@ export default function Picks() {
     Thin: visiblePlays.filter(p => getPlayTrust(p) === 'Thin').length,
   }
 
-  const navStyle = { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 2.5rem', background: 'rgba(10,10,8,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(242,237,227,0.08)' }
-
   async function handleSubscribe(priceId) {
     setCheckoutLoading(priceId)
     try {
@@ -652,7 +646,7 @@ export default function Picks() {
         <title>Today's Board — GooliuzBoozler</title>
         <meta name="robots" content="noindex" />
       </Head>
-      <nav style={navStyle}>
+      <nav className="picks-nav member">
         <Link href="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.14em', color: '#F2EDE3' }}>
           GOOLIUZ<span style={{ color: '#C8180A' }}>BOOZLER</span>
         </Link>
@@ -664,7 +658,7 @@ export default function Picks() {
         </div>
       </nav>
 
-      <div style={{ paddingTop: '80px', minHeight: '100vh', padding: '80px 2.5rem 4rem', maxWidth: 1100, margin: '0 auto' }}>
+      <div className="picks-shell">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8180A', marginBottom: '0.5rem' }}>// Today's Board</div>
@@ -682,7 +676,7 @@ export default function Picks() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 1, marginBottom: '1.5rem', background: 'rgba(242,237,227,0.04)', padding: 1 }}>
+        <div className="filter-tabs">
           {tabs.map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.55rem 1.25rem', border: 'none', cursor: 'pointer', background: filter === f ? '#C8180A' : 'transparent', color: filter === f ? '#F2EDE3' : '#5A5448', transition: 'all 0.15s' }}>
               {f} {f === 'All' ? `(${visiblePlays.length})` : f === 'Likely' ? `(${counts.Strong})` : f === 'Playable' ? `(${counts.Playable})` : `(${counts.Thin})`}
@@ -690,7 +684,7 @@ export default function Picks() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr 1fr 1fr', gap: '0.5rem', padding: '0.5rem 1.25rem', fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#5A5448', borderBottom: '1px solid rgba(242,237,227,0.06)', marginBottom: 1 }}>
+        <div className="pick-header-row">
           <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>Edge</span><span></span>
         </div>
 
