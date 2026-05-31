@@ -9,6 +9,7 @@ export default function Admin() {
   const [fileLabel, setFileLabel] = useState(null)
   const [status, setStatus] = useState(null)
   const [result, setResult] = useState(null)
+  const [uploadMode, setUploadMode] = useState('today')
   const fileRef = useRef(null)
 
   const s = {
@@ -53,6 +54,28 @@ export default function Admin() {
     }
   }
 
+  function firstValue(source, keys) {
+    for (const key of keys) {
+      if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== '') {
+        return source[key]
+      }
+    }
+    return ''
+  }
+
+  function inferBetResult(bet, actualKs) {
+    const actual = Number.parseFloat(String(actualKs || '').replace(/[^0-9.-]/g, ''))
+    const match = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+    if (!Number.isFinite(actual) || !match) return ''
+
+    const side = match[1].toLowerCase()
+    const threshold = Number.parseInt(match[2], 10)
+    if (!Number.isFinite(threshold)) return ''
+
+    const hit = side === 'yes' ? actual >= threshold : actual < threshold
+    return hit ? 'Hit' : 'Miss'
+  }
+
   function parseCSV(text) {
     const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
 
@@ -92,6 +115,9 @@ export default function Admin() {
       const model1Prob = row['Model 1 Best Prob'] || ''
       const pitcher = parsePitcher(row['Pitcher'])
       if (model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
+      const actualKs = firstValue(row, ['Actual K', 'Actual Ks', 'Actual Strikeouts', 'Strikeouts', 'Final K', 'Final Ks', 'SO', 'K Result'])
+      const explicitResult = firstValue(row, ['Result', 'Outcome', 'Hit/Miss', 'Hit?', 'Model 1 Result', 'Best Bet Result'])
+      const inferredResult = explicitResult || inferBetResult(model1Bet, actualKs)
 
       plays.push({
         Pitcher: pitcher.name,
@@ -119,6 +145,8 @@ export default function Admin() {
         'Recent Last 2 K/G': row['K/G'] || '',
         'Bullpen Data': row['Bullpen Data'] || '',
         'Kalshi Lines': row['Projected Kalshi Lines'] || '',
+        'Actual Ks': actualKs,
+        Result: inferredResult,
       })
     }
     return plays
@@ -137,7 +165,7 @@ export default function Admin() {
         return
       }
 
-      const res = await fetch('/api/picks', {
+      const res = await fetch(uploadMode === 'yesterday' ? '/api/yesterday-picks' : '/api/picks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-admin-key': password },
         body: JSON.stringify({ plays }),
@@ -183,10 +211,37 @@ export default function Admin() {
       <div style={s.page}>
         <div style={s.box}>
           <div style={{ fontSize: '0.6rem', letterSpacing: '0.25em', color: '#C8180A', marginBottom: '0.5rem' }}>// GOOLIUZBOOZLER ADMIN</div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>Upload Today's Board</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
+            {uploadMode === 'yesterday' ? "Upload Yesterday's Results" : "Upload Today's Board"}
+          </div>
           <div style={{ fontSize: '0.65rem', color: '#5A5448', marginBottom: '2rem', lineHeight: 1.6 }}>
             In Numbers: File → Export To → CSV → choose the <strong style={{color:'#888'}}>Filterable Board</strong> sheet.<br />
-            Drop the CSV below to publish instantly.
+            {uploadMode === 'yesterday' ? 'For results, include an Actual K / Result column if you have one. The site can infer hit or miss from Actual K.' : 'Drop the CSV below to publish instantly.'}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#222', marginBottom: '1rem' }}>
+            {[
+              ['today', "Today's Board"],
+              ['yesterday', "Yesterday's Results"],
+            ].map(([mode, label]) => (
+              <button
+                key={mode}
+                onClick={() => { setUploadMode(mode); setStatus(null); setResult(null) }}
+                style={{
+                  background: uploadMode === mode ? '#C8180A' : '#0e0e0e',
+                  border: 'none',
+                  color: '#F2EDE3',
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: '0.62rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '0.7rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           <div style={s.dropzone(!!fileLabel)} onClick={() => fileRef.current?.click()} onDragOver={e => e.preventDefault()} onDrop={handleFileDrop}>
@@ -198,14 +253,14 @@ export default function Admin() {
             )}
           </div>
 
-          {status === 'success' && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#22C55E', lineHeight: 1.6 }}>✓ Board updated — {result?.count} plays live on gooliuzboozler.com/picks</div>}
+          {status === 'success' && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#22C55E', lineHeight: 1.6 }}>✓ {uploadMode === 'yesterday' ? 'Yesterday results' : 'Board'} updated — {result?.count} plays live</div>}
           {status === 'error' && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#EF4444', lineHeight: 1.6 }}>✗ {result?.message}</div>}
 
           <button style={{ ...s.btn(status === 'uploading' ? '#333' : fileLabel ? '#C8180A' : '#2a2a2a'), cursor: fileLabel && status !== 'uploading' ? 'pointer' : 'not-allowed' }} onClick={handleUpload} disabled={!fileLabel || status === 'uploading'}>
-            {status === 'uploading' ? '◌  Uploading...' : status === 'success' ? '✓  Upload Another' : '▲  Publish Board'}
+            {status === 'uploading' ? '◌  Uploading...' : status === 'success' ? '✓  Upload Another' : uploadMode === 'yesterday' ? '▲  Publish Results' : '▲  Publish Board'}
           </button>
 
-          {status === 'success' && <a href="/picks" target="_blank" style={{ display: 'block', textAlign: 'center', marginTop: '0.75rem', fontSize: '0.65rem', color: '#5A5448', letterSpacing: '0.1em', textDecoration: 'none' }}>View live board →</a>}
+          {status === 'success' && <a href={uploadMode === 'yesterday' ? '/yesterday' : '/picks'} target="_blank" style={{ display: 'block', textAlign: 'center', marginTop: '0.75rem', fontSize: '0.65rem', color: '#5A5448', letterSpacing: '0.1em', textDecoration: 'none' }}>View live page →</a>}
         </div>
       </div>
     </>

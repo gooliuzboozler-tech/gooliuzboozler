@@ -747,6 +747,90 @@ footer {
   background: rgba(242,237,227,0.04);
   padding: 1px;
 }
+.result-card.hit {
+  border-left: 3px solid var(--green);
+}
+.result-card.miss {
+  border-left: 3px solid #EF4444;
+}
+.result-card.pending {
+  border-left: 3px solid var(--muted);
+}
+.result-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(242,237,227,0.12);
+  white-space: nowrap;
+}
+.result-badge.hit {
+  color: var(--green);
+  background: rgba(34,197,94,0.1);
+  border-color: rgba(34,197,94,0.3);
+}
+.result-badge.miss {
+  color: #EF4444;
+  background: rgba(239,68,68,0.09);
+  border-color: rgba(239,68,68,0.28);
+}
+.result-badge.pending {
+  color: var(--muted);
+  background: rgba(242,237,227,0.035);
+}
+.result-summary {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.75rem;
+  background: rgba(242,237,227,0.04);
+  border: 1px solid rgba(242,237,227,0.08);
+}
+.result-summary.hit { color: var(--green); }
+.result-summary.miss { color: #EF4444; }
+.result-detail-grid,
+.yesterday-model-grid {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 1.25rem 1rem;
+}
+.result-detail-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.result-detail-grid > div,
+.yesterday-model-grid > div {
+  background: rgba(242,237,227,0.03);
+  padding: 0.7rem 0.85rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--cream);
+}
+.result-detail-grid span,
+.yesterday-model-grid span {
+  display: block;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+.yesterday-model-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.yesterday-model-grid strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+}
+.yesterday-model-grid small {
+  display: block;
+  color: var(--tan);
+  font-size: 0.68rem;
+  margin-bottom: 0.65rem;
+}
 
 /* FADE UP */
 .fade-up {
@@ -890,7 +974,9 @@ footer {
   .model-cards,
   .pick-stats-grid,
   .public-free-pick-grid,
-  .membership-choice-grid {
+  .membership-choice-grid,
+  .result-detail-grid,
+  .yesterday-model-grid {
     grid-template-columns: 1fr !important;
   }
   .filter-tabs {
