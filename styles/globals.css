@@ -19,11 +19,11 @@ html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
   background:
-    linear-gradient(118deg, rgba(111,50,160,0.68) 0%, rgba(43,17,62,0.92) 36%, rgba(21,8,31,0.94) 100%),
-    linear-gradient(242deg, rgba(147,66,190,0.5) 0%, rgba(29,10,42,0.2) 50%),
-    radial-gradient(circle at 78% 18%, rgba(116,51,165,0.42), rgba(21,8,31,0) 36%),
-    radial-gradient(circle at 18% 72%, rgba(85,36,130,0.26), rgba(21,8,31,0) 32%),
-    repeating-linear-gradient(108deg, rgba(190,136,238,0.05) 0 1px, transparent 1px 8px),
+    linear-gradient(118deg, rgba(100,45,145,0.62) 0%, rgba(36,15,52,0.92) 36%, rgba(20,8,29,0.95) 100%),
+    linear-gradient(242deg, rgba(132,58,176,0.44) 0%, rgba(24,9,36,0.16) 48%),
+    radial-gradient(circle at 78% 18%, rgba(101,45,148,0.35), rgba(20,8,29,0) 35%),
+    radial-gradient(circle at 18% 72%, rgba(78,32,120,0.12), rgba(20,8,29,0) 30%),
+    repeating-linear-gradient(108deg, rgba(180,126,230,0.044) 0 1px, transparent 1px 8px),
     var(--ink);
   background-attachment: fixed;
   color: var(--cream);
@@ -48,12 +48,12 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(180deg, rgba(135,70,190,0.2), rgba(21,8,31,0.06)),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%238a49c4' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+    linear-gradient(180deg, rgba(121,62,178,0.17), rgba(20,8,29,0.055)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%238249bd' filter='url(%23noise)' opacity='0.09'/%3E%3C/svg%3E");
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 1000;
-  opacity: 0.74;
+  opacity: 0.69;
 }
 
 /* NAV */
@@ -388,14 +388,15 @@ section { padding: 6rem 2.5rem; }
 }
 .free-pick-gold-name {
   display: inline-block;
-  color: #F8D77A;
-  background: linear-gradient(100deg, #8A5A18 0%, #F5C95E 22%, #FFF2B0 42%, #C98925 62%, #F8D77A 82%, #9D641A 100%);
-  background-size: 220% auto;
+  color: #F8D77A !important;
+  background-image: linear-gradient(100deg, #7A4A10 0%, #E7AD2B 18%, #FFF2A8 38%, #C8841E 58%, #FFD96F 78%, #8B540F 100%);
+  background-size: 240% auto;
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 18px rgba(245,201,94,0.18), 0 1px 0 rgba(255,255,255,0.16);
-  animation: gold-shine 4s ease-in-out infinite;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 22px rgba(255,210,95,0.24);
+  filter: drop-shadow(0 0 8px rgba(255,203,82,0.22));
+  animation: gold-shine 3.4s ease-in-out infinite;
 }
 @keyframes gold-shine {
   0%, 100% { background-position: 0% center; }
