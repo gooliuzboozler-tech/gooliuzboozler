@@ -26,6 +26,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+#__next {
+  position: relative;
+  z-index: 1;
+}
+
 /* scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--ink); }
@@ -40,31 +45,39 @@ a { color: inherit; text-decoration: none; }
 body::before {
   content: '';
   position: fixed;
-  inset: -18%;
+  inset: 0;
   background-image:
-    radial-gradient(ellipse at 12% 22%, rgba(126,55,185,0.34) 0%, rgba(126,55,185,0.18) 18%, rgba(126,55,185,0) 42%),
-    radial-gradient(ellipse at 86% 16%, rgba(100,42,165,0.28) 0%, rgba(100,42,165,0.14) 20%, rgba(100,42,165,0) 44%),
-    radial-gradient(ellipse at 64% 78%, rgba(88,34,145,0.24) 0%, rgba(88,34,145,0.12) 18%, rgba(88,34,145,0) 42%);
-  filter: blur(36px);
+    url('/purple-smoke.png'),
+    url('/purple-smoke.png');
+  background-repeat: no-repeat;
+  background-position:
+    50% 16%,
+    18% 72%;
+  background-size:
+    min(760px, 78vw) auto,
+    min(520px, 58vw) auto;
+  filter: saturate(1.12) blur(0.2px);
   mix-blend-mode: screen;
   pointer-events: none;
-  z-index: 999;
-  opacity: 0.62;
+  z-index: 0;
+  opacity: 0.74;
 }
 
 body::after {
   content: '';
   position: fixed;
-  inset: -20%;
+  inset: 0;
   background-image:
-    linear-gradient(116deg, rgba(155,82,220,0) 5%, rgba(155,82,220,0.16) 22%, rgba(118,52,185,0.08) 38%, rgba(155,82,220,0) 56%),
-    linear-gradient(22deg, rgba(95,45,150,0) 28%, rgba(95,45,150,0.13) 43%, rgba(95,45,150,0.05) 58%, rgba(95,45,150,0) 74%),
-    radial-gradient(ellipse at 30% 62%, rgba(136,68,210,0.16), rgba(136,68,210,0) 34%);
-  filter: blur(44px);
+    url('/purple-smoke.png');
+  background-repeat: no-repeat;
+  background-position: 88% 58%;
+  background-size: min(620px, 66vw) auto;
+  filter: blur(10px) saturate(1.25);
+  transform: scaleX(-1) rotate(-7deg);
   mix-blend-mode: screen;
   pointer-events: none;
-  z-index: 999;
-  opacity: 0.48;
+  z-index: 0;
+  opacity: 0.32;
 }
 
 /* NAV */
