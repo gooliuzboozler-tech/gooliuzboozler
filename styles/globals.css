@@ -72,9 +72,9 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: rgba(255,25,25,0.12);
-  color: #FF3B30;
-  border: 1px solid rgba(255,59,48,0.78);
+  background: #F2EDE3;
+  color: #070707;
+  border: 1px solid rgba(242,237,227,0.9);
   padding: 0.65rem 1.5rem;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s, border-color 0.15s;
@@ -83,12 +83,12 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   min-width: 150px;
   min-height: 36px;
-  box-shadow: 0 0 18px rgba(255,59,48,0.34), inset 0 0 14px rgba(255,59,48,0.08);
-  text-shadow: 0 0 10px rgba(255,59,48,0.62);
+  box-shadow: 0 0 22px rgba(242,237,227,0.26), inset 0 0 12px rgba(255,255,255,0.22);
+  text-shadow: none;
 }
 .nav-cta:hover {
-  background: rgba(255,25,25,0.22);
-  border-color: #FF3B30;
+  background: #FFFFFF;
+  border-color: #FFFFFF;
   transform: translateY(-1px);
 }
 .nav-actions {
