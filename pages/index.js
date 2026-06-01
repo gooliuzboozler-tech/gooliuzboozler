@@ -510,9 +510,16 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="stat-cycle-dots" aria-hidden="true">
+          <div className="stat-cycle-dots" aria-label="Choose backtest stat panel">
             {backtestStatSets.map((set, index) => (
-              <span key={set.key} className={index === backtestStatIndex ? 'active' : ''}></span>
+              <button
+                key={set.key}
+                type="button"
+                className={index === backtestStatIndex ? 'active' : ''}
+                aria-label={`Show ${set.title} stats`}
+                aria-pressed={index === backtestStatIndex}
+                onClick={() => setBacktestStatIndex(index)}
+              ></button>
             ))}
           </div>
         </div>
