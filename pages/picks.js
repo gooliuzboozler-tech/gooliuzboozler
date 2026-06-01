@@ -270,8 +270,8 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['Best Edge'])}</div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Edge</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['K Edge'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Edge</div>
         </div>
         <div className="pick-toggle">{expanded ? '▲' : '▼'}</div>
       </div>
@@ -378,7 +378,7 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
         {[
           ['Trust', trustFromProbability(pick['Best Prob'])],
           ['Odds', odds || '-'],
-          ['Edge', formatEdge(pick['Best Edge'])],
+          ['K Edge', formatEdge(pick['K Edge'])],
           ['Model K', formatRoundedNumber(pick['Model K'])],
         ].map(([label, value]) => (
           <div key={label} style={{ background: 'rgba(10,10,10,0.96)', padding: '0.85rem', fontFamily: 'DM Mono, monospace', fontSize: '0.78rem', color: '#F2EDE3' }}>
@@ -460,7 +460,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
         {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>Edge</span><span></span>
+          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span></span>
         </div>
         <BlurredPickPreview plays={blurredPlays} />
       </div>
@@ -741,7 +741,7 @@ export default function Picks() {
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>Edge</span><span></span>
+          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span></span>
         </div>
 
         {filtered.length === 0 ? (
