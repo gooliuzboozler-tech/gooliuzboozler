@@ -155,6 +155,51 @@ function parseProbability(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function parseNumber(value) {
+  const num = Number.parseFloat(String(value ?? '').replace(/[%,$]/g, '').replace(/,/g, '').trim())
+  return Number.isFinite(num) ? num : null
+}
+
+function formatPercentLike(value) {
+  const num = parseNumber(value)
+  if (num === null) return ''
+  const pct = num <= 1 ? num * 100 : num
+  return `${pct.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%`
+}
+
+function getModelBacktestsFromPlays(plays) {
+  const source = (plays || []).find(play => play['Model 1 Backtest Record'] || play['Model 5 Backtest Record']) || {}
+  const out = {}
+  for (let modelNumber = 1; modelNumber <= 5; modelNumber += 1) {
+    const record = source[`Model ${modelNumber} Backtest Record`]
+    const winRate = formatPercentLike(source[`Model ${modelNumber} Backtest Win Rate`])
+    const roi = formatPercentLike(source[`Model ${modelNumber} Backtest ROI`])
+    const plays = source[`Model ${modelNumber} Backtest Plays`]
+    if (record || winRate || roi || plays) {
+      out[`model${modelNumber}`] = { record, winRate, roi, plays }
+    }
+  }
+  return out
+}
+
+function buildBacktestStatSets(plays) {
+  const modelBacktests = getModelBacktestsFromPlays(plays)
+  if (!Object.keys(modelBacktests).length) return BACKTEST_STAT_SETS
+  return BACKTEST_STAT_SETS.map(set => {
+    const modelStats = modelBacktests[set.key]
+    if (!modelStats) return set
+    return {
+      ...set,
+      stats: [
+        [modelStats.record || 'TBD', 'Record', modelStats.record ? 'g' : ''],
+        [modelStats.winRate || 'TBD', 'Win Rate', modelStats.winRate ? 'g' : ''],
+        [modelStats.roi || 'TBD', 'ROI', ''],
+        [String(modelStats.plays || 'TBD'), 'Tracked Plays', ''],
+      ],
+    }
+  })
+}
+
 function formatRoundedNumber(value, { signed = false } = {}) {
   const raw = String(value ?? '').trim()
   if (!raw || raw === '—' || raw === '-') return '-'
@@ -267,7 +312,7 @@ export default function Home() {
   const [freePick, setFreePick] = useState(null)
   const [freePickUpdated, setFreePickUpdated] = useState(null)
   const [backtestStatIndex, setBacktestStatIndex] = useState(0)
-  const backtestStatSets = BACKTEST_STAT_SETS
+  const [backtestStatSets, setBacktestStatSets] = useState(BACKTEST_STAT_SETS)
   const backtestStats = backtestStatSets[backtestStatIndex] || backtestStatSets[0]
 
   useEffect(() => {
@@ -296,16 +341,25 @@ export default function Home() {
       })
       .catch(() => {})
 
+    fetch('/api/picks')
+      .then(res => res.json())
+      .then(data => {
+        const sets = buildBacktestStatSets(data.plays || [])
+        setBacktestStatSets(sets)
+        setBacktestStatIndex(index => Math.min(index, sets.length - 1))
+      })
+      .catch(() => {})
+
     return () => obs.disconnect()
   }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
-      setBacktestStatIndex(i => (i + 1) % BACKTEST_STAT_SETS.length)
+      setBacktestStatIndex(i => (i + 1) % backtestStatSets.length)
     }, 10000)
 
     return () => clearInterval(id)
-  }, [])
+  }, [backtestStatSets.length])
 
   async function handleSubscribe(priceId) {
     setLoading(priceId)
