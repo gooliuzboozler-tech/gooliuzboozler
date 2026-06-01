@@ -25,6 +25,7 @@ function publicPick(play) {
     'Game Time': play['Game Time'] || '',
     Side: play.Side || '',
     Trust: play.Trust || '',
+    'Best Model': play['Best Model'] || '',
     'Best Bet': play['Best Bet'] || '',
     'Best Prob': play['Best Prob'] || '',
     'Best Edge': play['Best Edge'] || '',

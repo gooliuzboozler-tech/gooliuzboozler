@@ -165,6 +165,10 @@ function planHasModel3(plan) {
   return plan === 'monthly' || plan === 'season'
 }
 
+function planHasAllModels(plan) {
+  return plan === 'monthly' || plan === 'season'
+}
+
 function planHasFullBoard(plan) {
   return plan === 'season'
 }
@@ -194,29 +198,49 @@ function PickCard({ play, plan }) {
   const [expanded, setExpanded] = useState(false)
   const trust = getPlayTrust(play)
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
+  const bestModelLabel = play['Best Model'] || 'Best Model'
   const legacyModel2Bet = play[['Conserv', 'ative Bet'].join('')] || ''
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
   const legacyModel2Edge = play[['Conserv', 'ative Edge'].join('')] || ''
-  const model2Bet = play['Model 2 Bet'] || legacyModel2Bet
-  const model2Prob = play['Model 2 Prob'] || legacyModel2Prob
-  const model2Edge = firstValue(play, [
-    'Model 2 Edge',
-    'Model 2 Best Edge',
-    'Model 2 K Edge',
-    'Model 2 Best K Edge',
-    legacyModel2Edge ? ['Conserv', 'ative Edge'].join('') : '',
-  ]) || impliedEdgeFromMarket(model2Prob, model2Bet, play['Kalshi Lines'])
-  const model3Bet = play['Model 3 Bet'] || ''
-  const model3Prob = play['Model 3 Prob'] || ''
-  const model3Edge = play['Model 3 Edge'] || ''
-  const model1Odds = formatOdds(play['Best Odds'], play['Best Bet'], play['Kalshi Lines'])
-  const model2Odds = formatOdds(play['Model 2 Odds'], model2Bet, play['Kalshi Lines'])
-  const model3Odds = formatOdds(play['Model 3 Odds'], model3Bet, play['Kalshi Lines'])
+  const modelStyles = {
+    1: { bg: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' },
+    2: { bg: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', color: '#EAB308' },
+    3: { bg: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', color: '#C084FC' },
+    4: { bg: 'rgba(14,165,233,0.07)', border: '1px solid rgba(56,189,248,0.24)', color: '#38BDF8' },
+    5: { bg: 'rgba(236,72,153,0.07)', border: '1px solid rgba(244,114,182,0.24)', color: '#F472B6' },
+  }
+  const modelRows = [1, 2, 3, 4, 5].map(modelNumber => {
+    const fallbackBest = play['Best Model'] === `Model ${modelNumber}`
+    const bet = firstValue(play, [
+      `Model ${modelNumber} Bet`,
+      modelNumber === 1 ? 'Best Bet' : '',
+      modelNumber === 2 ? legacyModel2Bet : '',
+    ])
+    const prob = firstValue(play, [
+      `Model ${modelNumber} Prob`,
+      modelNumber === 1 ? 'Best Prob' : '',
+      modelNumber === 2 ? legacyModel2Prob : '',
+    ])
+    const edge = firstValue(play, [
+      `Model ${modelNumber} Edge`,
+      `Model ${modelNumber} Best Edge`,
+      `Model ${modelNumber} K Edge`,
+      modelNumber === 1 ? 'Best Edge' : '',
+      modelNumber === 2 ? legacyModel2Edge : '',
+    ]) || impliedEdgeFromMarket(prob, bet, play['Kalshi Lines'])
+    const odds = formatOdds(firstValue(play, [
+      `Model ${modelNumber} Odds`,
+      `Model ${modelNumber} Best Odds`,
+      fallbackBest ? 'Best Odds' : '',
+    ]), bet, play['Kalshi Lines'])
+    return { modelNumber, bet, prob, edge, odds, style: modelStyles[modelNumber] }
+  })
+  const bestOdds = formatOdds(play['Best Odds'], play['Best Bet'], play['Kalshi Lines'])
   const parlayPick = play['Parlay Pick'] || ''
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
-  const showModel2 = planHasModel2(plan)
-  const showModel3 = planHasModel3(plan)
-  const modelCardCount = 1 + (showModel2 ? 1 : 0) + (showModel3 ? 1 : 0)
+  const showAllModels = planHasAllModels(plan)
+  const visibleModels = showAllModels ? modelRows : modelRows.filter(model => model.modelNumber === Number(String(play['Best Model'] || '').replace(/\D/g, '')) || model.bet === play['Best Bet']).slice(0, 1)
+  const modelCardCount = visibleModels.length || 1
 
   return (
     <div className="pick-card" style={{ borderColor: expanded ? ts.border : 'rgba(242,237,227,0.07)' }}>
@@ -238,7 +262,7 @@ function PickCard({ play, plan }) {
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: ts.color }}>{play['Best Bet']}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
-            Best Bet{model1Odds ? ` · ${model1Odds}` : ''}
+            {bestModelLabel}{bestOdds ? ` · ${bestOdds}` : ''}
           </div>
         </div>
         <div>
@@ -255,41 +279,27 @@ function PickCard({ play, plan }) {
       {expanded && (
         <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid rgba(242,237,227,0.05)' }}>
           <div className="model-cards" style={{ '--model-card-count': modelCardCount }}>
-            <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', padding: '0.85rem' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#22C55E', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 1 BEST BET</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{play['Best Bet']}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                {formatProbability(play['Best Prob'])} prob{model1Odds ? ` · ${model1Odds} odds` : ''} · {formatEdge(play['Best Edge'])} edge
-              </div>
-            </div>
-            {showModel2 && (
-              <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '0.85rem' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 2 BEST BET</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model2Bet || '—'}</div>
+            {visibleModels.map(model => (
+              <div key={model.modelNumber} style={{ background: model.style.bg, border: model.style.border, padding: '0.85rem' }}>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: model.style.color, letterSpacing: '0.15em', marginBottom: '0.4rem' }}>
+                  MODEL {model.modelNumber}{play['Best Model'] === `Model ${model.modelNumber}` ? ' · BEST' : ''}
+                </div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model.bet || '—'}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                  {formatProbability(model2Prob)} prob{model2Odds ? ` · ${model2Odds} odds` : ''}{model2Edge ? ` · ${formatEdge(model2Edge)} edge` : ''}
+                  {formatProbability(model.prob)} prob{model.odds ? ` · ${model.odds} odds` : ''}{model.edge ? ` · ${formatEdge(model.edge)} edge` : ''}
                 </div>
               </div>
-            )}
-            {showModel3 && (
-              <div style={{ background: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', padding: '0.85rem' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#C084FC', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>MODEL 3 BEST BET</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model3Bet || '—'}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                  {formatProbability(model3Prob)} prob{model3Odds ? ` · ${model3Odds} odds` : ''}{model3Edge ? ` · ${formatEdge(model3Edge)} edge` : ''}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
 
-          {showModel2 && parlayPick && parlayPick.toLowerCase() !== 'pass' && (
+          {showAllModels && parlayPick && parlayPick.toLowerCase() !== 'pass' && (
             <div style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', padding: '0.85rem', marginBottom: '0.75rem' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#EAB308', letterSpacing: '0.15em', marginBottom: '0.4rem' }}>BEST PARLAY PICK</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{parlayPick}</div>
             </div>
           )}
 
-          {showModel2 && (
+          {showAllModels && (
             <>
               <div className="pick-stats-grid">
                 {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
@@ -362,7 +372,7 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: '#22C55E', lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
       </div>
       <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>
-        {pick['Best Bet']}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
+        {pick['Best Bet']}{pick['Best Model'] ? <span style={{ color: '#BFB090' }}> · {pick['Best Model']}</span> : ''}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
       </div>
       <div className="public-free-pick-grid">
         {[

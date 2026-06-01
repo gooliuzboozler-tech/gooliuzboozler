@@ -76,6 +76,43 @@ export default function Admin() {
     return hit ? 'Hit' : 'Miss'
   }
 
+  function parseProbabilityNumber(value) {
+    const raw = String(value || '').replace('%', '').trim()
+    const num = Number.parseFloat(raw)
+    if (!Number.isFinite(num)) return 0
+    return num <= 1 ? num * 100 : num
+  }
+
+  function getModel(row, modelNumber) {
+    const prefix = `Model ${modelNumber}`
+    const bet = firstValue(row, [
+      `${prefix} Best Bet`,
+      `${prefix} Bet`,
+      modelNumber === 3 ? 'Model 3' : '',
+    ])
+    const prob = firstValue(row, [
+      `${prefix} Best Prob`,
+      `${prefix} Prob`,
+      `${prefix} Probability`,
+    ])
+
+    return {
+      number: modelNumber,
+      bet,
+      prob,
+      edge: firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`, `${prefix} K Edge`, `${prefix} Best K Edge`]),
+      odds: firstValue(row, [`${prefix} Odds`, `${prefix} Best Odds`]),
+      k: firstValue(row, [`${prefix} K`, `${prefix} Model K`]),
+      kEdge: firstValue(row, [`${prefix} K Edge`, `${prefix} Best K Edge`]),
+      probabilityNumber: parseProbabilityNumber(prob),
+    }
+  }
+
+  function isUsableModel(model) {
+    const bet = String(model.bet || '').trim().toLowerCase()
+    return bet && bet !== 'pass' && model.probabilityNumber > 0
+  }
+
   function parseCSV(text) {
     const lines = text.split('\n').map(l => l.replace(/\r$/, ''))
 
@@ -110,14 +147,15 @@ export default function Admin() {
 
       if (!row['Pitcher']) break
 
-      // Keep Model 1 plays even when the parlay column says Pass.
-      const model1Bet = row['Model 1 Best Bet'] || ''
-      const model1Prob = row['Model 1 Best Prob'] || ''
+      const models = [1, 2, 3, 4, 5].map(modelNumber => getModel(row, modelNumber))
+      const bestModel = models
+        .filter(isUsableModel)
+        .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0]
       const pitcher = parsePitcher(row['Pitcher'])
-      if (model1Bet === 'Pass' || model1Bet === '' || model1Bet === 'pass') continue
+      if (!bestModel) continue
       const actualKs = firstValue(row, ['Actual K', 'Actual Ks', 'Actual Strikeouts', 'Strikeouts', 'Final K', 'Final Ks', 'SO', 'K Result'])
       const explicitResult = firstValue(row, ['Result', 'Outcome', 'Hit/Miss', 'Hit?', 'Model 1 Result', 'Best Bet Result'])
-      const inferredResult = explicitResult || inferBetResult(model1Bet, actualKs)
+      const inferredResult = explicitResult || inferBetResult(bestModel.bet, actualKs)
 
       plays.push({
         Pitcher: pitcher.name,
@@ -125,22 +163,35 @@ export default function Admin() {
         Opponent: row['Opponent'] || '',
         'Game Time': row['Game Time'] || '',
         Side: row['Side'] || '',
-        Trust: trustFromProbability(model1Prob),
-        'Best Bet': model1Bet,
-        'Model 2 Bet': row['Model 2 Best Bet'] || '',
-        'Model 3 Bet': row['Model 3 Best Bet'] || row['Model 3 Bet'] || row['Model 3'] || '',
+        Trust: trustFromProbability(bestModel.prob),
+        'Best Model': `Model ${bestModel.number}`,
+        'Best Bet': bestModel.bet,
+        'Model 1 Bet': models[0].bet,
+        'Model 2 Bet': models[1].bet,
+        'Model 3 Bet': models[2].bet,
+        'Model 4 Bet': models[3].bet,
+        'Model 5 Bet': models[4].bet,
         'Parlay Pick': row['Best Parlay Pick'] || row['Parlay Pick'] || row['Parlay Bets'] || '',
-        'Best Prob': model1Prob,
-        'Model 2 Prob': row['Model 2 Prob'] || '',
-        'Model 3 Prob': row['Model 3 Best Prob'] || row['Model 3 Prob'] || row['Model 3 Probability'] || '',
-        'Best Edge': row['Model 1 Best Edge'] || '',
-        'Model 2 Edge': row['Model 2 Best Edge'] || row['Model 2 Edge'] || row['Model 2 K Edge'] || row['Model 2 Best K Edge'] || '',
-        'Model 3 Edge': row['Model 3 Best Edge'] || row['Model 3 Edge'] || '',
-        'Best Odds': row['Model 1 Odds'] || row['Model 1 Best Odds'] || row['Best Odds'] || '',
-        'Model 2 Odds': row['Model 2 Odds'] || row['Model 2 Best Odds'] || '',
-        'Model 3 Odds': row['Model 3 Odds'] || row['Model 3 Best Odds'] || '',
-        'Model K': row['Model 1 K'] || '',
-        'K Edge': row['Model 1 K Edge'] || '',
+        'Best Prob': bestModel.prob,
+        'Model 1 Prob': models[0].prob,
+        'Model 2 Prob': models[1].prob,
+        'Model 3 Prob': models[2].prob,
+        'Model 4 Prob': models[3].prob,
+        'Model 5 Prob': models[4].prob,
+        'Best Edge': bestModel.edge,
+        'Model 1 Edge': models[0].edge,
+        'Model 2 Edge': models[1].edge,
+        'Model 3 Edge': models[2].edge,
+        'Model 4 Edge': models[3].edge,
+        'Model 5 Edge': models[4].edge,
+        'Best Odds': bestModel.odds || row['Best Odds'] || '',
+        'Model 1 Odds': models[0].odds,
+        'Model 2 Odds': models[1].odds,
+        'Model 3 Odds': models[2].odds,
+        'Model 4 Odds': models[3].odds,
+        'Model 5 Odds': models[4].odds,
+        'Model K': bestModel.k || models[0].k,
+        'K Edge': bestModel.kEdge || models[0].kEdge,
         'Individual BvP K%': row['Individual BvP K%'] || '',
         'Individual BvP PA': row['Individual BvP PA'] || '',
         'Individual BvP Standouts': row['Individual BvP Standouts'] || '',
