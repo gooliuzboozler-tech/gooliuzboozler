@@ -16,6 +16,121 @@ const MLB_TEAM_IDS = {
   TOR: 141, WSH: 120, WSN: 120,
 }
 
+const BACKTEST_STAT_SETS = [
+  {
+    key: 'best',
+    title: 'Best Bets',
+    subtitle: 'Highest probability pick per pitcher with payout above $1.29',
+    stats: [
+      ['394-125', 'Record', 'g'],
+      ['75.92%', 'Win Rate', 'g'],
+      ['82.57%', 'ROI', ''],
+      ['519', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '72.01%', '72.01%'],
+      ['Avg Edge', '+16.64', '83%'],
+      ['Avg K Edge', '+1.33', '66.5%'],
+    ],
+  },
+  {
+    key: 'model1',
+    title: 'Model 1',
+    subtitle: 'Primary probability read with full-board K edge grading',
+    stats: [
+      ['352-95', 'Record', 'g'],
+      ['78.75%', 'Win Rate', 'g'],
+      ['82.81%', 'ROI', ''],
+      ['447', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '71.26%', '71.26%'],
+      ['Avg Edge', '+15.97', '79.85%'],
+      ['Avg K Edge', '+1.31', '65.5%'],
+    ],
+  },
+  {
+    key: 'model2',
+    title: 'Model 2',
+    subtitle: 'Alternate line read used for monthly and season-pass boards',
+    stats: [
+      ['354-97', 'Record', 'g'],
+      ['78.49%', 'Win Rate', 'g'],
+      ['82.01%', 'ROI', ''],
+      ['451', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '70.89%', '70.89%'],
+      ['Avg Edge', '+15.36', '76.8%'],
+      ['Avg K Edge', '+1.21', '60.5%'],
+    ],
+  },
+  {
+    key: 'model3',
+    title: 'Model 3',
+    subtitle: 'Third model angle for cross-checking the best available line',
+    stats: [
+      ['346-94', 'Record', 'g'],
+      ['78.64%', 'Win Rate', 'g'],
+      ['82.08%', 'ROI', ''],
+      ['440', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '71.43%', '71.43%'],
+      ['Avg Edge', '+15.91', '79.55%'],
+      ['Avg K Edge', '+1.27', '63.5%'],
+    ],
+  },
+  {
+    key: 'model4',
+    title: 'Model 4',
+    subtitle: 'High-confidence filter focused on 90%+ probability spots',
+    stats: [
+      ['120-10', 'Record', 'g'],
+      ['92.31%', 'Win Rate', 'g'],
+      ['78.02%', 'ROI', ''],
+      ['130', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '66.07%', '66.07%'],
+      ['Avg Edge', '+9.43', '47.15%'],
+      ['Avg K Edge', '+1.66', '83%'],
+    ],
+  },
+  {
+    key: 'model5',
+    title: 'Model 5',
+    subtitle: 'Ensemble read built from agreement across model inputs',
+    stats: [
+      ['117-13', 'Record', 'g'],
+      ['90.00%', 'Win Rate', 'g'],
+      ['80.08%', 'ROI', ''],
+      ['130', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '69.27%', '69.27%'],
+      ['Avg Edge', '+13.17', '65.85%'],
+      ['Avg K Edge', '+1.69', '84.5%'],
+    ],
+  },
+  {
+    key: 'parlay',
+    title: 'Parlay Picks',
+    subtitle: 'Best parlay pick per pitcher; historical parlay tracking is being built',
+    stats: [
+      ['Live', 'Board Status', 'g'],
+      ['TBD', 'Win Rate', ''],
+      ['TBD', 'ROI', ''],
+      ['Daily', 'Parlay Picks', ''],
+    ],
+    bars: [
+      ['Model Source', 'Best parlay column', '80%'],
+      ['Backtest Status', 'Tracking', '45%'],
+      ['Display Status', 'Live on picks board', '100%'],
+    ],
+  },
+]
+
 function teamLogoUrl(team) {
   const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
   return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
@@ -161,6 +276,8 @@ export default function Home() {
   const [loading, setLoading] = useState(null)
   const [freePick, setFreePick] = useState(null)
   const [freePickUpdated, setFreePickUpdated] = useState(null)
+  const [backtestStatIndex, setBacktestStatIndex] = useState(0)
+  const backtestStats = BACKTEST_STAT_SETS[backtestStatIndex]
 
   useEffect(() => {
     // Fade-up observer
@@ -189,6 +306,14 @@ export default function Home() {
       .catch(() => {})
 
     return () => obs.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setBacktestStatIndex(i => (i + 1) % BACKTEST_STAT_SETS.length)
+    }, 5000)
+
+    return () => clearInterval(id)
   }, [])
 
   async function handleSubscribe(priceId) {
@@ -277,35 +402,37 @@ export default function Home() {
 
         <div className="stat-card fade-up">
           <div className="stat-card-label">// All-Time Backtest — Weighted K Model</div>
-          <div className="stat-grid">
+          <div className="stat-cycle-head">
             <div>
-              <div className="stat-val g">247-69</div>
-              <div className="stat-lbl">Active Record</div>
+              <div className="stat-cycle-title">{backtestStats.title}</div>
+              <div className="stat-cycle-sub">{backtestStats.subtitle}</div>
             </div>
-            <div>
-              <div className="stat-val g">78.16%</div>
-              <div className="stat-lbl">Win Rate</div>
-            </div>
-            <div>
-              <div className="stat-val">40.79%</div>
-              <div className="stat-lbl">ROI</div>
-            </div>
-            <div>
-              <div className="stat-val">72.88%</div>
-              <div className="stat-lbl">Test Split</div>
+            <div className="stat-cycle-count">
+              {String(backtestStatIndex + 1).padStart(2, '0')} / {String(BACKTEST_STAT_SETS.length).padStart(2, '0')}
             </div>
           </div>
-          <div className="bar-row">
-            <div className="bar-meta"><span>Strong Plays</span><span>~86% avg prob</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{width:'86%'}}></div></div>
+          <div key={backtestStats.key} className="stat-cycle-body">
+            <div className="stat-grid">
+              {backtestStats.stats.map(([value, label, tone]) => (
+                <div key={label}>
+                  <div className={`stat-val ${tone}`}>{value}</div>
+                  <div className="stat-lbl">{label}</div>
+                </div>
+              ))}
+            </div>
+            {backtestStats.bars.map(([label, value, width], index) => (
+              <div className="bar-row" key={label}>
+                <div className="bar-meta"><span>{label}</span><span>{value}</span></div>
+                <div className="bar-track">
+                  <div className="bar-fill" style={{ width, animationDelay: `${index * 0.12}s` }}></div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="bar-row">
-            <div className="bar-meta"><span>Playable Plays</span><span>~77% avg prob</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{width:'77%', animationDelay:'0.2s'}}></div></div>
-          </div>
-          <div className="bar-row">
-            <div className="bar-meta"><span>Test Split</span><span>43-16 (72.88%)</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{width:'72.88%', animationDelay:'0.4s'}}></div></div>
+          <div className="stat-cycle-dots" aria-hidden="true">
+            {BACKTEST_STAT_SETS.map((set, index) => (
+              <span key={set.key} className={index === backtestStatIndex ? 'active' : ''}></span>
+            ))}
           </div>
         </div>
       </section>
