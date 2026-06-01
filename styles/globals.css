@@ -144,32 +144,6 @@ a { color: inherit; text-decoration: none; }
   border-color: #C084FC;
 }
 
-/* TICKER */
-.ticker-wrap {
-  overflow: hidden;
-  background: var(--red);
-  padding: 0.55rem 0;
-  white-space: nowrap;
-  margin-top: 62px;
-}
-.ticker-inner {
-  display: inline-flex;
-  animation: ticker 30s linear infinite;
-}
-.ticker-item {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
-  color: var(--cream);
-  padding: 0 2rem;
-  border-right: 1px solid rgba(242,237,227,0.25);
-  opacity: 0.9;
-}
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 /* HERO */
 .hero {
   min-height: 92vh;
@@ -969,11 +943,6 @@ footer {
     min-width: calc(50% - 0.25rem);
     min-height: 32px;
   }
-  .ticker-wrap { margin-top: 74px; }
-  .ticker-item {
-    font-size: 0.75rem;
-    padding: 0 1.25rem;
-  }
   .hero { grid-template-columns: 1fr; min-height: auto; padding: 4.25rem 1rem 3rem; gap: 2.25rem; }
   .hero-bg-letter { display: none; }
   .hero-eyebrow {
@@ -1102,7 +1071,6 @@ footer {
   .picks-nav {
     flex-direction: column;
   }
-  .ticker-wrap { margin-top: 112px; }
   .picks-shell { padding-top: 132px; }
   .hero { padding-top: 3rem; }
   .stat-grid,

@@ -340,38 +340,12 @@ export default function Home() {
     <span className="nav-tag">MLB K Props</span>
   </div>
   <div className="nav-actions">
-    <a href="/picks" className="nav-link neon-green">Today&#39;s Picks</a>
-    <a href="/yesterday" className="nav-link neon-purple">Yesterday&#39;s Picks</a>
     <a href="/picks" className="nav-link gold">Free Pick</a>
+    <a href="/yesterday" className="nav-link neon-purple">Yesterday&#39;s Picks</a>
     <a href="#pricing" className="nav-cta">Get Access</a>
+    <a href="/picks" className="nav-link neon-green">Today&#39;s Picks</a>
   </div>
 </nav>
-
-      {/* TICKER */}
-      <div className="ticker-wrap">
-        <div className="ticker-inner">
-          {[
-            'PITCHER K MODEL — 2026 SEASON LIVE — 2026 SEASON LIVE',
-            '247-69 ALL-TIME RECORD',
-            '78.16% WIN RATE',
-            '40.79% ROI',
-            'WIN-FIRST OPTIMIZER ACTIVE',
-            'DAILY PICKS — EVERY MLB STARTER',
-            'BvP SPLITS — ACTIVE ROSTER',
-            'FULL BACKTEST TRANSPARENCY',
-            'PITCHER K MODEL — 2026 SEASON LIVE — 2026 SEASON LIVE',
-            '247-69 ALL-TIME RECORD',
-            '78.16% WIN RATE',
-            '40.79% ROI',
-            'WIN-FIRST OPTIMIZER ACTIVE',
-            'DAILY PICKS — EVERY MLB STARTER',
-            'BvP SPLITS — ACTIVE ROSTER',
-            'FULL BACKTEST TRANSPARENCY',
-          ].map((item, i) => (
-            <div key={i} className="ticker-item">{item}</div>
-          ))}
-        </div>
-      </div>
 
       {/* HERO */}
       <section className="hero">
