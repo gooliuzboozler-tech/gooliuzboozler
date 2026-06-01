@@ -117,7 +117,7 @@ const BACKTEST_STAT_SETS = [
 
 function backtestBarClass(label) {
   if (label === 'Avg Edge') return ' purple'
-  if (label === 'Avg K Edge') return ' orange'
+  if (label === 'Avg K Edge') return ' red'
   return ''
 }
 
@@ -341,9 +341,9 @@ export default function Home() {
   </div>
   <div className="nav-actions">
     <a href="/picks" className="nav-link gold">Free Pick</a>
-    <a href="/yesterday" className="nav-link neon-purple">Yesterday&#39;s Picks</a>
+    <a href="/yesterday" className="nav-link neon-red">Yesterday&#39;s Picks</a>
+    <a href="/picks" className="nav-link neon-purple">Today&#39;s Picks</a>
     <a href="#pricing" className="nav-cta">Get Access</a>
-    <a href="/picks" className="nav-link neon-green">Today&#39;s Picks</a>
   </div>
 </nav>
 
