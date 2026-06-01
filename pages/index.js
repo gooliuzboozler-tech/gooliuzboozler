@@ -113,88 +113,7 @@ const BACKTEST_STAT_SETS = [
       ['Avg K Edge', '+1.69', '84.5%'],
     ],
   },
-  {
-    key: 'parlay',
-    title: 'Parlay Picks',
-    subtitle: 'Best parlay pick per pitcher with full-season backtest tracking',
-    stats: [
-      ['Live', 'Board Status', 'g'],
-      ['85.54%', 'Win Rate', 'g'],
-      ['66.8%', 'ROI', ''],
-      ['Daily', 'Parlay Picks', ''],
-    ],
-    bars: [
-      ['Model Source', 'Model 2 parlay filter', '80%'],
-      ['Backtest Status', '83 plays | 71-12', '85.54%'],
-      ['Display Status', 'Live on picks board', '100%'],
-    ],
-  },
 ]
-
-function parseNumber(value) {
-  const num = Number.parseFloat(String(value ?? '').replace(/[%,$]/g, '').replace(/,/g, '').trim())
-  return Number.isFinite(num) ? num : null
-}
-
-function formatPercentLike(value) {
-  const num = parseNumber(value)
-  if (num === null) return ''
-  const pct = num <= 1 ? num * 100 : num
-  return `${pct.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%`
-}
-
-function getParlayBacktestFromPlays(plays) {
-  const parlayRows = (plays || []).filter(play => {
-    const pick = String(play['Parlay Pick'] || '').trim()
-    return pick && pick.toLowerCase() !== 'pass'
-  })
-  const source = parlayRows.find(play => play['Parlay Full Record'] || play['Parlay Full Win Rate'] || play['Parlay Pick']) || {}
-  const pickText = String(source['Parlay Pick'] || '')
-  const labelMatch = pickText.match(/BT\s+([^,]+),\s*([0-9.]+%)\s*WR,\s*([0-9.]+%)\s*ROI,\s*([0-9]+)\s*plays/i)
-
-  const record = source['Parlay Full Record'] || labelMatch?.[1] || ''
-  const winRate = formatPercentLike(source['Parlay Full Win Rate']) || labelMatch?.[2] || ''
-  const roi = formatPercentLike(source['Parlay Full ROI']) || labelMatch?.[3] || ''
-  const playsCount = source['Parlay Full Plays'] || labelMatch?.[4] || ''
-  const model = source['Parlay Backtest Selected Model'] || 'Model 2'
-
-  if (!record && !winRate && !roi && !playsCount && parlayRows.length === 0) return null
-
-  return {
-    model,
-    record,
-    winRate,
-    roi,
-    playsCount,
-    dailyCount: parlayRows.length,
-  }
-}
-
-function buildBacktestStatSets(plays) {
-  const parlay = getParlayBacktestFromPlays(plays)
-  if (!parlay) return BACKTEST_STAT_SETS
-
-  return BACKTEST_STAT_SETS.map(set => {
-    if (set.key !== 'parlay') return set
-    return {
-      ...set,
-      subtitle: parlay.record
-        ? `Best parlay pick per pitcher; full backtest ${parlay.record}`
-        : set.subtitle,
-      stats: [
-        ['Live', 'Board Status', 'g'],
-        [parlay.winRate || 'TBD', 'Win Rate', parlay.winRate ? 'g' : ''],
-        [parlay.roi || 'TBD', 'ROI', ''],
-        [String(parlay.dailyCount || 'Daily'), 'Parlay Picks', parlay.dailyCount ? 'g' : ''],
-      ],
-      bars: [
-        ['Model Source', `${parlay.model} parlay filter`, '80%'],
-        ['Backtest Status', `${parlay.playsCount || 'TBD'} plays${parlay.record ? ` | ${parlay.record}` : ''}`, parlay.winRate || '45%'],
-        ['Display Status', 'Live on picks board', '100%'],
-      ],
-    }
-  })
-}
 
 function backtestBarClass(label) {
   if (label === 'Avg Edge') return ' purple'
@@ -348,7 +267,7 @@ export default function Home() {
   const [freePick, setFreePick] = useState(null)
   const [freePickUpdated, setFreePickUpdated] = useState(null)
   const [backtestStatIndex, setBacktestStatIndex] = useState(0)
-  const [backtestStatSets, setBacktestStatSets] = useState(BACKTEST_STAT_SETS)
+  const backtestStatSets = BACKTEST_STAT_SETS
   const backtestStats = backtestStatSets[backtestStatIndex] || backtestStatSets[0]
 
   useEffect(() => {
@@ -377,25 +296,16 @@ export default function Home() {
       })
       .catch(() => {})
 
-    fetch('/api/picks')
-      .then(res => res.json())
-      .then(data => {
-        const sets = buildBacktestStatSets(data.plays || [])
-        setBacktestStatSets(sets)
-        setBacktestStatIndex(index => Math.min(index, sets.length - 1))
-      })
-      .catch(() => {})
-
     return () => obs.disconnect()
   }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
-      setBacktestStatIndex(i => (i + 1) % backtestStatSets.length)
+      setBacktestStatIndex(i => (i + 1) % BACKTEST_STAT_SETS.length)
     }, 10000)
 
     return () => clearInterval(id)
-  }, [backtestStatSets.length])
+  }, [])
 
   async function handleSubscribe(priceId) {
     setLoading(priceId)
