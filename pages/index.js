@@ -311,7 +311,7 @@ export default function Home() {
   useEffect(() => {
     const id = setInterval(() => {
       setBacktestStatIndex(i => (i + 1) % BACKTEST_STAT_SETS.length)
-    }, 5000)
+    }, 10000)
 
     return () => clearInterval(id)
   }, [])
