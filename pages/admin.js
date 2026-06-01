@@ -229,7 +229,7 @@ export default function Admin() {
         Result: inferredResult,
       })
     }
-    return plays
+    return plays.sort((a, b) => parseProbabilityNumber(b['Best Prob']) - parseProbabilityNumber(a['Best Prob']))
   }
 
   async function handleUpload() {

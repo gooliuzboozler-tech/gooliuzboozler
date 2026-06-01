@@ -650,7 +650,8 @@ export default function Picks() {
 
   const visiblePlays = planHasFullBoard(memberPlan) ? plays : plays.filter(isCorePlay)
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
-  const filtered = filter === 'All' ? visiblePlays : visiblePlays.filter(p => filterByTrust(p, filter))
+  const sortedVisiblePlays = [...visiblePlays].sort((a, b) => parseProbability(b['Best Prob']) - parseProbability(a['Best Prob']))
+  const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter))
   const counts = {
     Strong: visiblePlays.filter(p => getPlayTrust(p) === 'Strong').length,
     Playable: visiblePlays.filter(p => getPlayTrust(p) === 'Playable').length,
