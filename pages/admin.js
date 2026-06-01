@@ -83,6 +83,27 @@ export default function Admin() {
     return num <= 1 ? num * 100 : num
   }
 
+  function oddsFromMarket(bet, lines) {
+    const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+    if (!betMatch || !lines) return ''
+
+    const side = betMatch[1].toLowerCase()
+    const threshold = betMatch[2]
+    const escapedThreshold = threshold.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const lineRegex = new RegExp(`${escapedThreshold}\\+:\\s*Yes\\s*\\$?([0-9.]+)\\s*/\\s*No\\s*\\$?([0-9.]+)`, 'i')
+    const lineMatch = String(lines).match(lineRegex)
+    if (!lineMatch) return ''
+
+    return side === 'yes' ? lineMatch[1] : lineMatch[2]
+  }
+
+  function parseOddsNumber(value, bet, lines) {
+    const explicit = String(value || '').trim()
+    const raw = explicit || oddsFromMarket(bet, lines)
+    const num = Number.parseFloat(String(raw || '').replace(/[$,]/g, ''))
+    return Number.isFinite(num) ? num : 0
+  }
+
   function getModel(row, modelNumber) {
     const prefix = `Model ${modelNumber}`
     const bet = firstValue(row, [
@@ -96,15 +117,18 @@ export default function Admin() {
       `${prefix} Probability`,
     ])
 
+    const odds = firstValue(row, [`${prefix} Odds`, `${prefix} Best Odds`])
+
     return {
       number: modelNumber,
       bet,
       prob,
       edge: firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`, `${prefix} K Edge`, `${prefix} Best K Edge`]),
-      odds: firstValue(row, [`${prefix} Odds`, `${prefix} Best Odds`]),
+      odds,
       k: firstValue(row, [`${prefix} K`, `${prefix} Model K`]),
       kEdge: firstValue(row, [`${prefix} K Edge`, `${prefix} Best K Edge`]),
       probabilityNumber: parseProbabilityNumber(prob),
+      oddsNumber: parseOddsNumber(odds, bet, row['Projected Kalshi Lines']),
     }
   }
 
@@ -148,8 +172,10 @@ export default function Admin() {
       if (!row['Pitcher']) break
 
       const models = [1, 2, 3, 4, 5].map(modelNumber => getModel(row, modelNumber))
-      const bestModel = models
-        .filter(isUsableModel)
+      const usableModels = models.filter(isUsableModel)
+      const bestModel = usableModels
+        .filter(model => model.oddsNumber > 1.29)
+        .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || usableModels
         .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0]
       const pitcher = parsePitcher(row['Pitcher'])
       if (!bestModel) continue
