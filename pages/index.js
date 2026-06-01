@@ -298,7 +298,7 @@ function FreePickCard({ pick, lastUpdated }) {
       <div className="free-pick-grid">
         <div><span>Trust</span>{trustFromProbability(pick['Best Prob'])}</div>
         <div><span>Odds</span>{odds || '-'}</div>
-        <div><span>Edge</span>{formatEdge(pick['Best Edge'])}</div>
+        <div><span>K Edge</span>{formatEdge(pick['K Edge'])}</div>
         <div><span>Model K</span>{formatRoundedNumber(pick['Model K'])}</div>
       </div>
       {lastUpdated && <div className="free-pick-updated">Updated: {lastUpdated}</div>}
