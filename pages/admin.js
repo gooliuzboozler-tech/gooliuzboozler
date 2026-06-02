@@ -174,14 +174,28 @@ export default function Admin() {
 
         const models = [1, 2, 3, 4, 5].map(modelNumber => getModel(row, modelNumber))
         const usableModels = models.filter(isUsableModel)
-        const bestModel = usableModels
+        const explicitBestBet = firstValue(row, ['Best Bet', 'Best Pick', 'Best Model Bet'])
+        const explicitBestModel = firstValue(row, ['Best Model', 'Best Bet Model'])
+        const explicitBestModelNumber = Number.parseInt(String(explicitBestModel || '').replace(/\D/g, ''), 10)
+        const explicitModel = usableModels.find(model => (
+          model.number === explicitBestModelNumber ||
+          (explicitBestBet && String(model.bet || '').trim() === String(explicitBestBet).trim())
+        ))
+        const bestModel = explicitModel || usableModels
           .filter(model => model.oddsNumber > 1.29)
           .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || usableModels
           .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0]
         const pitcher = parsePitcher(row['Pitcher'])
         if (!bestModel) continue
         const actualKs = firstValue(row, ['Actual K', 'Actual Ks', 'Actual Strikeouts', 'Strikeouts', 'Final K', 'Final Ks', 'SO', 'K Result'])
-        const explicitResult = firstValue(row, ['Result', 'Outcome', 'Hit/Miss', 'Hit?', 'Model 1 Result', 'Best Bet Result'])
+        const explicitResult = firstValue(row, [
+          'Best Bet Result',
+          `Model ${bestModel.number} Result`,
+          'Result',
+          'Outcome',
+          'Hit/Miss',
+          'Hit?',
+        ])
         const inferredResult = explicitResult || inferBetResult(bestModel.bet, actualKs)
 
         plays.push({

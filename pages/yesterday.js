@@ -87,6 +87,7 @@ function ResultBadge({ result }) {
 function ResultCard({ play }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const result = inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result)
+  const bestModelLabel = play['Best Model'] || 'Best Model'
   const modelOutcomes = [2, 3, 4, 5]
     .map(modelNumber => ({
       modelNumber,
@@ -111,7 +112,7 @@ function ResultCard({ play }) {
         <div><ResultBadge result={result} /></div>
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: result === 'Miss' ? '#EF4444' : '#22C55E' }}>{play['Best Bet']}</div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Model 1</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>{bestModelLabel}</div>
         </div>
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(play['Best Prob'])}</div>
@@ -126,7 +127,7 @@ function ResultCard({ play }) {
 
       <div className="result-detail-grid">
         <div>
-          <span>Model 1 Edge</span>
+          <span>{bestModelLabel} Edge</span>
           {formatEdge(play['Best Edge'])}
         </div>
         <div>
