@@ -23,6 +23,64 @@ function parseProbability(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function oddsFromMarket(bet, lines) {
+  const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  if (!betMatch || !lines) return ''
+
+  const side = betMatch[1].toLowerCase()
+  const threshold = betMatch[2]
+  const lineRegex = new RegExp(`${threshold}\\+:\\s*Yes\\s*\\$?([0-9.]+)\\s*/\\s*No\\s*\\$?([0-9.]+)`, 'i')
+  const lineMatch = String(lines).match(lineRegex)
+  if (!lineMatch) return ''
+
+  return side === 'yes' ? lineMatch[1] : lineMatch[2]
+}
+
+function parseOdds(value, bet, lines) {
+  const explicit = String(value || '').trim()
+  const raw = explicit || oddsFromMarket(bet, lines)
+  const num = Number.parseFloat(String(raw || '').replace(/[$,]/g, ''))
+  return Number.isFinite(num) ? num : 0
+}
+
+function modelRead(play, modelNumber) {
+  const bet = play[`Model ${modelNumber} Bet`]
+  return {
+    modelNumber,
+    label: `Model ${modelNumber}`,
+    bet,
+    prob: play[`Model ${modelNumber} Prob`],
+    edge: play[`Model ${modelNumber} Edge`],
+    odds: play[`Model ${modelNumber} Odds`],
+    probabilityNumber: parseProbability(play[`Model ${modelNumber} Prob`]),
+    oddsNumber: parseOdds(play[`Model ${modelNumber} Odds`], bet, play['Kalshi Lines']),
+  }
+}
+
+function usableModelRead(model) {
+  const bet = String(model.bet || '').trim().toLowerCase()
+  return bet && bet !== 'pass' && model.probabilityNumber > 0
+}
+
+function bestReadForPlay(play) {
+  const models = [1, 2, 3, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const best = models
+    .filter(model => model.oddsNumber > 1.29)
+    .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models
+    .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0]
+
+  if (!best) {
+    return {
+      label: play['Best Model'] || 'Best Model',
+      bet: play['Best Bet'],
+      prob: play['Best Prob'],
+      edge: play['Best Edge'],
+    }
+  }
+
+  return best
+}
+
 function formatProbability(value) {
   const prob = parseProbability(value)
   return prob ? `${prob.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%` : '-'
@@ -86,8 +144,9 @@ function ResultBadge({ result }) {
 
 function ResultCard({ play }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
-  const result = inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result)
-  const bestModelLabel = play['Best Model'] || 'Best Model'
+  const bestRead = bestReadForPlay(play)
+  const result = inferBetResult(bestRead.bet, play['Actual Ks'])
+  const bestModelLabel = bestRead.label
   const modelOutcomes = [2, 3, 4, 5]
     .map(modelNumber => ({
       modelNumber,
@@ -97,7 +156,7 @@ function ResultCard({ play }) {
       result: inferBetResult(play[`Model ${modelNumber} Bet`], play['Actual Ks']),
     }))
     .filter(model => model.bet)
-  const trust = trustFromProbability(play['Best Prob'])
+  const trust = trustFromProbability(bestRead.prob)
 
   return (
     <div className={`pick-card result-card ${normalizeResult(result).toLowerCase() || 'pending'}`}>
@@ -111,11 +170,11 @@ function ResultCard({ play }) {
         </div>
         <div><ResultBadge result={result} /></div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: result === 'Miss' ? '#EF4444' : '#22C55E' }}>{play['Best Bet']}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: result === 'Miss' ? '#EF4444' : '#22C55E' }}>{bestRead.bet}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>{bestModelLabel}</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(play['Best Prob'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(bestRead.prob)}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
@@ -128,7 +187,7 @@ function ResultCard({ play }) {
       <div className="result-detail-grid">
         <div>
           <span>{bestModelLabel} Edge</span>
-          {formatEdge(play['Best Edge'])}
+          {formatEdge(bestRead.edge)}
         </div>
         <div>
           <span>Model K</span>
@@ -175,8 +234,8 @@ export default function Yesterday() {
       .finally(() => setLoading(false))
   }, [])
 
-  const hits = plays.filter(play => inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result) === 'Hit').length
-  const misses = plays.filter(play => inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result) === 'Miss').length
+  const hits = plays.filter(play => inferBetResult(bestReadForPlay(play).bet, play['Actual Ks']) === 'Hit').length
+  const misses = plays.filter(play => inferBetResult(bestReadForPlay(play).bet, play['Actual Ks']) === 'Miss').length
 
   return (
     <>

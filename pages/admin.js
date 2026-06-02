@@ -174,13 +174,9 @@ export default function Admin() {
 
         const models = [1, 2, 3, 4, 5].map(modelNumber => getModel(row, modelNumber))
         const usableModels = models.filter(isUsableModel)
-        const explicitBestBet = firstValue(row, ['Best Bet', 'Best Pick', 'Best Model Bet'])
         const explicitBestModel = firstValue(row, ['Best Model', 'Best Bet Model'])
         const explicitBestModelNumber = Number.parseInt(String(explicitBestModel || '').replace(/\D/g, ''), 10)
-        const explicitModel = usableModels.find(model => (
-          model.number === explicitBestModelNumber ||
-          (explicitBestBet && String(model.bet || '').trim() === String(explicitBestBet).trim())
-        ))
+        const explicitModel = usableModels.find(model => model.number === explicitBestModelNumber)
         const bestModel = explicitModel || usableModels
           .filter(model => model.oddsNumber > 1.29)
           .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || usableModels
