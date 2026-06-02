@@ -87,8 +87,15 @@ function ResultBadge({ result }) {
 function ResultCard({ play }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const result = inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result)
-  const model2Result = inferBetResult(play['Model 2 Bet'], play['Actual Ks'])
-  const model3Result = inferBetResult(play['Model 3 Bet'], play['Actual Ks'])
+  const modelOutcomes = [2, 3, 4, 5]
+    .map(modelNumber => ({
+      modelNumber,
+      bet: play[`Model ${modelNumber} Bet`],
+      prob: play[`Model ${modelNumber} Prob`],
+      edge: play[`Model ${modelNumber} Edge`],
+      result: inferBetResult(play[`Model ${modelNumber} Bet`], play['Actual Ks']),
+    }))
+    .filter(model => model.bet)
   const trust = trustFromProbability(play['Best Prob'])
 
   return (
@@ -136,24 +143,16 @@ function ResultCard({ play }) {
         </div>
       </div>
 
-      {(play['Model 2 Bet'] || play['Model 3 Bet']) && (
+      {modelOutcomes.length > 0 && (
         <div className="yesterday-model-grid">
-          {play['Model 2 Bet'] && (
-            <div>
-              <span>Model 2</span>
-              <strong>{play['Model 2 Bet']}</strong>
-              <small>{formatProbability(play['Model 2 Prob'])} prob · {formatEdge(play['Model 2 Edge'])} edge</small>
-              <ResultBadge result={model2Result} />
+          {modelOutcomes.map(model => (
+            <div key={model.modelNumber}>
+              <span>Model {model.modelNumber}</span>
+              <strong>{model.bet}</strong>
+              <small>{formatProbability(model.prob)} prob · {formatEdge(model.edge)} edge</small>
+              <ResultBadge result={model.result} />
             </div>
-          )}
-          {play['Model 3 Bet'] && (
-            <div>
-              <span>Model 3</span>
-              <strong>{play['Model 3 Bet']}</strong>
-              <small>{formatProbability(play['Model 3 Prob'])} prob · {formatEdge(play['Model 3 Edge'])} edge</small>
-              <ResultBadge result={model3Result} />
-            </div>
-          )}
+          ))}
         </div>
       )}
     </div>
