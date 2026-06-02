@@ -305,13 +305,98 @@ export default function Admin() {
     return { today, yesterday }
   }
 
+  function cleanMatchValue(value) {
+    return String(value || '')
+      .replace(/^[✅❌✕✓✗\s]+/, '')
+      .replace(/^[^A-Za-z0-9]+/, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase()
+  }
+
+  function cleanTeamValue(value) {
+    return String(value || '').replace(/[^A-Za-z]/g, '').trim().toUpperCase()
+  }
+
+  function buildRememberedBestLookup(previousTodayPlays) {
+    const full = new Map()
+    const pitcherTeam = new Map()
+    const pitcherOnlyCandidates = new Map()
+    const pitcherCounts = new Map()
+
+    previousTodayPlays.forEach(play => {
+      const pitcher = cleanMatchValue(play.Pitcher)
+      if (!pitcher || !play['Best Bet']) return
+
+      const team = cleanTeamValue(play['Pitcher Team'])
+      const opponent = cleanTeamValue(play.Opponent)
+      if (team && opponent) full.set(`${pitcher}|${team}|${opponent}`, play)
+      if (team) pitcherTeam.set(`${pitcher}|${team}`, play)
+      pitcherOnlyCandidates.set(pitcher, play)
+      pitcherCounts.set(pitcher, (pitcherCounts.get(pitcher) || 0) + 1)
+    })
+
+    const pitcherOnly = new Map()
+    pitcherOnlyCandidates.forEach((play, pitcher) => {
+      if (pitcherCounts.get(pitcher) === 1) pitcherOnly.set(pitcher, play)
+    })
+
+    return { full, pitcherTeam, pitcherOnly }
+  }
+
+  function findRememberedBestBet(play, lookup) {
+    const pitcher = cleanMatchValue(play.Pitcher)
+    if (!pitcher) return null
+
+    const team = cleanTeamValue(play['Pitcher Team'])
+    const opponent = cleanTeamValue(play.Opponent)
+    return (team && opponent && lookup.full.get(`${pitcher}|${team}|${opponent}`)) ||
+      (team && lookup.pitcherTeam.get(`${pitcher}|${team}`)) ||
+      lookup.pitcherOnly.get(pitcher) ||
+      null
+  }
+
+  function applyRememberedBestBets(yesterday, previousTodayPlays) {
+    const lookup = buildRememberedBestLookup(previousTodayPlays)
+    let rememberedCount = 0
+
+    const plays = yesterday.map(play => {
+      const remembered = findRememberedBestBet(play, lookup)
+      if (!remembered) return play
+
+      rememberedCount += 1
+      const next = {
+        ...play,
+        Trust: remembered.Trust || play.Trust,
+        'Best Model': remembered['Best Model'] || play['Best Model'],
+        'Best Bet': remembered['Best Bet'] || play['Best Bet'],
+        'Best Prob': remembered['Best Prob'] || play['Best Prob'],
+        'Best Edge': remembered['Best Edge'] || play['Best Edge'],
+        'Best Odds': remembered['Best Odds'] || play['Best Odds'],
+        'Model K': remembered['Model K'] || play['Model K'],
+        'K Edge': remembered['K Edge'] || play['K Edge'],
+      }
+
+      const rememberedResult = inferBetResult(next['Best Bet'], next['Actual Ks'])
+      if (rememberedResult) next.Result = rememberedResult
+      return next
+    })
+
+    return { plays, rememberedCount }
+  }
+
   async function handleUpload() {
     if (!file) return
     setStatus('uploading')
     try {
       const text = await file.text()
+      const previousTodayPlays = await fetch('/api/picks')
+        .then(res => res.ok ? res.json() : { plays: [] })
+        .then(data => data.plays || [])
+        .catch(() => [])
       const plays = parseCSV(text)
       const { today, yesterday } = splitAllInOnePlays(plays)
+      const rememberedYesterday = applyRememberedBestBets(yesterday, previousTodayPlays)
 
       if (plays.length === 0) {
         setStatus('error')
@@ -331,7 +416,7 @@ export default function Admin() {
         requests.push(fetch('/api/yesterday-picks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-admin-key': password },
-          body: JSON.stringify({ plays: yesterday }),
+          body: JSON.stringify({ plays: rememberedYesterday.plays }),
         }).then(async res => ({ name: 'yesterday', res, data: await res.json() })))
       }
 
@@ -340,7 +425,7 @@ export default function Admin() {
 
       if (!failed) {
         setStatus('success')
-        setResult({ todayCount: today.length, yesterdayCount: yesterday.length })
+        setResult({ todayCount: today.length, yesterdayCount: yesterday.length, rememberedCount: rememberedYesterday.rememberedCount })
       } else if (failed.res.status === 401) {
         setStatus('error')
         setResult({ message: 'Wrong password.' })
@@ -392,7 +477,7 @@ export default function Admin() {
             )}
           </div>
 
-          {status === 'success' && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#22C55E', lineHeight: 1.6 }}>✓ All-in-one CSV published — {result?.todayCount || 0} today plays and {result?.yesterdayCount || 0} yesterday results live</div>}
+          {status === 'success' && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#22C55E', lineHeight: 1.6 }}>✓ All-in-one CSV published — {result?.todayCount || 0} today plays and {result?.yesterdayCount || 0} yesterday results live{result?.rememberedCount ? ` (${result.rememberedCount} remembered best bets)` : ''}</div>}
           {status === 'error' && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', padding: '1rem', marginBottom: '1rem', fontSize: '0.72rem', color: '#EF4444', lineHeight: 1.6 }}>✗ {result?.message}</div>}
 
           <button style={{ ...s.btn(status === 'uploading' ? '#333' : fileLabel ? '#C8180A' : '#2a2a2a'), cursor: fileLabel && status !== 'uploading' ? 'pointer' : 'not-allowed' }} onClick={handleUpload} disabled={!fileLabel || status === 'uploading'}>
