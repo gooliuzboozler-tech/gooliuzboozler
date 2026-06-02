@@ -178,7 +178,7 @@ export default function Admin() {
         const explicitBestModelNumber = Number.parseInt(String(explicitBestModel || '').replace(/\D/g, ''), 10)
         const explicitModel = usableModels.find(model => model.number === explicitBestModelNumber)
         const bestModel = explicitModel || usableModels
-          .filter(model => model.oddsNumber > 1.29)
+          .filter(model => model.oddsNumber > 1.16)
           .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || usableModels
           .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0]
         const pitcher = parsePitcher(row['Pitcher'])

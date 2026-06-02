@@ -20,7 +20,7 @@ const BACKTEST_STAT_SETS = [
   {
     key: 'best',
     title: 'Best Bets',
-    subtitle: 'Highest probability pick per pitcher with payout above $1.29',
+    subtitle: 'Highest probability pick per pitcher with payout above $1.16',
     stats: [
       ['394-125', 'Record', 'g'],
       ['75.92%', 'Win Rate', 'g'],
