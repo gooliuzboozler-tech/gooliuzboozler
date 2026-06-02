@@ -107,14 +107,6 @@ function formatEdge(value) {
   return formatRoundedNumber(value, { signed: true })
 }
 
-function trustFromProbability(value) {
-  const prob = parseProbability(value)
-  if (prob >= 80) return 'Strong'
-  if (prob >= 70) return 'Playable'
-  if (prob >= 60) return 'Thin'
-  return 'Pass'
-}
-
 function normalizeResult(value) {
   const raw = String(value || '').toLowerCase()
   if (['hit', 'win', 'won', 'cash', 'cashed', 'true', 'yes', 'w'].some(v => raw.includes(v))) return 'Hit'
@@ -156,8 +148,6 @@ function ResultCard({ play }) {
       result: inferBetResult(play[`Model ${modelNumber} Bet`], play['Actual Ks']),
     }))
     .filter(model => model.bet)
-  const trust = trustFromProbability(bestRead.prob)
-
   return (
     <div className={`pick-card result-card ${normalizeResult(result).toLowerCase() || 'pending'}`}>
       <div className="pick-row">
@@ -178,10 +168,17 @@ function ResultCard({ play }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['K Edge'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Edge</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Model K'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Wizard Proj.</div>
+        </div>
+        <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Actual Ks'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Actual Ks</div>
         </div>
-        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448', textAlign: 'right' }}>{trust}</div>
       </div>
 
       <div className="result-detail-grid">
@@ -267,7 +264,7 @@ export default function Yesterday() {
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Result</span><span>Bet</span><span>Prob</span><span>Actual</span><span>Tier</span>
+          <span>Pitcher</span><span>Result</span><span>Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Actual</span>
         </div>
 
         {loading ? (

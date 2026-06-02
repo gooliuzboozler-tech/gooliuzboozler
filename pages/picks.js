@@ -273,6 +273,10 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['K Edge'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Edge</div>
         </div>
+        <div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Model K'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Wizard Proj.</div>
+        </div>
         <div className="pick-toggle">{expanded ? '▲' : '▼'}</div>
       </div>
 
@@ -460,7 +464,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
         {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span></span>
+          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span></span>
         </div>
         <BlurredPickPreview plays={blurredPlays} />
       </div>
@@ -741,7 +745,7 @@ export default function Picks() {
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span></span>
+          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span></span>
         </div>
 
         {filtered.length === 0 ? (
