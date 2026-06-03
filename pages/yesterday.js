@@ -63,7 +63,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [1, 2, 3, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [1, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber > 1.16)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models
@@ -139,7 +139,7 @@ function ResultCard({ play }) {
   const bestRead = bestReadForPlay(play)
   const result = inferBetResult(bestRead.bet, play['Actual Ks'])
   const bestModelLabel = bestRead.label
-  const modelOutcomes = [2, 3, 4, 5]
+  const modelOutcomes = [2, 6, 4, 5]
     .map(modelNumber => ({
       modelNumber,
       bet: play[`Model ${modelNumber} Bet`],

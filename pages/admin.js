@@ -1,6 +1,8 @@
 import Head from 'next/head'
 import { useState, useRef } from 'react'
 
+const WEBSITE_MODEL_NUMBERS = [1, 2, 6, 4, 5]
+
 export default function Admin() {
   const [password, setPassword] = useState('')
   const [authed, setAuthed] = useState(false)
@@ -108,7 +110,6 @@ export default function Admin() {
     const bet = firstValue(row, [
       `${prefix} Best Bet`,
       `${prefix} Bet`,
-      modelNumber === 3 ? 'Model 3' : '',
     ])
     const prob = firstValue(row, [
       `${prefix} Best Prob`,
@@ -172,7 +173,8 @@ export default function Admin() {
 
         if (!row['Pitcher']) break
 
-        const models = [1, 2, 3, 4, 5].map(modelNumber => getModel(row, modelNumber))
+        const models = WEBSITE_MODEL_NUMBERS.map(modelNumber => getModel(row, modelNumber))
+        const modelByNumber = Object.fromEntries(models.map(model => [model.number, model]))
         const usableModels = models.filter(isUsableModel)
         const explicitBestModel = firstValue(row, ['Best Model', 'Best Bet Model'])
         const explicitBestModelNumber = Number.parseInt(String(explicitBestModel || '').replace(/\D/g, ''), 10)
@@ -203,32 +205,32 @@ export default function Admin() {
           Trust: trustFromProbability(bestModel.prob),
           'Best Model': `Model ${bestModel.number}`,
           'Best Bet': bestModel.bet,
-          'Model 1 Bet': models[0].bet,
-          'Model 2 Bet': models[1].bet,
-          'Model 3 Bet': models[2].bet,
-          'Model 4 Bet': models[3].bet,
-          'Model 5 Bet': models[4].bet,
+          'Model 1 Bet': modelByNumber[1]?.bet || '',
+          'Model 2 Bet': modelByNumber[2]?.bet || '',
+          'Model 6 Bet': modelByNumber[6]?.bet || '',
+          'Model 4 Bet': modelByNumber[4]?.bet || '',
+          'Model 5 Bet': modelByNumber[5]?.bet || '',
           'Parlay Pick': row['Best Parlay Pick'] || row['Parlay Pick'] || row['Parlay Bets'] || '',
           'Best Prob': bestModel.prob,
-          'Model 1 Prob': models[0].prob,
-          'Model 2 Prob': models[1].prob,
-          'Model 3 Prob': models[2].prob,
-          'Model 4 Prob': models[3].prob,
-          'Model 5 Prob': models[4].prob,
+          'Model 1 Prob': modelByNumber[1]?.prob || '',
+          'Model 2 Prob': modelByNumber[2]?.prob || '',
+          'Model 6 Prob': modelByNumber[6]?.prob || '',
+          'Model 4 Prob': modelByNumber[4]?.prob || '',
+          'Model 5 Prob': modelByNumber[5]?.prob || '',
           'Best Edge': bestModel.edge,
-          'Model 1 Edge': models[0].edge,
-          'Model 2 Edge': models[1].edge,
-          'Model 3 Edge': models[2].edge,
-          'Model 4 Edge': models[3].edge,
-          'Model 5 Edge': models[4].edge,
+          'Model 1 Edge': modelByNumber[1]?.edge || '',
+          'Model 2 Edge': modelByNumber[2]?.edge || '',
+          'Model 6 Edge': modelByNumber[6]?.edge || '',
+          'Model 4 Edge': modelByNumber[4]?.edge || '',
+          'Model 5 Edge': modelByNumber[5]?.edge || '',
           'Best Odds': bestModel.odds || row['Best Odds'] || '',
-          'Model 1 Odds': models[0].odds,
-          'Model 2 Odds': models[1].odds,
-          'Model 3 Odds': models[2].odds,
-          'Model 4 Odds': models[3].odds,
-          'Model 5 Odds': models[4].odds,
-          'Model K': bestModel.k || models[0].k,
-          'K Edge': bestModel.kEdge || models[0].kEdge,
+          'Model 1 Odds': modelByNumber[1]?.odds || '',
+          'Model 2 Odds': modelByNumber[2]?.odds || '',
+          'Model 6 Odds': modelByNumber[6]?.odds || '',
+          'Model 4 Odds': modelByNumber[4]?.odds || '',
+          'Model 5 Odds': modelByNumber[5]?.odds || '',
+          'Model K': bestModel.k || modelByNumber[1]?.k || '',
+          'K Edge': bestModel.kEdge || modelByNumber[1]?.kEdge || '',
           'Parlay Backtest Selected Model': row['Parlay Backtest Selected Model'] || '',
           'Parlay Full Plays': row['Parlay Full Plays'] || '',
           'Parlay Full Record': row['Parlay Full Record'] || '',
@@ -245,10 +247,10 @@ export default function Admin() {
           'Model 2 Backtest Win Rate': row['Model 2 Backtest Win Rate'] || '',
           'Model 2 Backtest Plays': row['Model 2 Backtest Plays'] || '',
           'Model 2 Backtest ROI': row['Model 2 Backtest ROI'] || '',
-          'Model 3 Backtest Record': row['Model 3 Backtest Record'] || '',
-          'Model 3 Backtest Win Rate': row['Model 3 Backtest Win Rate'] || '',
-          'Model 3 Backtest Plays': row['Model 3 Backtest Plays'] || '',
-          'Model 3 Backtest ROI': row['Model 3 Backtest ROI'] || '',
+          'Model 6 Backtest Record': row['Model 6 Backtest Record'] || '',
+          'Model 6 Backtest Win Rate': row['Model 6 Backtest Win Rate'] || '',
+          'Model 6 Backtest Plays': row['Model 6 Backtest Plays'] || '',
+          'Model 6 Backtest ROI': row['Model 6 Backtest ROI'] || '',
           'Model 4 Backtest Record': row['Model 4 Backtest Record'] || '',
           'Model 4 Backtest Win Rate': row['Model 4 Backtest Win Rate'] || '',
           'Model 4 Backtest Plays': row['Model 4 Backtest Plays'] || '',
