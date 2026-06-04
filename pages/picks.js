@@ -670,14 +670,24 @@ export default function Picks() {
       setStatus('unauthorized')
     }
 
-    // Load picks
-    fetch('/api/picks')
-      .then(r => r.json())
-      .then(data => {
-        setPlays(data.plays || [])
-        setLastUpdated(data.lastUpdated || null)
-      })
-      .catch(() => {})
+    let cancelled = false
+    const loadPicks = () => {
+      fetch('/api/picks')
+        .then(r => r.json())
+        .then(data => {
+          if (cancelled) return
+          setPlays(data.plays || [])
+          setLastUpdated(data.lastUpdated || null)
+        })
+        .catch(() => {})
+    }
+
+    loadPicks()
+    const liveRefresh = window.setInterval(loadPicks, 60000)
+    return () => {
+      cancelled = true
+      window.clearInterval(liveRefresh)
+    }
   }, [])
 
   useEffect(() => {
