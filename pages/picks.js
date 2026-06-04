@@ -672,7 +672,7 @@ export default function Picks() {
 
     let cancelled = false
     const loadPicks = () => {
-      fetch('/api/picks')
+      fetch(`/api/picks?live=${Date.now()}`, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           if (cancelled) return
