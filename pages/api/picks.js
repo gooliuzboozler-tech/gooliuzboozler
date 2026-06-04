@@ -1,13 +1,16 @@
 import { Redis } from '@upstash/redis'
+import liveMlb from '../../lib/liveMlb'
 
 const redis = Redis.fromEnv()
+const { enrichPlaysWithLiveMlb } = liveMlb
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const data = await redis.get('picks:today')
       if (!data) return res.status(200).json({ plays: [], lastUpdated: null })
-      res.status(200).json(data)
+      const plays = await enrichPlaysWithLiveMlb(data.plays || [])
+      res.status(200).json({ ...data, plays })
     } catch (err) {
       res.status(200).json({ plays: [], lastUpdated: null })
     }

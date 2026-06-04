@@ -780,7 +780,7 @@ footer {
 .pick-row,
 .pick-header-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr 1fr 1fr 1fr 0.5fr;
+  grid-template-columns: 2fr 1fr 2fr 1fr 1fr 1fr 0.8fr 0.4fr;
   gap: 0.5rem;
   align-items: center;
 }
@@ -870,6 +870,17 @@ footer {
 .result-badge.pending {
   color: var(--muted);
   background: rgba(242,237,227,0.035);
+}
+.result-badge.live {
+  color: #EAB308;
+  background: rgba(234,179,8,0.09);
+  border-color: rgba(234,179,8,0.28);
+}
+.live-pick-card.hit {
+  border-left: 3px solid var(--green);
+}
+.live-pick-card.miss {
+  border-left: 3px solid #EF4444;
 }
 .result-summary {
   font-family: 'DM Mono', monospace;
@@ -1045,7 +1056,8 @@ footer {
   .pick-row > div:nth-child(3),
   .pick-row > div:nth-child(4),
   .pick-row > div:nth-child(5),
-  .pick-row > div:nth-child(6) {
+  .pick-row > div:nth-child(6),
+  .pick-row > div:nth-child(7) {
     grid-column: auto;
   }
   .pick-row > div:nth-child(3) {
@@ -1054,7 +1066,8 @@ footer {
   }
   .pick-row > div:nth-child(4),
   .pick-row > div:nth-child(5),
-  .pick-row > div:nth-child(6) {
+  .pick-row > div:nth-child(6),
+  .pick-row > div:nth-child(7) {
     background: rgba(242,237,227,0.035);
     padding: 0.55rem;
   }

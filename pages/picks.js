@@ -80,6 +80,29 @@ function formatEdge(value) {
   return formatRoundedNumber(value, { signed: true })
 }
 
+function normalizeResult(value) {
+  const raw = String(value || '').toLowerCase()
+  if (['hit', 'win', 'won', 'cash', 'cashed', 'true', 'yes', 'w'].some(v => raw.includes(v))) return 'Hit'
+  if (['miss', 'loss', 'lost', 'false', 'no', 'l'].some(v => raw.includes(v))) return 'Miss'
+  return ''
+}
+
+function LiveResultBadge({ play }) {
+  const result = normalizeResult(play.Result)
+  const liveStatus = String(play['Live Status'] || '').trim()
+  const liveKs = String(play['Live Ks'] || play['Actual Ks'] || '').trim()
+
+  if (result) {
+    return <span className={`result-badge ${result === 'Hit' ? 'hit' : 'miss'}`}>{result === 'Hit' ? '✓' : '✕'}</span>
+  }
+
+  if (liveStatus || liveKs) {
+    return <span className="result-badge live">Live</span>
+  }
+
+  return <span className="result-badge pending">Pending</span>
+}
+
 function oppKRankColor(value) {
   const rank = Number.parseInt(String(value || '').replace(/[^0-9-]/g, ''), 10)
   if (!Number.isFinite(rank)) return '#F2EDE3'
@@ -238,12 +261,16 @@ function PickCard({ play, plan }) {
   const bestOdds = formatOdds(play['Best Odds'], play['Best Bet'], play['Kalshi Lines'])
   const parlayPick = play['Parlay Pick'] || ''
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
+  const liveKs = play['Live Ks'] || play['Actual Ks'] || ''
+  const liveStatus = play['Live Status'] || ''
+  const liveResult = normalizeResult(play.Result)
+  const liveColor = liveResult === 'Hit' ? '#22C55E' : liveResult === 'Miss' ? '#EF4444' : liveStatus === 'Pitching Live' ? '#EAB308' : '#F2EDE3'
   const showAllModels = planHasAllModels(plan)
   const visibleModels = showAllModels ? modelRows : modelRows.filter(model => model.modelNumber === Number(String(play['Best Model'] || '').replace(/\D/g, '')) || model.bet === play['Best Bet']).slice(0, 1)
   const modelCardCount = visibleModels.length || 1
 
   return (
-    <div className="pick-card" style={{ borderColor: expanded ? ts.border : 'rgba(242,237,227,0.07)' }}>
+    <div className={`pick-card live-pick-card ${liveResult.toLowerCase() || ''}`} style={{ borderColor: expanded ? ts.border : 'rgba(242,237,227,0.07)' }}>
       <div onClick={() => setExpanded(!expanded)} className="pick-row">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3', letterSpacing: '0.04em' }}>
@@ -258,7 +285,10 @@ function PickCard({ play, plan }) {
           </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>vs {play.Opponent} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
         </div>
-        <TrustBadge trust={trust} />
+        <div>
+          <LiveResultBadge play={play} />
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 4 }}>{liveStatus || trust}</div>
+        </div>
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: ts.color }}>{play['Best Bet']}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
@@ -276,6 +306,10 @@ function PickCard({ play, plan }) {
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Model K'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Wizard Proj.</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: liveColor }}>{liveKs ? formatRoundedNumber(liveKs) : '-'}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Live Ks</div>
         </div>
         <div className="pick-toggle">{expanded ? '▲' : '▼'}</div>
       </div>
@@ -464,7 +498,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
         {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span></span>
+          <span>Pitcher</span><span>Status</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
         </div>
         <BlurredPickPreview plays={blurredPlays} />
       </div>
@@ -745,7 +779,7 @@ export default function Picks() {
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Trust</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span></span>
+          <span>Pitcher</span><span>Status</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
         </div>
 
         {filtered.length === 0 ? (
