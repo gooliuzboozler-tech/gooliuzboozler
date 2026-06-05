@@ -9,9 +9,9 @@ const PLAN_BY_PRICE = {
 }
 
 const PLAN_PRICE_TARGETS = {
-  weekly: { unitAmount: 999, recurringInterval: 'week' },
-  monthly: { unitAmount: 2499, recurringInterval: 'month' },
-  season: { unitAmount: 14900, recurringInterval: null },
+  weekly: { unitAmount: 999, recurringInterval: 'week', name: 'GooliuzBoozler Weekly' },
+  monthly: { unitAmount: 2499, recurringInterval: 'month', name: 'GooliuzBoozler Monthly' },
+  season: { unitAmount: 14900, recurringInterval: null, name: 'GooliuzBoozler Season Pass' },
 }
 
 function planFromPriceId(priceId) {
@@ -36,7 +36,17 @@ async function findActivePriceForPlan(plan) {
     .sort((a, b) => b.created - a.created)
 
   if (!matches.length) {
-    throw new Error(`No active Stripe price found for ${plan}. Create or reactivate the ${plan} price in Stripe.`)
+    const created = await stripe.prices.create({
+      currency: 'usd',
+      unit_amount: target.unitAmount,
+      recurring: target.recurringInterval ? { interval: target.recurringInterval } : undefined,
+      product_data: {
+        name: target.name,
+      },
+      metadata: { plan },
+    })
+
+    return created.id
   }
 
   return matches[0].id
