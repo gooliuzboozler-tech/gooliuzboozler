@@ -5,7 +5,8 @@ When updating the baseball spreadsheet and website:
 1. Run the daily spreadsheet refresh for the requested board date.
 2. Export and publish the website board for that board date.
 3. Confirm the website board includes current K/G values for all live/probable pitchers.
-   - Source K/G from `Start_Model` / `Last 5 K/Game` when the filterable board does not expose it.
+   - K/G means actual pitcher season strikeouts per game.
+   - Source it from `Start_Model` as `Pitcher Season K/9 * IP/Game / 9` when the filterable board does not expose it.
    - Report any pitcher whose K/G is still blank after export.
 4. Grade the previous board as Yesterday's Picks using MLB box scores.
 5. Publish Yesterday's Picks to the website.
