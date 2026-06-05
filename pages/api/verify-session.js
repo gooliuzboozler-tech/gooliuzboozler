@@ -10,6 +10,14 @@ const PLAN_BY_PRICE = {
   price_1TYwPfIzVbZI7suaxHy2ScZ3: 'season',
 }
 
+function planFromPrice(price) {
+  if (!price) return ''
+  if (price.unit_amount === 999 && price.recurring?.interval === 'week') return 'weekly'
+  if (price.unit_amount === 2499 && price.recurring?.interval === 'month') return 'monthly'
+  if (price.unit_amount === 14900 && !price.recurring) return 'season'
+  return ''
+}
+
 function parseMember(data) {
   if (!data) return null
   if (typeof data === 'string') return JSON.parse(data)
@@ -20,8 +28,8 @@ function planFromSession(session) {
   const metadataPlan = session.metadata?.plan || session.subscription?.metadata?.plan
   if (metadataPlan) return metadataPlan
 
-  const priceId = session.line_items?.data?.[0]?.price?.id
-  return PLAN_BY_PRICE[priceId] || (session.mode === 'payment' ? 'season' : 'weekly')
+  const price = session.line_items?.data?.[0]?.price
+  return PLAN_BY_PRICE[price?.id] || planFromPrice(price) || (session.mode === 'payment' ? 'season' : 'weekly')
 }
 
 function isKnownPlan(plan) {

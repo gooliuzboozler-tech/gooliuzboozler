@@ -8,6 +8,40 @@ const PLAN_BY_PRICE = {
   price_1TYwPfIzVbZI7suaxHy2ScZ3: 'season',
 }
 
+const PLAN_PRICE_TARGETS = {
+  weekly: { unitAmount: 999, recurringInterval: 'week' },
+  monthly: { unitAmount: 2499, recurringInterval: 'month' },
+  season: { unitAmount: 14900, recurringInterval: null },
+}
+
+function planFromPriceId(priceId) {
+  return PLAN_BY_PRICE[priceId] || 'weekly'
+}
+
+async function findActivePriceForPlan(plan) {
+  const target = PLAN_PRICE_TARGETS[plan]
+  if (!target) throw new Error(`Unknown checkout plan: ${plan}`)
+
+  const prices = await stripe.prices.list({
+    active: true,
+    currency: 'usd',
+    limit: 100,
+  })
+
+  const matches = prices.data
+    .filter(price => {
+      const interval = price.recurring?.interval || null
+      return price.unit_amount === target.unitAmount && interval === target.recurringInterval
+    })
+    .sort((a, b) => b.created - a.created)
+
+  if (!matches.length) {
+    throw new Error(`No active Stripe price found for ${plan}. Create or reactivate the ${plan} price in Stripe.`)
+  }
+
+  return matches[0].id
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -19,18 +53,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing priceId' })
   }
 
-  // Determine if one-time or recurring based on price ID
-  const seasonPriceId = 'price_1TYwPfIzVbZI7suaxHy2ScZ3'
-  const isOneTime = priceId === seasonPriceId
-  const plan = PLAN_BY_PRICE[priceId] || 'weekly'
-
   try {
+    const plan = planFromPriceId(priceId)
+    const checkoutPriceId = await findActivePriceForPlan(plan)
+    const isOneTime = plan === 'season'
+    const origin = req.headers.origin || `https://${req.headers.host}`
     const sessionParams = {
       mode: isOneTime ? 'payment' : 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: checkoutPriceId, quantity: 1 }],
       metadata: { plan },
-      success_url: `${req.headers.origin}/picks?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/?canceled=true`,
+      success_url: `${origin}/picks?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?canceled=true`,
       allow_promotion_codes: true,
       billing_address_collection: 'auto',
       custom_text: {
