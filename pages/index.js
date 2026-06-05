@@ -264,6 +264,22 @@ function trustFromProbability(value) {
   return 'Pass'
 }
 
+function probabilityColor(value) {
+  const trust = trustFromProbability(value)
+  if (trust === 'Strong') return '#22C55E'
+  if (trust === 'Playable') return '#EAB308'
+  if (trust === 'Thin') return '#F97316'
+  if (trust === 'Pass') return '#EF4444'
+  return '#F2EDE3'
+}
+
+function betSideColor(value) {
+  const raw = String(value || '').trim().toLowerCase()
+  if (raw.startsWith('yes')) return '#22C55E'
+  if (raw.startsWith('no')) return '#EF4444'
+  return '#F2EDE3'
+}
+
 function FreePickCard({ pick, lastUpdated }) {
   if (!pick) {
     return (
@@ -290,10 +306,10 @@ function FreePickCard({ pick, lastUpdated }) {
           </div>
           <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
         </div>
-        <div className="free-pick-prob">{formatProbability(pick['Best Prob'])}</div>
+        <div className="free-pick-prob" style={{ color: probabilityColor(pick['Best Prob']) }}>{formatProbability(pick['Best Prob'])}</div>
       </div>
       <div className="free-pick-bet">
-        {pick['Best Bet']}{pick['Best Model'] ? <span style={{ color: '#BFB090' }}> · {pick['Best Model']}</span> : ''}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
+        <span style={{ color: betSideColor(pick['Best Bet']) }}>{pick['Best Bet']}</span>{pick['Best Model'] ? <span style={{ color: '#BFB090' }}> · {pick['Best Model']}</span> : ''}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
       </div>
       <div className="free-pick-grid">
         <div><span>Trust</span>{trustFromProbability(pick['Best Prob'])}</div>

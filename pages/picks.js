@@ -176,6 +176,18 @@ function trustFromProbability(value) {
   return 'Pass'
 }
 
+function probabilityColor(value) {
+  const trust = trustFromProbability(value)
+  return (TRUST_STYLES[trust] || TRUST_STYLES.Pass).color
+}
+
+function betSideColor(value) {
+  const raw = String(value || '').trim().toLowerCase()
+  if (raw.startsWith('yes')) return '#22C55E'
+  if (raw.startsWith('no')) return '#EF4444'
+  return '#F2EDE3'
+}
+
 function getPlayTrust(play) {
   return trustFromProbability(play['Best Prob'])
 }
@@ -290,13 +302,13 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 4 }}>{liveStatus || trust}</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: ts.color }}>{play['Best Bet']}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: betSideColor(play['Best Bet']) }}>{play['Best Bet']}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
             {bestModelLabel}{bestOdds ? ` · ${bestOdds}` : ''}
           </div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#F2EDE3' }}>{formatProbability(play['Best Prob'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: probabilityColor(play['Best Prob']) }}>{formatProbability(play['Best Prob'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
@@ -322,9 +334,9 @@ function PickCard({ play, plan }) {
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: model.style.color, letterSpacing: '0.15em', marginBottom: '0.4rem' }}>
                   MODEL {model.modelNumber}{play['Best Model'] === `Model ${model.modelNumber}` ? ' · BEST' : ''}
                 </div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: '#F2EDE3' }}>{model.bet || '—'}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: betSideColor(model.bet) }}>{model.bet || '—'}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
-                  {formatProbability(model.prob)} prob{model.odds ? ` · ${model.odds} odds` : ''}{model.edge ? ` · ${formatEdge(model.edge)} edge` : ''}
+                  <span style={{ color: probabilityColor(model.prob) }}>{formatProbability(model.prob)} prob</span>{model.odds ? ` · ${model.odds} odds` : ''}{model.edge ? ` · ${formatEdge(model.edge)} edge` : ''}
                 </div>
               </div>
             ))}
@@ -407,10 +419,10 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
             vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}
           </div>
         </div>
-        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: '#22C55E', lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
+        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: probabilityColor(pick['Best Prob']), lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
       </div>
       <div style={{ marginTop: '1.5rem', fontFamily: 'DM Mono, monospace', fontSize: '1rem', color: '#F2EDE3', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '1rem' }}>
-        {pick['Best Bet']}{pick['Best Model'] ? <span style={{ color: '#BFB090' }}> · {pick['Best Model']}</span> : ''}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
+        <span style={{ color: betSideColor(pick['Best Bet']) }}>{pick['Best Bet']}</span>{pick['Best Model'] ? <span style={{ color: '#BFB090' }}> · {pick['Best Model']}</span> : ''}{odds ? <span style={{ color: '#EAB308' }}> · {odds} odds</span> : ''}
       </div>
       <div className="public-free-pick-grid">
         {[
