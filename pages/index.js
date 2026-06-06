@@ -113,22 +113,6 @@ const BACKTEST_STAT_SETS = [
       ['Avg K Edge', '+1.69', '84.5%'],
     ],
   },
-  {
-    key: 'model8',
-    title: 'Model 8',
-    subtitle: 'Career profile plus last-five-start form for safer pitcher reads',
-    stats: [
-      ['147-47', 'Record', 'g'],
-      ['75.77%', 'Win Rate', 'g'],
-      ['35.41%', 'ROI', ''],
-      ['194', 'Tracked Plays', ''],
-    ],
-    bars: [
-      ['Avg Probability', '75.90%', '75.9%'],
-      ['Avg Edge', '+19.69', '98.45%'],
-      ['Avg K Edge', '+1.64', '82%'],
-    ],
-  },
 ]
 
 function backtestBarClass(label) {
