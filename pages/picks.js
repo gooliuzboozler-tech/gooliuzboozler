@@ -352,10 +352,10 @@ function PickCard({ play, plan }) {
           {showAllModels && (
             <>
               <div className="pick-stats-grid">
-                {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']]].map(([label, val]) => (
+                {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']], ['Last 5 Ks', play['Last 5 Ks']]].map(([label, val]) => (
                   <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>{formatRoundedNumber(val)}</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>{label === 'Last 5 Ks' ? (val || '-') : formatRoundedNumber(val)}</div>
                   </div>
                 ))}
               </div>
