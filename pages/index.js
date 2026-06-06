@@ -115,6 +115,14 @@ const BACKTEST_STAT_SETS = [
   },
 ]
 
+const MODEL_BACKTEST_FALLBACKS = {
+  1: { record: '389-133', winRate: '0.7452', roi: '0.3448', plays: '522' },
+  2: { record: '394-132', winRate: '0.749', roi: '0.338', plays: '526' },
+  6: { record: '634-96', winRate: '0.8685', roi: '0.737', plays: '730' },
+  4: { record: '185-32', winRate: '0.8525', roi: '0.3604', plays: '217' },
+  5: { record: '160-17', winRate: '0.904', roi: '0.4552', plays: '177' },
+}
+
 function backtestBarClass(label) {
   if (label === 'Avg Edge') return ' purple'
   if (label === 'Avg K Edge') return ' red'
@@ -167,14 +175,21 @@ function formatPercentLike(value) {
   return `${pct.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%`
 }
 
+function backtestValue(value, fallback) {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw.toLowerCase() === 'tbd') return fallback || ''
+  return raw
+}
+
 function getModelBacktestsFromPlays(plays) {
   const source = (plays || []).find(play => play['Model 1 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
   const out = {}
   ;[1, 2, 6, 4, 5].forEach(modelNumber => {
-    const record = source[`Model ${modelNumber} Backtest Record`]
-    const winRate = formatPercentLike(source[`Model ${modelNumber} Backtest Win Rate`])
-    const roi = formatPercentLike(source[`Model ${modelNumber} Backtest ROI`])
-    const plays = source[`Model ${modelNumber} Backtest Plays`]
+    const fallback = MODEL_BACKTEST_FALLBACKS[modelNumber] || {}
+    const record = backtestValue(source[`Model ${modelNumber} Backtest Record`], fallback.record)
+    const winRate = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest Win Rate`], fallback.winRate))
+    const roi = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest ROI`], fallback.roi))
+    const plays = backtestValue(source[`Model ${modelNumber} Backtest Plays`], fallback.plays)
     if (record || winRate || roi || plays) {
       out[`model${modelNumber}`] = { record, winRate, roi, plays }
     }
