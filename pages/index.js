@@ -118,15 +118,15 @@ const BACKTEST_STAT_SETS = [
     title: 'Model 8',
     subtitle: 'Career profile plus last-five-start form for safer pitcher reads',
     stats: [
-      ['TESTING', 'Record', ''],
-      ['TBD', 'Win Rate', ''],
-      ['TBD', 'ROI', ''],
-      ['TBD', 'Tracked Plays', ''],
+      ['147-47', 'Record', 'g'],
+      ['75.77%', 'Win Rate', 'g'],
+      ['35.41%', 'ROI', ''],
+      ['194', 'Tracked Plays', ''],
     ],
     bars: [
-      ['Avg Probability', 'TBD', '0%'],
-      ['Avg Edge', 'TBD', '0%'],
-      ['Avg K Edge', 'TBD', '0%'],
+      ['Avg Probability', '75.90%', '75.9%'],
+      ['Avg Edge', '+19.69', '98.45%'],
+      ['Avg K Edge', '+1.64', '82%'],
     ],
   },
 ]
