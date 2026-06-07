@@ -105,6 +105,36 @@ function bestBetRecord(plays) {
   }, { hits: 0, misses: 0 })
 }
 
+function selectedModelRecord(plays, preferredModel = 'best') {
+  return (plays || []).reduce((record, play) => {
+    const read = getPreferredModelRead(play, preferredModel)
+    const betMatch = String(read.bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+    const actualKs = Number.parseFloat(String(play['Live Ks'] || play['Actual Ks'] || '').replace(/[^0-9.-]/g, ''))
+    const liveStatus = String(play['Live Status'] || '').toLowerCase()
+    const terminal = /starter out|final|completed|game over/.test(liveStatus) || Boolean(normalizeResult(play.Result))
+    let result = ''
+
+    if (preferredModel === 'best') result = normalizeResult(play.Result)
+
+    if (betMatch && Number.isFinite(actualKs)) {
+      const side = betMatch[1].toLowerCase()
+      const threshold = Number.parseInt(betMatch[2], 10)
+
+      if (side === 'yes') {
+        if (actualKs >= threshold) result = 'Hit'
+        else if (terminal) result = 'Miss'
+      } else if (side === 'no') {
+        if (actualKs >= threshold) result = 'Miss'
+        else if (terminal) result = 'Hit'
+      }
+    }
+
+    if (result === 'Hit') record.hits += 1
+    if (result === 'Miss') record.misses += 1
+    return record
+  }, { hits: 0, misses: 0 })
+}
+
 function LiveResultBadge({ play }) {
   const result = normalizeResult(play.Result)
   const liveStatus = String(play['Live Status'] || '').trim()
@@ -776,13 +806,14 @@ export default function Picks() {
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
   const sortedVisiblePlays = [...visiblePlays].sort((a, b) => parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob))
   const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter, preferredModel))
-  const todayRecord = bestBetRecord(plays)
+  const todayRecord = selectedModelRecord(plays, preferredModel)
   const counts = {
     Strong: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Strong').length,
     Playable: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Playable').length,
     Thin: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Thin').length,
   }
   const selectedModelLabel = MODEL_OPTIONS.find(option => option.value === preferredModel)?.label || 'Best Model'
+  const recordLabel = preferredModel === 'best' ? "Today's Best Bet Record" : `Today's ${selectedModelLabel} Record`
 
   async function handleSubscribe(priceId) {
     setCheckoutLoading(priceId)
@@ -846,7 +877,7 @@ export default function Picks() {
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8180A', marginBottom: '0.5rem' }}>// Today's Board</div>
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3rem', letterSpacing: '0.04em', lineHeight: 1 }}>Pitcher K Model</h1>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.5rem' }}>
-              Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses}
+              {recordLabel}: {todayRecord.hits}-{todayRecord.misses}
             </div>
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
