@@ -31,6 +31,15 @@ const MLB_TEAM_IDS = {
   TOR: 141, WSH: 120, WSN: 120,
 }
 
+const MODEL_OPTIONS = [
+  { value: 'best', label: 'Best Model' },
+  { value: '8', label: 'Model 8' },
+  { value: '2', label: 'Model 2' },
+  { value: '6', label: 'Model 6' },
+  { value: '4', label: 'Model 4' },
+  { value: '5', label: 'Model 5' },
+]
+
 function teamLogoUrl(team) {
   const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
   return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
@@ -197,8 +206,46 @@ function betSideColor(value) {
   return '#F2EDE3'
 }
 
-function getPlayTrust(play) {
-  return trustFromProbability(play['Best Prob'])
+function getPreferredModelRead(play, preferredModel = 'best') {
+  if (preferredModel === 'best') {
+    return {
+      modelLabel: play['Best Model'] || 'Best Model',
+      bet: play['Best Bet'] || '',
+      prob: play['Best Prob'] || '',
+      edge: play['Best Edge'] || '',
+      odds: play['Best Odds'] || '',
+      modelK: play['Model K'] || '',
+      kEdge: play['K Edge'] || '',
+    }
+  }
+
+  const modelNumber = Number.parseInt(preferredModel, 10)
+  if (!Number.isFinite(modelNumber)) return getPreferredModelRead(play, 'best')
+
+  const bet = firstValue(play, [`Model ${modelNumber} Bet`, `Model ${modelNumber} Best Bet`])
+  const prob = firstValue(play, [`Model ${modelNumber} Prob`, `Model ${modelNumber} Best Prob`])
+  const edge = firstValue(play, [`Model ${modelNumber} Edge`, `Model ${modelNumber} Best Edge`, `Model ${modelNumber} K Edge`])
+  const odds = firstValue(play, [`Model ${modelNumber} Odds`, `Model ${modelNumber} Best Odds`])
+
+  return {
+    modelLabel: `Model ${modelNumber}`,
+    bet,
+    prob,
+    edge,
+    odds,
+    modelK: firstValue(play, [`Model ${modelNumber} K`, `Model ${modelNumber} Model K`, 'Model K']),
+    kEdge: firstValue(play, [`Model ${modelNumber} K Edge`, `Model ${modelNumber} Best K Edge`, 'K Edge']),
+  }
+}
+
+function usablePreferredRead(play, preferredModel = 'best') {
+  const read = getPreferredModelRead(play, preferredModel)
+  const bet = String(read.bet || '').trim().toLowerCase()
+  return bet && bet !== 'pass' && parseProbability(read.prob) > 0
+}
+
+function getPlayTrust(play, preferredModel = 'best') {
+  return trustFromProbability(getPreferredModelRead(play, preferredModel).prob)
 }
 
 function planHasModel2(plan) {
@@ -217,12 +264,12 @@ function planHasFullBoard(plan) {
   return plan === 'season'
 }
 
-function isCorePlay(play) {
-  return ['Strong', 'Playable'].includes(getPlayTrust(play))
+function isCorePlay(play, preferredModel = 'best') {
+  return ['Strong', 'Playable'].includes(getPlayTrust(play, preferredModel))
 }
 
-function filterByTrust(play, filter) {
-  const trust = getPlayTrust(play)
+function filterByTrust(play, filter, preferredModel = 'best') {
+  const trust = getPlayTrust(play, preferredModel)
   if (filter === 'Likely') return trust === 'Strong'
   return trust === filter
 }
@@ -238,11 +285,12 @@ function TrustBadge({ trust }) {
   )
 }
 
-function PickCard({ play, plan }) {
+function PickCard({ play, plan, preferredModel = 'best' }) {
   const [expanded, setExpanded] = useState(false)
-  const trust = getPlayTrust(play)
+  const preferredRead = getPreferredModelRead(play, preferredModel)
+  const trust = trustFromProbability(preferredRead.prob)
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
-  const bestModelLabel = play['Best Model'] || 'Best Model'
+  const bestModelLabel = preferredRead.modelLabel || 'Best Model'
   const legacyModel2Bet = play[['Conserv', 'ative Bet'].join('')] || ''
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
   const legacyModel2Edge = play[['Conserv', 'ative Edge'].join('')] || ''
@@ -255,6 +303,7 @@ function PickCard({ play, plan }) {
   }
   const modelRows = [8, 2, 6, 4, 5].map(modelNumber => {
     const fallbackBest = play['Best Model'] === `Model ${modelNumber}`
+    const selected = preferredModel === String(modelNumber)
     const bet = firstValue(play, [
       `Model ${modelNumber} Bet`,
       modelNumber === 8 ? 'Best Bet' : '',
@@ -277,9 +326,9 @@ function PickCard({ play, plan }) {
       `Model ${modelNumber} Best Odds`,
       fallbackBest ? 'Best Odds' : '',
     ]), bet, play['Kalshi Lines'])
-    return { modelNumber, bet, prob, edge, odds, style: modelStyles[modelNumber] }
+    return { modelNumber, bet, prob, edge, odds, selected, style: modelStyles[modelNumber] }
   })
-  const bestOdds = formatOdds(play['Best Odds'], play['Best Bet'], play['Kalshi Lines'])
+  const bestOdds = formatOdds(preferredRead.odds, preferredRead.bet, play['Kalshi Lines'])
   const parlayPick = play['Parlay Pick'] || ''
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const liveKs = play['Live Ks'] || play['Actual Ks'] || ''
@@ -311,21 +360,21 @@ function PickCard({ play, plan }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 4 }}>{liveStatus || trust}</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: betSideColor(play['Best Bet']) }}>{play['Best Bet']}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.75rem', color: betSideColor(preferredRead.bet) }}>{preferredRead.bet}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
             {bestModelLabel}{bestOdds ? ` · ${bestOdds}` : ''}
           </div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: probabilityColor(play['Best Prob']) }}>{formatProbability(play['Best Prob'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: probabilityColor(preferredRead.prob) }}>{formatProbability(preferredRead.prob)}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['K Edge'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(preferredRead.kEdge)}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Edge</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Model K'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(preferredRead.modelK)}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Wizard Proj.</div>
         </div>
         <div>
@@ -341,7 +390,7 @@ function PickCard({ play, plan }) {
             {visibleModels.map(model => (
               <div key={model.modelNumber} style={{ background: model.style.bg, border: model.style.border, padding: '0.85rem' }}>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: model.style.color, letterSpacing: '0.15em', marginBottom: '0.4rem' }}>
-                  MODEL {model.modelNumber}{play['Best Model'] === `Model ${model.modelNumber}` ? ' · BEST' : ''}
+                  MODEL {model.modelNumber}{model.selected ? ' · SELECTED' : play['Best Model'] === `Model ${model.modelNumber}` ? ' · BEST' : ''}
                 </div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.85rem', color: betSideColor(model.bet) }}>{model.bet || '—'}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', color: '#BFB090', marginTop: 4 }}>
@@ -642,6 +691,7 @@ export default function Picks() {
   const [memberPlan, setMemberPlan] = useState('weekly')
   const [checkoutLoading, setCheckoutLoading] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
+  const [preferredModel, setPreferredModel] = useState('best')
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -721,16 +771,18 @@ export default function Picks() {
     }
   }, [memberPlan, filter])
 
-  const visiblePlays = planHasFullBoard(memberPlan) ? plays : plays.filter(isCorePlay)
+  const modelQualifiedPlays = preferredModel === 'best' ? plays : plays.filter(play => usablePreferredRead(play, preferredModel))
+  const visiblePlays = planHasFullBoard(memberPlan) ? modelQualifiedPlays : modelQualifiedPlays.filter(play => isCorePlay(play, preferredModel))
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
-  const sortedVisiblePlays = [...visiblePlays].sort((a, b) => parseProbability(b['Best Prob']) - parseProbability(a['Best Prob']))
-  const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter))
+  const sortedVisiblePlays = [...visiblePlays].sort((a, b) => parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob))
+  const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter, preferredModel))
   const todayRecord = bestBetRecord(plays)
   const counts = {
-    Strong: visiblePlays.filter(p => getPlayTrust(p) === 'Strong').length,
-    Playable: visiblePlays.filter(p => getPlayTrust(p) === 'Playable').length,
-    Thin: visiblePlays.filter(p => getPlayTrust(p) === 'Thin').length,
+    Strong: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Strong').length,
+    Playable: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Playable').length,
+    Thin: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Thin').length,
   }
+  const selectedModelLabel = MODEL_OPTIONS.find(option => option.value === preferredModel)?.label || 'Best Model'
 
   async function handleSubscribe(priceId) {
     setCheckoutLoading(priceId)
@@ -817,8 +869,39 @@ export default function Picks() {
           ))}
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem', background: 'rgba(242,237,227,0.025)', border: '1px solid rgba(242,237,227,0.08)', padding: '0.85rem 1rem' }}>
+          <div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.56rem', color: '#5A5448', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Preferred Model View</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#BFB090', letterSpacing: '0.06em' }}>
+              Showing {visiblePlays.length} {selectedModelLabel} play{visiblePlays.length === 1 ? '' : 's'}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {MODEL_OPTIONS.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => { setPreferredModel(option.value); setFilter('All') }}
+                style={{
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: '0.62rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '0.5rem 0.75rem',
+                  border: preferredModel === option.value ? '1px solid #EAB308' : '1px solid rgba(242,237,227,0.12)',
+                  background: preferredModel === option.value ? 'rgba(234,179,8,0.12)' : 'rgba(10,10,10,0.7)',
+                  color: preferredModel === option.value ? '#EAB308' : '#BFB090',
+                  cursor: 'pointer',
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Status</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
+          <span>Pitcher</span><span>Status</span><span>{preferredModel === 'best' ? 'Best Bet' : `${selectedModelLabel} Bet`}</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
         </div>
 
         {filtered.length === 0 ? (
@@ -826,7 +909,7 @@ export default function Picks() {
             NO PLAYS POSTED YET — CHECK BACK BEFORE FIRST PITCH
           </div>
         ) : (
-          filtered.map((play, i) => <PickCard key={i} play={play} plan={memberPlan} />)
+          filtered.map((play, i) => <PickCard key={i} play={play} plan={memberPlan} preferredModel={preferredModel} />)
         )}
 
         <div style={{ marginTop: '2rem', fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: 'rgba(90,84,72,0.5)', lineHeight: 1.7, borderTop: '1px solid rgba(242,237,227,0.04)', paddingTop: '1.5rem' }}>
