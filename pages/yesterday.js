@@ -63,7 +63,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [1, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [8, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber > 1.16)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models

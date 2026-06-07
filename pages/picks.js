@@ -247,29 +247,29 @@ function PickCard({ play, plan }) {
   const legacyModel2Prob = play[['Conserv', 'ative Prob'].join('')] || ''
   const legacyModel2Edge = play[['Conserv', 'ative Edge'].join('')] || ''
   const modelStyles = {
-    1: { bg: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' },
+    8: { bg: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' },
     2: { bg: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', color: '#EAB308' },
     6: { bg: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', color: '#C084FC' },
     4: { bg: 'rgba(14,165,233,0.07)', border: '1px solid rgba(56,189,248,0.24)', color: '#38BDF8' },
     5: { bg: 'rgba(236,72,153,0.07)', border: '1px solid rgba(244,114,182,0.24)', color: '#F472B6' },
   }
-  const modelRows = [1, 2, 6, 4, 5].map(modelNumber => {
+  const modelRows = [8, 2, 6, 4, 5].map(modelNumber => {
     const fallbackBest = play['Best Model'] === `Model ${modelNumber}`
     const bet = firstValue(play, [
       `Model ${modelNumber} Bet`,
-      modelNumber === 1 ? 'Best Bet' : '',
+      modelNumber === 8 ? 'Best Bet' : '',
       modelNumber === 2 ? legacyModel2Bet : '',
     ])
     const prob = firstValue(play, [
       `Model ${modelNumber} Prob`,
-      modelNumber === 1 ? 'Best Prob' : '',
+      modelNumber === 8 ? 'Best Prob' : '',
       modelNumber === 2 ? legacyModel2Prob : '',
     ])
     const edge = firstValue(play, [
       `Model ${modelNumber} Edge`,
       `Model ${modelNumber} Best Edge`,
       `Model ${modelNumber} K Edge`,
-      modelNumber === 1 ? 'Best Edge' : '',
+      modelNumber === 8 ? 'Best Edge' : '',
       modelNumber === 2 ? legacyModel2Edge : '',
     ]) || impliedEdgeFromMarket(prob, bet, play['Kalshi Lines'])
     const odds = formatOdds(firstValue(play, [

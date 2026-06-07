@@ -34,14 +34,14 @@ const BACKTEST_STAT_SETS = [
     ],
   },
   {
-    key: 'model1',
-    title: 'Model 1',
-    subtitle: 'Primary probability read with full-board K edge grading',
+    key: 'model8',
+    title: 'Model 8',
+    subtitle: 'Model 2 cushion filter with top-100 career strikeout Yes tilt',
     stats: [
-      ['352-95', 'Record', 'g'],
-      ['78.75%', 'Win Rate', 'g'],
-      ['82.81%', 'ROI', ''],
-      ['447', 'Tracked Plays', ''],
+      ['304-33', 'Record', 'g'],
+      ['90.21%', 'Win Rate', 'g'],
+      ['TBD', 'ROI', ''],
+      ['337', 'Tracked Plays', ''],
     ],
     bars: [
       ['Avg Probability', '71.26%', '71.26%'],
@@ -116,7 +116,7 @@ const BACKTEST_STAT_SETS = [
 ]
 
 const MODEL_BACKTEST_FALLBACKS = {
-  1: { record: '389-133', winRate: '0.7452', roi: '0.3448', plays: '522' },
+  8: { record: '304-33', winRate: '0.9021', roi: '', plays: '337' },
   2: { record: '394-132', winRate: '0.749', roi: '0.338', plays: '526' },
   6: { record: '634-96', winRate: '0.8685', roi: '0.737', plays: '730' },
   4: { record: '185-32', winRate: '0.8525', roi: '0.3604', plays: '217' },
@@ -182,9 +182,9 @@ function backtestValue(value, fallback) {
 }
 
 function getModelBacktestsFromPlays(plays) {
-  const source = (plays || []).find(play => play['Model 1 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
+  const source = (plays || []).find(play => play['Model 8 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
   const out = {}
-  ;[1, 2, 6, 4, 5].forEach(modelNumber => {
+  ;[8, 2, 6, 4, 5].forEach(modelNumber => {
     const fallback = MODEL_BACKTEST_FALLBACKS[modelNumber] || {}
     const record = backtestValue(source[`Model ${modelNumber} Backtest Record`], fallback.record)
     const winRate = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest Win Rate`], fallback.winRate))
@@ -439,7 +439,7 @@ export default function Home() {
           <div className="hero-eyebrow">2026 Season — Live Now</div>
           <h1>The <em>K</em> Board<br />Built to<br />Beat the Line.</h1>
           <p className="hero-sub">
-            Sharp MLB strikeout projections powered by weighted Models 1, 2, 4, 5, and 6.
+            Sharp MLB strikeout projections powered by weighted Models 8, 2, 4, 5, and 6.
             Members get plan-based access to the picks board, with higher tiers unlocking
             all five model reads, parlay picks, K Edge, BvP context, market lines, and full-board data.
           </p>
@@ -512,7 +512,7 @@ export default function Home() {
         <div className="eyebrow">// What Makes This Different</div>
         <h2 className="section-title">Built on Weighted Inputs.<br />Checked Against the Line.</h2>
         <p className="section-sub">
-          Every board is built from Models 1, 2, 4, 5, and 6 projections, probability thresholds,
+          Every board is built from Models 8, 2, 4, 5, and 6 projections, probability thresholds,
           K-edge scoring, market lines, BvP data, opponent strikeout profile, recent form,
           and bullpen context. No generic picks. Just the numbers that moved the board.
         </p>
@@ -522,7 +522,7 @@ export default function Home() {
             [
               '01',
               'Best-Probability Tiers',
-              'The highest probability across Models 1, 2, 4, 5, and 6 drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. Weekly and Monthly members see Strong and Playable plays; Season members see the full board.'
+              'The highest probability across Models 8, 2, 4, 5, and 6 drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. Weekly and Monthly members see Strong and Playable plays; Season members see the full board.'
             ],
             [
               '02',
@@ -591,7 +591,7 @@ export default function Home() {
             features={[
               { yes: true, text: "Today's picks board access" },
               { yes: true, text: 'Strong + Playable plays' },
-              { yes: true, text: 'Models 1, 2, 4, 5, and 6 plays' },
+              { yes: true, text: 'Models 8, 2, 4, 5, and 6 plays' },
               { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'BvP standout callouts' },
               { yes: true, text: 'K Edge + model variable breakdown' },
@@ -607,7 +607,7 @@ export default function Home() {
             features={[
               { yes: true, text: 'Everything in Monthly' },
               { yes: true, text: 'Full board — all posted plays daily' },
-              { yes: true, text: 'Models 1, 2, 4, 5, and 6 across full board' },
+              { yes: true, text: 'Models 8, 2, 4, 5, and 6 across full board' },
               { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: true, text: 'Thin plays + weighted-input data' },
@@ -624,7 +624,7 @@ export default function Home() {
         <div className="faq-list">
           {[
             ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable best-probability plays. Monthly adds all five models, parlay picks, K Edge, BvP, and context. Season adds the full board, including Thin plays."],
-            ['What are the five model reads?', 'Models 1, 2, 4, 5, and 6 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
+            ['What are the five model reads?', 'Models 8, 2, 4, 5, and 6 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
