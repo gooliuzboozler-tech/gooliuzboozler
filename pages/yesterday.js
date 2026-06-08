@@ -11,6 +11,15 @@ const MLB_TEAM_IDS = {
   TOR: 141, WSH: 120, WSN: 120,
 }
 
+const MODEL_OPTIONS = [
+  { value: 'best', label: 'Best Model' },
+  { value: '8', label: 'Model 8' },
+  { value: '2', label: 'Model 2' },
+  { value: '6', label: 'Model 6' },
+  { value: '4', label: 'Model 4' },
+  { value: '5', label: 'Model 5' },
+]
+
 function teamLogoUrl(team) {
   const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
   return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
@@ -43,17 +52,28 @@ function parseOdds(value, bet, lines) {
   return Number.isFinite(num) ? num : 0
 }
 
+function firstValue(source, keys) {
+  for (const key of keys) {
+    if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== '') {
+      return source[key]
+    }
+  }
+  return ''
+}
+
 function modelRead(play, modelNumber) {
-  const bet = play[`Model ${modelNumber} Bet`]
+  const bet = firstValue(play, [`Model ${modelNumber} Bet`, `Model ${modelNumber} Best Bet`])
   return {
     modelNumber,
     label: `Model ${modelNumber}`,
     bet,
-    prob: play[`Model ${modelNumber} Prob`],
-    edge: play[`Model ${modelNumber} Edge`],
-    odds: play[`Model ${modelNumber} Odds`],
-    probabilityNumber: parseProbability(play[`Model ${modelNumber} Prob`]),
-    oddsNumber: parseOdds(play[`Model ${modelNumber} Odds`], bet, play['Kalshi Lines']),
+    prob: firstValue(play, [`Model ${modelNumber} Prob`, `Model ${modelNumber} Best Prob`]),
+    edge: firstValue(play, [`Model ${modelNumber} Edge`, `Model ${modelNumber} Best Edge`, `Model ${modelNumber} K Edge`]),
+    odds: firstValue(play, [`Model ${modelNumber} Odds`, `Model ${modelNumber} Best Odds`]),
+    modelK: firstValue(play, [`Model ${modelNumber} K`, `Model ${modelNumber} Model K`, 'Model K']),
+    kEdge: firstValue(play, [`Model ${modelNumber} K Edge`, `Model ${modelNumber} Best K Edge`, 'K Edge']),
+    probabilityNumber: parseProbability(firstValue(play, [`Model ${modelNumber} Prob`, `Model ${modelNumber} Best Prob`])),
+    oddsNumber: parseOdds(firstValue(play, [`Model ${modelNumber} Odds`, `Model ${modelNumber} Best Odds`]), bet, play['Kalshi Lines']),
   }
 }
 
@@ -79,6 +99,31 @@ function bestReadForPlay(play) {
   }
 
   return best
+}
+
+function getPreferredModelRead(play, preferredModel = 'best') {
+  if (preferredModel === 'best') {
+    const bestRead = bestReadForPlay(play)
+    return {
+      label: bestRead.label || play['Best Model'] || 'Best Model',
+      bet: bestRead.bet || play['Best Bet'] || '',
+      prob: bestRead.prob || play['Best Prob'] || '',
+      edge: bestRead.edge || play['Best Edge'] || '',
+      odds: bestRead.odds || play['Best Odds'] || '',
+      modelK: bestRead.modelK || play['Model K'] || '',
+      kEdge: bestRead.kEdge || play['K Edge'] || '',
+    }
+  }
+
+  const modelNumber = Number.parseInt(preferredModel, 10)
+  if (!Number.isFinite(modelNumber)) return getPreferredModelRead(play, 'best')
+  return modelRead(play, modelNumber)
+}
+
+function usablePreferredRead(play, preferredModel = 'best') {
+  const read = getPreferredModelRead(play, preferredModel)
+  const bet = String(read.bet || '').trim().toLowerCase()
+  return bet && bet !== 'pass' && parseProbability(read.prob) > 0
 }
 
 function formatProbability(value) {
@@ -128,26 +173,35 @@ function inferBetResult(bet, actualKs, explicitResult) {
   return hit ? 'Hit' : 'Miss'
 }
 
+function selectedModelRecord(plays, preferredModel = 'best') {
+  return (plays || []).reduce((record, play) => {
+    const read = getPreferredModelRead(play, preferredModel)
+    const result = inferBetResult(read.bet, play['Actual Ks'], preferredModel === 'best' ? play.Result : '')
+    if (result === 'Hit') record.hits += 1
+    if (result === 'Miss') record.misses += 1
+    return record
+  }, { hits: 0, misses: 0 })
+}
+
 function ResultBadge({ result }) {
   const value = normalizeResult(result)
   if (!value) return <span className="result-badge pending">Pending</span>
   return <span className={`result-badge ${value === 'Hit' ? 'hit' : 'miss'}`}>{value === 'Hit' ? '✓ Hit' : '✕ Miss'}</span>
 }
 
-function ResultCard({ play }) {
+function ResultCard({ play, preferredModel = 'best' }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
-  const bestRead = bestReadForPlay(play)
-  const result = inferBetResult(bestRead.bet, play['Actual Ks'])
+  const bestRead = getPreferredModelRead(play, preferredModel)
+  const result = inferBetResult(bestRead.bet, play['Actual Ks'], preferredModel === 'best' ? play.Result : '')
   const bestModelLabel = bestRead.label
-  const modelOutcomes = [2, 6, 4, 5]
+  const modelOutcomes = [8, 2, 6, 4, 5]
     .map(modelNumber => ({
       modelNumber,
-      bet: play[`Model ${modelNumber} Bet`],
-      prob: play[`Model ${modelNumber} Prob`],
-      edge: play[`Model ${modelNumber} Edge`],
-      result: inferBetResult(play[`Model ${modelNumber} Bet`], play['Actual Ks']),
+      selected: preferredModel === String(modelNumber),
+      ...modelRead(play, modelNumber),
+      result: inferBetResult(modelRead(play, modelNumber).bet, play['Actual Ks']),
     }))
-    .filter(model => model.bet)
+    .filter(model => model.bet && model.bet !== 'Pass')
   return (
     <div className={`pick-card result-card ${normalizeResult(result).toLowerCase() || 'pending'}`}>
       <div className="pick-row">
@@ -168,11 +222,11 @@ function ResultCard({ play }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Prob</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(play['K Edge'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#22C55E' }}>{formatEdge(bestRead.kEdge || play['K Edge'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Edge</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(play['Model K'])}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: '#EAB308' }}>{formatRoundedNumber(bestRead.modelK || play['Model K'])}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>K Wizard Proj.</div>
         </div>
         <div>
@@ -188,11 +242,11 @@ function ResultCard({ play }) {
         </div>
         <div>
           <span>Model K</span>
-          {formatRoundedNumber(play['Model K'])}
+          {formatRoundedNumber(bestRead.modelK || play['Model K'])}
         </div>
         <div>
           <span>K Edge</span>
-          {formatRoundedNumber(play['K Edge'])}
+          {formatRoundedNumber(bestRead.kEdge || play['K Edge'])}
         </div>
         <div>
           <span>Opp K Rank</span>
@@ -203,7 +257,7 @@ function ResultCard({ play }) {
       {modelOutcomes.length > 0 && (
         <div className="yesterday-model-grid">
           {modelOutcomes.map(model => (
-            <div key={model.modelNumber}>
+            <div key={model.modelNumber} style={model.selected ? { borderColor: 'rgba(234,179,8,0.45)', background: 'rgba(234,179,8,0.08)' } : undefined}>
               <span>Model {model.modelNumber}</span>
               <strong>{model.bet}</strong>
               <small>{formatProbability(model.prob)} prob · {formatEdge(model.edge)} edge</small>
@@ -220,6 +274,7 @@ export default function Yesterday() {
   const [plays, setPlays] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [preferredModel, setPreferredModel] = useState('best')
 
   useEffect(() => {
     fetch('/api/yesterday-picks')
@@ -231,8 +286,11 @@ export default function Yesterday() {
       .finally(() => setLoading(false))
   }, [])
 
-  const hits = plays.filter(play => inferBetResult(bestReadForPlay(play).bet, play['Actual Ks']) === 'Hit').length
-  const misses = plays.filter(play => inferBetResult(bestReadForPlay(play).bet, play['Actual Ks']) === 'Miss').length
+  const modelQualifiedPlays = preferredModel === 'best' ? plays : plays.filter(play => usablePreferredRead(play, preferredModel))
+  const sortedVisiblePlays = [...modelQualifiedPlays].sort((a, b) => parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob))
+  const yesterdayRecord = selectedModelRecord(plays, preferredModel)
+  const selectedModelLabel = MODEL_OPTIONS.find(option => option.value === preferredModel)?.label || 'Best Model'
+  const recordLabel = preferredModel === 'best' ? "Yesterday's Best Bet Record" : `Yesterday's ${selectedModelLabel} Record`
 
   return (
     <>
@@ -258,23 +316,48 @@ export default function Yesterday() {
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <div className="result-summary hit">✓ {hits} Hit</div>
-            <div className="result-summary miss">✕ {misses} Miss</div>
+            <div className="result-summary hit">✓ {yesterdayRecord.hits} Hit</div>
+            <div className="result-summary miss">✕ {yesterdayRecord.misses} Miss</div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.55rem' }}>{recordLabel}: {yesterdayRecord.hits}-{yesterdayRecord.misses}</div>
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+            {MODEL_OPTIONS.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setPreferredModel(option.value)}
+                style={{
+                  border: preferredModel === option.value ? '1px solid #EAB308' : '1px solid rgba(242,237,227,0.12)',
+                  background: preferredModel === option.value ? 'rgba(234,179,8,0.12)' : 'rgba(10,10,10,0.7)',
+                  color: preferredModel === option.value ? '#EAB308' : '#BFB090',
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: '0.66rem',
+                  letterSpacing: '0.08em',
+                  padding: '0.5rem 0.7rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Result</span><span>Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Actual</span>
+          <span>Pitcher</span><span>Result</span><span>{preferredModel === 'best' ? 'Bet' : `${selectedModelLabel} Bet`}</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Actual</span>
         </div>
 
         {loading ? (
           <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448', letterSpacing: '0.15em' }}>LOADING RESULTS...</div>
-        ) : plays.length === 0 ? (
+        ) : sortedVisiblePlays.length === 0 ? (
           <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: '#5A5448', letterSpacing: '0.15em' }}>
             NO RESULTS POSTED YET
           </div>
         ) : (
-          plays.map((play, i) => <ResultCard key={i} play={play} />)
+          sortedVisiblePlays.map((play, i) => <ResultCard key={i} play={play} preferredModel={preferredModel} />)
         )}
       </div>
     </>
