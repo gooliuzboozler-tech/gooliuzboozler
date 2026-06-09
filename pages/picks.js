@@ -98,36 +98,39 @@ function normalizeResult(value) {
 
 function bestBetRecord(plays) {
   return (plays || []).reduce((record, play) => {
-    const result = normalizeResult(play.Result)
+    const result = inferDisplayedBetResult(play, getPreferredModelRead(play, 'best'), true)
     if (result === 'Hit') record.hits += 1
     if (result === 'Miss') record.misses += 1
     return record
   }, { hits: 0, misses: 0 })
+}
+
+function inferDisplayedBetResult(play, read, allowStoredResult = false) {
+  const betMatch = String(read?.bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  const actualKs = Number.parseFloat(String(play['Live Ks'] || play['Actual Ks'] || '').replace(/[^0-9.-]/g, ''))
+  const liveStatus = String(play['Live Status'] || '').toLowerCase()
+  const terminal = /starter out|final|completed|game over/.test(liveStatus) || Boolean(normalizeResult(play.Result))
+
+  if (betMatch && Number.isFinite(actualKs)) {
+    const side = betMatch[1].toLowerCase()
+    const threshold = Number.parseInt(betMatch[2], 10)
+
+    if (side === 'yes') {
+      if (actualKs >= threshold) return 'Hit'
+      if (terminal) return 'Miss'
+    } else if (side === 'no') {
+      if (actualKs >= threshold) return 'Miss'
+      if (terminal) return 'Hit'
+    }
+  }
+
+  return allowStoredResult ? normalizeResult(play.Result) : ''
 }
 
 function selectedModelRecord(plays, preferredModel = 'best') {
   return (plays || []).reduce((record, play) => {
     const read = getPreferredModelRead(play, preferredModel)
-    const betMatch = String(read.bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
-    const actualKs = Number.parseFloat(String(play['Live Ks'] || play['Actual Ks'] || '').replace(/[^0-9.-]/g, ''))
-    const liveStatus = String(play['Live Status'] || '').toLowerCase()
-    const terminal = /starter out|final|completed|game over/.test(liveStatus) || Boolean(normalizeResult(play.Result))
-    let result = ''
-
-    if (preferredModel === 'best') result = normalizeResult(play.Result)
-
-    if (betMatch && Number.isFinite(actualKs)) {
-      const side = betMatch[1].toLowerCase()
-      const threshold = Number.parseInt(betMatch[2], 10)
-
-      if (side === 'yes') {
-        if (actualKs >= threshold) result = 'Hit'
-        else if (terminal) result = 'Miss'
-      } else if (side === 'no') {
-        if (actualKs >= threshold) result = 'Miss'
-        else if (terminal) result = 'Hit'
-      }
-    }
+    const result = inferDisplayedBetResult(play, read, preferredModel === 'best')
 
     if (result === 'Hit') record.hits += 1
     if (result === 'Miss') record.misses += 1
@@ -135,8 +138,8 @@ function selectedModelRecord(plays, preferredModel = 'best') {
   }, { hits: 0, misses: 0 })
 }
 
-function LiveResultBadge({ play }) {
-  const result = normalizeResult(play.Result)
+function LiveResultBadge({ play, read, allowStoredResult = false }) {
+  const result = inferDisplayedBetResult(play, read, allowStoredResult)
   const liveStatus = String(play['Live Status'] || '').trim()
   const liveKs = String(play['Live Ks'] || play['Actual Ks'] || '').trim()
 
@@ -363,7 +366,7 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const liveKs = play['Live Ks'] || play['Actual Ks'] || ''
   const liveStatus = play['Live Status'] || ''
-  const liveResult = normalizeResult(play.Result)
+  const liveResult = inferDisplayedBetResult(play, preferredRead, preferredModel === 'best')
   const liveColor = liveResult === 'Hit' ? '#22C55E' : liveResult === 'Miss' ? '#EF4444' : liveStatus === 'Pitching Live' ? '#EAB308' : '#F2EDE3'
   const showAllModels = planHasAllModels(plan)
   const visibleModels = showAllModels ? modelRows : modelRows.filter(model => model.modelNumber === Number(String(play['Best Model'] || '').replace(/\D/g, '')) || model.bet === play['Best Bet']).slice(0, 1)
@@ -386,7 +389,7 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>vs {play.Opponent} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
         </div>
         <div>
-          <LiveResultBadge play={play} />
+          <LiveResultBadge play={play} read={preferredRead} allowStoredResult={preferredModel === 'best'} />
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 4 }}>{liveStatus || trust}</div>
         </div>
         <div>
