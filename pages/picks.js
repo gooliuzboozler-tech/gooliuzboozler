@@ -366,6 +366,10 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
   const teamLogo = teamLogoUrl(play['Pitcher Team'])
   const liveKs = play['Live Ks'] || play['Actual Ks'] || ''
   const liveStatus = play['Live Status'] || ''
+  const liveInning = play['Live Inning'] || ''
+  const liveOuts = play['Live Outs'] || ''
+  const livePitches = play['Live Pitches'] || ''
+  const liveOutLabel = liveOuts !== '' ? `${liveOuts} out${String(liveOuts) === '1' ? '' : 's'}` : ''
   const liveResult = inferDisplayedBetResult(play, preferredRead, preferredModel === 'best')
   const liveColor = liveResult === 'Hit' ? '#22C55E' : liveResult === 'Miss' ? '#EF4444' : liveStatus === 'Pitching Live' ? '#EAB308' : '#F2EDE3'
   const showAllModels = planHasAllModels(plan)
@@ -413,6 +417,14 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
         <div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: liveColor }}>{liveKs ? formatRoundedNumber(liveKs) : '-'}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>Live Ks</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: liveInning ? '#F2EDE3' : '#5A5448', whiteSpace: 'nowrap' }}>
+            {liveInning ? `${liveInning}${liveOutLabel ? ` · ${liveOutLabel}` : ''}` : '-'}
+          </div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>
+            {livePitches ? `${formatRoundedNumber(livePitches)} pitches` : 'Pitches'}
+          </div>
         </div>
         <div className="pick-toggle">{expanded ? '▲' : '▼'}</div>
       </div>
@@ -605,7 +617,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
         {showPlans && <MembershipChoices loading={loading} onSubscribe={onSubscribe} />}
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Status</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
+          <span>Pitcher</span><span>Status</span><span>Best Bet</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span>Game</span><span></span>
         </div>
         <BlurredPickPreview plays={blurredPlays} />
       </div>
@@ -935,7 +947,7 @@ export default function Picks() {
         </div>
 
         <div className="pick-header-row">
-          <span>Pitcher</span><span>Status</span><span>{preferredModel === 'best' ? 'Best Bet' : `${selectedModelLabel} Bet`}</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span></span>
+          <span>Pitcher</span><span>Status</span><span>{preferredModel === 'best' ? 'Best Bet' : `${selectedModelLabel} Bet`}</span><span>Prob</span><span>K Edge</span><span>K Wizard Proj.</span><span>Live Ks</span><span>Game</span><span></span>
         </div>
 
         {filtered.length === 0 ? (
