@@ -879,6 +879,7 @@ export default function Picks() {
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/yesterday" className="nav-link neon-purple">Yesterday Results</Link>
+          {memberPlan === 'season' && <Link href="/history" className="nav-link neon-gold">History</Link>}
           {memberEmail && <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', letterSpacing: '0.08em' }}>{memberEmail}</span>}
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#EAB308', border: '1px solid rgba(234,179,8,0.3)', padding: '0.3rem 0.7rem' }}>{PLAN_LABELS[memberPlan] || 'Weekly'}</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.15em', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)', padding: '0.3rem 0.7rem' }}>● MEMBER</div>

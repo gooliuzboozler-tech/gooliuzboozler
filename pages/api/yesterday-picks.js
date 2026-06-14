@@ -1,6 +1,8 @@
 import { Redis } from '@upstash/redis'
+import historyArchive from '../../lib/historyArchive'
 
 const redis = Redis.fromEnv()
+const { archivePlaysByDate } = historyArchive
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -28,6 +30,7 @@ export default async function handler(req, res) {
         }),
       }
       await redis.set('picks:yesterday', payload)
+      await archivePlaysByDate(redis, payload.plays, payload.lastUpdated)
       return res.status(200).json({ success: true, count: payload.plays.length })
     } catch (err) {
       return res.status(500).json({ error: err.message })

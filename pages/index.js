@@ -611,6 +611,7 @@ export default function Home() {
               { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: true, text: 'Thin plays + weighted-input data' },
+              { yes: true, text: 'All-time calendar archive access' },
               { yes: true, text: 'One-time payment, no renewal' },
             ]}
           />
@@ -623,12 +624,12 @@ export default function Home() {
         <h2 className="section-title">Common Questions.</h2>
         <div className="faq-list">
           {[
-            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable best-probability plays. Monthly adds all five models, parlay picks, K Edge, BvP, and context. Season adds the full board, including Thin plays."],
+            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable best-probability plays. Monthly adds all five models, parlay picks, K Edge, BvP, and context. Season adds the full board, Thin plays, and the date archive."],
             ['What are the five model reads?', 'Models 8, 2, 4, 5, and 6 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
-            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, all five website model reads, best parlay picks, K Edge, BvP context, market lines, and weighted-input data. One payment, no recurring charges.'],
+            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, all five website model reads, best parlay picks, K Edge, BvP context, market lines, weighted-input data, and the all-time calendar archive. One payment, no recurring charges.'],
           ].map(([q, a]) => (
             <div key={q} className="faq-item">
               <div className="faq-q">{q}</div>

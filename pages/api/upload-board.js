@@ -1,8 +1,10 @@
 import { Redis } from '@upstash/redis'
 import boardCsv from '../../lib/boardCsv'
+import historyArchive from '../../lib/historyArchive'
 
 const redis = Redis.fromEnv()
 const { applyRememberedBestBets, parseCSV, splitAllInOnePlays } = boardCsv
+const { archivePlaysByDate } = historyArchive
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -36,10 +38,12 @@ export default async function handler(req, res) {
 
     if (today.length) {
       await redis.set('picks:today', { plays: today, lastUpdated })
+      await archivePlaysByDate(redis, today, lastUpdated)
     }
 
     if (rememberedYesterday.plays.length) {
       await redis.set('picks:yesterday', { plays: rememberedYesterday.plays, lastUpdated })
+      await archivePlaysByDate(redis, rememberedYesterday.plays, lastUpdated)
     }
 
     return res.status(200).json({
