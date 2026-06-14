@@ -2,7 +2,7 @@ import { Redis } from '@upstash/redis'
 import historyArchive from '../../lib/historyArchive'
 
 const redis = Redis.fromEnv()
-const { cleanDate } = historyArchive
+const { archiveHistoryPayload, cleanDate } = historyArchive
 
 function parseMember(data) {
   if (!data) return null
@@ -11,6 +11,30 @@ function parseMember(data) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    try {
+      const date = cleanDate(req.body?.date)
+      const plays = Array.isArray(req.body?.plays) ? req.body.plays : []
+      if (!date) return res.status(400).json({ error: 'Valid date is required' })
+      if (!plays.length) return res.status(400).json({ error: 'At least one play is required' })
+
+      const lastUpdated = req.body?.lastUpdated || new Date().toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        dateStyle: 'full',
+        timeStyle: 'short',
+      })
+
+      await archiveHistoryPayload(redis, date, { plays, lastUpdated })
+      return res.status(200).json({ success: true, date, count: plays.length })
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
