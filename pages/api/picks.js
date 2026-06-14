@@ -1,8 +1,10 @@
 import { Redis } from '@upstash/redis'
 import liveMlb from '../../lib/liveMlb'
+import historyArchive from '../../lib/historyArchive'
 
 const redis = Redis.fromEnv()
 const { enrichPlaysWithLiveMlb } = liveMlb
+const { archivePlaysByDate } = historyArchive
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0')
@@ -30,6 +32,7 @@ export default async function handler(req, res) {
         }),
       }
       await redis.set('picks:today', payload)
+      await archivePlaysByDate(redis, payload.plays, payload.lastUpdated)
       res.status(200).json({ success: true, count: payload.plays.length })
     } catch (err) {
       res.status(500).json({ error: err.message })
