@@ -590,7 +590,7 @@ function BlurredPickPreview({ plays }) {
   )
 }
 
-function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginClick, allTimeRecord }) {
+function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginClick }) {
   const [showPlans, setShowPlans] = useState(false)
   const freePick = getFreePick(plays)
   const blurredPlays = plays.filter(play => play !== freePick)
@@ -620,9 +620,6 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3.5rem', letterSpacing: '0.04em', lineHeight: 1 }}>Today&apos;s Public Play</h1>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.6rem' }}>
             Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
-          </div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#EAB308', marginTop: '0.35rem' }}>
-            Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses} ({formatRecordWinPct(allTimeRecord)})
           </div>
         </div>
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
@@ -748,7 +745,6 @@ export default function Picks() {
   const [checkoutLoading, setCheckoutLoading] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
   const [preferredModel, setPreferredModel] = useState('best')
-  const [allTimeRecord, setAllTimeRecord] = useState({ hits: 0, misses: 0 })
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -804,15 +800,12 @@ export default function Picks() {
 
     let cancelled = false
     const loadPicks = () => {
-      Promise.all([
-        fetch(`/api/picks?live=${Date.now()}`, { cache: 'no-store' }).then(r => r.json()),
-        fetch(`/api/best-bet-record?live=${Date.now()}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null),
-      ])
-        .then(([data, recordData]) => {
+      fetch(`/api/picks?live=${Date.now()}`, { cache: 'no-store' })
+        .then(r => r.json())
+        .then(data => {
           if (cancelled) return
           setPlays(data.plays || [])
           setLastUpdated(data.lastUpdated || null)
-          if (recordData) setAllTimeRecord({ hits: recordData.hits || 0, misses: recordData.misses || 0 })
         })
         .catch(() => {})
     }
@@ -879,7 +872,6 @@ export default function Picks() {
       loading={checkoutLoading}
       onSubscribe={handleSubscribe}
       onLoginClick={() => setShowLogin(true)}
-      allTimeRecord={allTimeRecord}
     />
   )
 
@@ -910,9 +902,6 @@ export default function Picks() {
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3rem', letterSpacing: '0.04em', lineHeight: 1 }}>Pitcher K Model</h1>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.5rem' }}>
               {recordLabel}: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
-            </div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#EAB308', marginTop: '0.35rem' }}>
-              Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses} ({formatRecordWinPct(allTimeRecord)})
             </div>
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
