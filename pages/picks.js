@@ -105,6 +105,14 @@ function bestBetRecord(plays) {
   }, { hits: 0, misses: 0 })
 }
 
+function formatRecordWinPct(record) {
+  const hits = Number(record?.hits || 0)
+  const misses = Number(record?.misses || 0)
+  const total = hits + misses
+  if (!total) return '0%'
+  return `${((hits / total) * 100).toFixed(1).replace(/\.0$/, '')}%`
+}
+
 function inferDisplayedBetResult(play, read, allowStoredResult = false) {
   const betMatch = String(read?.bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
   const actualKs = Number.parseFloat(String(play['Live Ks'] || play['Actual Ks'] || '').replace(/[^0-9.-]/g, ''))
@@ -611,10 +619,10 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#EAB308', marginBottom: '0.5rem' }}>// Free Pick</div>
           <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3.5rem', letterSpacing: '0.04em', lineHeight: 1 }}>Today&apos;s Public Play</h1>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.6rem' }}>
-            Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses}
+            Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
           </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#EAB308', marginTop: '0.35rem' }}>
-            Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses}
+            Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses} ({formatRecordWinPct(allTimeRecord)})
           </div>
         </div>
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
@@ -901,10 +909,10 @@ export default function Picks() {
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8180A', marginBottom: '0.5rem' }}>// Today's Board</div>
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3rem', letterSpacing: '0.04em', lineHeight: 1 }}>Pitcher K Model</h1>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.5rem' }}>
-              {recordLabel}: {todayRecord.hits}-{todayRecord.misses}
+              {recordLabel}: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
             </div>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#EAB308', marginTop: '0.35rem' }}>
-              Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses}
+              Today&apos;s Best Bet All-Time Record: {allTimeRecord.hits}-{allTimeRecord.misses} ({formatRecordWinPct(allTimeRecord)})
             </div>
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
