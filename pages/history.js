@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
-  { value: '9', label: 'Model 9' },
   { value: '8', label: 'Model 8' },
   { value: '2', label: 'Model 2' },
   { value: '6', label: 'Model 6' },
@@ -122,7 +121,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [9, 8, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [8, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber >= 1.10)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models

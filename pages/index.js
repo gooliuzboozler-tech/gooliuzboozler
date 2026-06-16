@@ -34,22 +34,6 @@ const BACKTEST_STAT_SETS = [
     ],
   },
   {
-    key: 'model9',
-    title: 'Model 9',
-    subtitle: 'Selective 30%+ ROI No-side Kalshi selector for 6+ through 9+ strikeout lines',
-    stats: [
-      ['TBD', 'Record', ''],
-      ['TBD', 'Win Rate', ''],
-      ['TBD', 'ROI', ''],
-      ['TBD', 'Tracked Plays', ''],
-    ],
-    bars: [
-      ['Avg Probability', 'TBD', '0%'],
-      ['Avg Edge', 'TBD', '0%'],
-      ['Avg K Edge', 'TBD', '0%'],
-    ],
-  },
-  {
     key: 'model8',
     title: 'Model 8',
     subtitle: 'Model 2 cushion filter with top-100 career strikeout Yes tilt',
@@ -132,7 +116,6 @@ const BACKTEST_STAT_SETS = [
 ]
 
 const MODEL_BACKTEST_FALLBACKS = {
-  9: { record: '', winRate: '', roi: '', plays: '' },
   8: { record: '304-33', winRate: '0.9021', roi: '', plays: '337' },
   2: { record: '394-132', winRate: '0.749', roi: '0.338', plays: '526' },
   6: { record: '634-96', winRate: '0.8685', roi: '0.737', plays: '730' },
@@ -199,9 +182,9 @@ function backtestValue(value, fallback) {
 }
 
 function getModelBacktestsFromPlays(plays) {
-  const source = (plays || []).find(play => play['Model 9 Backtest Record'] || play['Model 8 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
+  const source = (plays || []).find(play => play['Model 8 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
   const out = {}
-  ;[9, 8, 2, 6, 4, 5].forEach(modelNumber => {
+  ;[8, 2, 6, 4, 5].forEach(modelNumber => {
     const fallback = MODEL_BACKTEST_FALLBACKS[modelNumber] || {}
     const record = backtestValue(source[`Model ${modelNumber} Backtest Record`], fallback.record)
     const winRate = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest Win Rate`], fallback.winRate))
@@ -456,9 +439,9 @@ export default function Home() {
           <div className="hero-eyebrow">2026 Season — Live Now</div>
           <h1>The <em>K</em> Board<br />Built to<br />Beat the Line.</h1>
           <p className="hero-sub">
-            Sharp MLB strikeout projections powered by weighted Models 9, 8, 2, 6, 4, and 5.
+            Sharp MLB strikeout projections powered by weighted Models 8, 2, 6, 4, and 5.
             Members get plan-based access to the picks board, with higher tiers unlocking
-            all six model reads, parlay picks, K Edge, BvP context, market lines, and full-board data.
+            all five model reads, parlay picks, K Edge, BvP context, market lines, and full-board data.
           </p>
           <div className="hero-actions">
             <a href="#pricing" className="btn-primary">Get Access Now</a>
@@ -529,7 +512,7 @@ export default function Home() {
         <div className="eyebrow">// What Makes This Different</div>
         <h2 className="section-title">Built on Weighted Inputs.<br />Checked Against the Line.</h2>
         <p className="section-sub">
-          Every board is built from Models 9, 8, 2, 6, 4, and 5 projections, probability thresholds,
+          Every board is built from Models 8, 2, 6, 4, and 5 projections, probability thresholds,
           K-edge scoring, market lines, BvP data, opponent strikeout profile, recent form,
           and bullpen context. No generic picks. Just the numbers that moved the board.
         </p>
@@ -539,12 +522,12 @@ export default function Home() {
             [
               '01',
               'Best-Probability Tiers',
-              'The highest probability across Models 9, 8, 2, 6, 4, and 5 drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. Weekly and Monthly members see Strong and Playable plays; Season members see the full board.'
+              'The highest probability across Models 8, 2, 6, 4, and 5 drives the trust grade on every play: 80%+ is Strong, 70-79% is Playable, 60-69% is Thin, and under 60% is Pass. Weekly and Monthly members see Strong and Playable plays; Season members see the full board.'
             ],
             [
               '02',
-              'Six Model Reads',
-              'Each pitcher is checked across six model outputs. The main Best Bet is whichever model posts the highest non-pass probability, while Monthly and Season members can compare every model read.'
+              'Five Model Reads',
+              'Each pitcher is checked across five model outputs. The main Best Bet is whichever model posts the highest non-pass probability, while Monthly and Season members can compare every model read.'
             ],
             [
               '03',
@@ -579,7 +562,7 @@ export default function Home() {
       {/* PRICING */}
       <section id="pricing">
         <div className="eyebrow">// Pricing</div>
-        <h2 className="section-title">Six Models.<br />Three Ways In.</h2>
+        <h2 className="section-title">Five Models.<br />Three Ways In.</h2>
         <p className="section-sub">
           Members get access to today&apos;s picks board before first pitch. Cancel anytime.
         </p>
@@ -594,7 +577,7 @@ export default function Home() {
               { yes: true,  text: "Today's picks board access" },
               { yes: true,  text: 'Strong + Playable plays' },
               { yes: true,  text: 'Highest-probability best bet per pitcher' },
-              { yes: false, text: 'All six model comparison plays' },
+              { yes: false, text: 'All five model comparison plays' },
               { yes: false, text: 'Best parlay pick per pitcher' },
               { yes: false, text: 'BvP standout callouts' },
             ]}
@@ -608,7 +591,7 @@ export default function Home() {
             features={[
               { yes: true, text: "Today's picks board access" },
               { yes: true, text: 'Strong + Playable plays' },
-              { yes: true, text: 'Models 9, 8, 2, 6, 4, and 5 plays' },
+              { yes: true, text: 'Models 8, 2, 6, 4, and 5 plays' },
               { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'BvP standout callouts' },
               { yes: true, text: 'K Edge + model variable breakdown' },
@@ -624,7 +607,7 @@ export default function Home() {
             features={[
               { yes: true, text: 'Everything in Monthly' },
               { yes: true, text: 'Full board — all posted plays daily' },
-              { yes: true, text: 'Models 9, 8, 2, 6, 4, and 5 across full board' },
+              { yes: true, text: 'Models 8, 2, 6, 4, and 5 across full board' },
               { yes: true, text: 'Best parlay pick per pitcher' },
               { yes: true, text: 'K Edge + model variable breakdown' },
               { yes: true, text: 'Thin plays + weighted-input data' },
@@ -641,12 +624,12 @@ export default function Home() {
         <h2 className="section-title">Common Questions.</h2>
         <div className="faq-list">
           {[
-            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable best-probability plays. Monthly adds all six models, parlay picks, K Edge, BvP, and context. Season adds the full board, Thin plays, and the date archive."],
-            ['What are the six model reads?', 'Models 9, 8, 2, 6, 4, and 5 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
+            ['How do I access picks?', "Members log in to the Today's Picks board on the website. Weekly gets Strong and Playable best-probability plays. Monthly adds all five models, parlay picks, K Edge, BvP, and context. Season adds the full board, Thin plays, and the date archive."],
+            ['What are the five model reads?', 'Models 8, 2, 6, 4, and 5 blend recent K/G, opponent K rank, active-roster BvP, full game context, weather, wind, time of day, previous games bullpen data, and much more.'],
             ['What lines do the picks use?', 'Kalshi-style K thresholds. For Yes bets, only accept the listed line or lower. For No bets, only accept the listed line or higher. The board shows the target line.'],
             ['Do you guarantee profits?', 'No — and anyone who does is selling you something else. The model has a 78.16% win rate on a 247-69 active record. Edges lose sometimes. The backtest is real and available to inspect.'],
             ['Can I cancel anytime?', 'Yes. Cancel from your account or by emailing support. No cancellation fees, no questions asked. Weekly and monthly subscriptions stop at the end of the paid period.'],
-            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, all six website model reads, best parlay picks, K Edge, BvP context, market lines, weighted-input data, and the all-time calendar archive. One payment, no recurring charges.'],
+            ['What does the Season Pass include?', 'Full 2026 season access — every posted play, including Thin plays, all five website model reads, best parlay picks, K Edge, BvP context, market lines, weighted-input data, and the all-time calendar archive. One payment, no recurring charges.'],
           ].map(([q, a]) => (
             <div key={q} className="faq-item">
               <div className="faq-q">{q}</div>

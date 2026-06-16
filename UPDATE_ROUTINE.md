@@ -11,7 +11,7 @@ When updating the baseball spreadsheet and website:
 4. Confirm today's picks include each pitcher's last-five strikeout game log.
    - Show the actual strikeout totals from the pitcher's five most recent starts, not just the average.
    - If fewer than five starts are available, show the available recent starts.
-5. Confirm the website payload includes current overall records for Models 9, 8, 2, 6, 4, and 5.
+5. Confirm the website payload includes current overall records for Models 8, 2, 6, 4, and 5.
    - The homepage has fallback records, but the daily CSV/API payload should still include each model's record, win rate, plays, and ROI.
    - Do not leave any model record as blank or `TBD`.
 6. Grade the previous board as Yesterday's Picks using MLB box scores.
