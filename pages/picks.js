@@ -40,6 +40,11 @@ const MODEL_OPTIONS = [
   { value: '5', label: 'Model 5' },
 ]
 
+const SORT_OPTIONS = [
+  { value: 'probability', label: 'Probability' },
+  { value: 'startTime', label: 'Start Time' },
+]
+
 function teamLogoUrl(team) {
   const teamId = MLB_TEAM_IDS[String(team || '').toUpperCase()]
   return teamId ? `https://www.mlbstatic.com/team-logos/${teamId}.svg` : ''
@@ -57,6 +62,19 @@ function parseProbabilityDecimal(value) {
   const num = Number.parseFloat(raw)
   if (!Number.isFinite(num)) return null
   return num > 1 ? num / 100 : num
+}
+
+function parseGameStartMinutes(gameTime) {
+  const raw = String(gameTime || '').trim()
+  const match = raw.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i)
+  if (!match) return Number.POSITIVE_INFINITY
+
+  let hours = Number.parseInt(match[1], 10)
+  const minutes = Number.parseInt(match[2] || '0', 10)
+  const meridiem = match[3].toUpperCase()
+  if (meridiem === 'AM' && hours === 12) hours = 0
+  if (meridiem === 'PM' && hours !== 12) hours += 12
+  return hours * 60 + minutes
 }
 
 function formatRoundedNumber(value, { signed = false } = {}) {
@@ -745,6 +763,7 @@ export default function Picks() {
   const [checkoutLoading, setCheckoutLoading] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
   const [preferredModel, setPreferredModel] = useState('best')
+  const [sortMode, setSortMode] = useState('probability')
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -827,7 +846,13 @@ export default function Picks() {
   const modelQualifiedPlays = preferredModel === 'best' ? plays : plays.filter(play => usablePreferredRead(play, preferredModel))
   const visiblePlays = planHasFullBoard(memberPlan) ? modelQualifiedPlays : modelQualifiedPlays.filter(play => isCorePlay(play, preferredModel))
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
-  const sortedVisiblePlays = [...visiblePlays].sort((a, b) => parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob))
+  const sortedVisiblePlays = [...visiblePlays].sort((a, b) => {
+    if (sortMode === 'startTime') {
+      const timeDiff = parseGameStartMinutes(a['Game Time']) - parseGameStartMinutes(b['Game Time'])
+      if (timeDiff !== 0) return timeDiff
+    }
+    return parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob)
+  })
   const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter, preferredModel))
   const todayRecord = selectedModelRecord(plays, preferredModel)
   const counts = {
@@ -931,27 +956,52 @@ export default function Picks() {
               Showing {visiblePlays.length} {selectedModelLabel} play{visiblePlays.length === 1 ? '' : 's'}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {MODEL_OPTIONS.map(option => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => { setPreferredModel(option.value); setFilter('All') }}
-                style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: '0.62rem',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  padding: '0.5rem 0.75rem',
-                  border: preferredModel === option.value ? '1px solid #EAB308' : '1px solid rgba(242,237,227,0.12)',
-                  background: preferredModel === option.value ? 'rgba(234,179,8,0.12)' : 'rgba(10,10,10,0.7)',
-                  color: preferredModel === option.value ? '#EAB308' : '#BFB090',
-                  cursor: 'pointer',
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {MODEL_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => { setPreferredModel(option.value); setFilter('All') }}
+                  style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    padding: '0.5rem 0.75rem',
+                    border: preferredModel === option.value ? '1px solid #EAB308' : '1px solid rgba(242,237,227,0.12)',
+                    background: preferredModel === option.value ? 'rgba(234,179,8,0.12)' : 'rgba(10,10,10,0.7)',
+                    color: preferredModel === option.value ? '#EAB308' : '#BFB090',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', borderLeft: '1px solid rgba(242,237,227,0.1)', paddingLeft: '0.7rem', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.56rem', color: '#5A5448', letterSpacing: '0.16em', textTransform: 'uppercase' }}>Sort</span>
+              {SORT_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSortMode(option.value)}
+                  style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    padding: '0.5rem 0.75rem',
+                    border: sortMode === option.value ? '1px solid #22C55E' : '1px solid rgba(242,237,227,0.12)',
+                    background: sortMode === option.value ? 'rgba(34,197,94,0.1)' : 'rgba(10,10,10,0.7)',
+                    color: sortMode === option.value ? '#22C55E' : '#BFB090',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
