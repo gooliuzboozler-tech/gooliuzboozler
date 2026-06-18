@@ -173,14 +173,39 @@ function inferBetResult(bet, actualKs, explicitResult) {
   return hit ? 'Hit' : 'Miss'
 }
 
+function addRecordResult(record, result, read, play) {
+  if (result !== 'Hit' && result !== 'Miss') return
+
+  const odds = parseOdds(read?.odds, read?.bet, play?.['Kalshi Lines'])
+  record.stake += 1
+  if (result === 'Hit') {
+    record.hits += 1
+    record.profit += odds > 0 ? odds - 1 : 0
+  } else {
+    record.misses += 1
+    record.profit -= 1
+  }
+}
+
+function formatRecordRoi(record) {
+  const stake = Number(record?.stake || 0)
+  const profit = Number(record?.profit || 0)
+  if (!stake) return ''
+
+  const roi = (profit / stake) * 100
+  const formatted = Math.abs(roi)
+    .toFixed(1)
+    .replace(/\.0$/, '')
+  return `ROI ${roi >= 0 ? '+' : '-'}${formatted}%`
+}
+
 function selectedModelRecord(plays, preferredModel = 'best') {
   return (plays || []).reduce((record, play) => {
     const read = getPreferredModelRead(play, preferredModel)
     const result = inferBetResult(read.bet, play['Actual Ks'], preferredModel === 'best' ? play.Result : '')
-    if (result === 'Hit') record.hits += 1
-    if (result === 'Miss') record.misses += 1
+    addRecordResult(record, result, read, play)
     return record
-  }, { hits: 0, misses: 0 })
+  }, { hits: 0, misses: 0, stake: 0, profit: 0 })
 }
 
 function ResultBadge({ result }) {
@@ -289,6 +314,7 @@ export default function Yesterday() {
   const modelQualifiedPlays = preferredModel === 'best' ? plays : plays.filter(play => usablePreferredRead(play, preferredModel))
   const sortedVisiblePlays = [...modelQualifiedPlays].sort((a, b) => parseProbability(getPreferredModelRead(b, preferredModel).prob) - parseProbability(getPreferredModelRead(a, preferredModel).prob))
   const yesterdayRecord = selectedModelRecord(plays, preferredModel)
+  const yesterdayRoi = formatRecordRoi(yesterdayRecord)
   const selectedModelLabel = MODEL_OPTIONS.find(option => option.value === preferredModel)?.label || 'Best Model'
   const recordLabel = preferredModel === 'best' ? "Yesterday's Best Bet Record" : `Yesterday's ${selectedModelLabel} Record`
 
@@ -322,7 +348,7 @@ export default function Yesterday() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.55rem' }}>{recordLabel}: {yesterdayRecord.hits}-{yesterdayRecord.misses}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5A5448', marginBottom: '0.55rem' }}>{recordLabel}: {yesterdayRecord.hits}-{yesterdayRecord.misses}{yesterdayRoi ? ` · ${yesterdayRoi}` : ''}</div>
           <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
             {MODEL_OPTIONS.map(option => (
               <button

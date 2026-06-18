@@ -107,6 +107,13 @@ function formatEdge(value) {
   return formatRoundedNumber(value, { signed: true })
 }
 
+function parseDecimalOdds(value, bet, lines) {
+  const explicit = String(value || '').trim()
+  const raw = explicit || oddsFromMarket(bet, lines)
+  const num = Number.parseFloat(String(raw || '').replace(/[$,]/g, ''))
+  return Number.isFinite(num) && num > 0 ? num : 0
+}
+
 function normalizeResult(value) {
   const raw = String(value || '').toLowerCase()
   if (['hit', 'win', 'won', 'cash', 'cashed', 'true', 'yes', 'w'].some(v => raw.includes(v))) return 'Hit'
@@ -116,11 +123,11 @@ function normalizeResult(value) {
 
 function bestBetRecord(plays) {
   return (plays || []).reduce((record, play) => {
-    const result = inferDisplayedBetResult(play, getPreferredModelRead(play, 'best'), true)
-    if (result === 'Hit') record.hits += 1
-    if (result === 'Miss') record.misses += 1
+    const read = getPreferredModelRead(play, 'best')
+    const result = inferDisplayedBetResult(play, read, true)
+    addRecordResult(record, result, read, play)
     return record
-  }, { hits: 0, misses: 0 })
+  }, { hits: 0, misses: 0, stake: 0, profit: 0 })
 }
 
 function formatRecordWinPct(record) {
@@ -129,6 +136,32 @@ function formatRecordWinPct(record) {
   const total = hits + misses
   if (!total) return '0%'
   return `${((hits / total) * 100).toFixed(1).replace(/\.0$/, '')}%`
+}
+
+function addRecordResult(record, result, read, play) {
+  if (result !== 'Hit' && result !== 'Miss') return
+
+  const odds = parseDecimalOdds(read?.odds, read?.bet, play?.['Kalshi Lines'])
+  record.stake += 1
+  if (result === 'Hit') {
+    record.hits += 1
+    record.profit += odds > 0 ? odds - 1 : 0
+  } else {
+    record.misses += 1
+    record.profit -= 1
+  }
+}
+
+function formatRecordRoi(record) {
+  const stake = Number(record?.stake || 0)
+  const profit = Number(record?.profit || 0)
+  if (!stake) return ''
+
+  const roi = (profit / stake) * 100
+  const formatted = Math.abs(roi)
+    .toFixed(1)
+    .replace(/\.0$/, '')
+  return `ROI ${roi >= 0 ? '+' : '-'}${formatted}%`
 }
 
 function inferDisplayedBetResult(play, read, allowStoredResult = false) {
@@ -157,11 +190,9 @@ function selectedModelRecord(plays, preferredModel = 'best') {
   return (plays || []).reduce((record, play) => {
     const read = getPreferredModelRead(play, preferredModel)
     const result = inferDisplayedBetResult(play, read, preferredModel === 'best')
-
-    if (result === 'Hit') record.hits += 1
-    if (result === 'Miss') record.misses += 1
+    addRecordResult(record, result, read, play)
     return record
-  }, { hits: 0, misses: 0 })
+  }, { hits: 0, misses: 0, stake: 0, profit: 0 })
 }
 
 function LiveResultBadge({ play, read, allowStoredResult = false }) {
@@ -613,6 +644,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
   const freePick = getFreePick(plays)
   const blurredPlays = plays.filter(play => play !== freePick)
   const todayRecord = bestBetRecord(plays)
+  const todayRoi = formatRecordRoi(todayRecord)
   return (
     <>
       <Head><title>Free Pick — GooliuzBoozler</title></Head>
@@ -637,7 +669,7 @@ function PublicPicksPreview({ plays, lastUpdated, loading, onSubscribe, onLoginC
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#EAB308', marginBottom: '0.5rem' }}>// Free Pick</div>
           <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3.5rem', letterSpacing: '0.04em', lineHeight: 1 }}>Today&apos;s Public Play</h1>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.6rem' }}>
-            Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
+            Today&apos;s Best Bet Record: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)}){todayRoi ? ` · ${todayRoi}` : ''}
           </div>
         </div>
         <PublicFreePick pick={freePick} lastUpdated={lastUpdated} onUnlock={() => setShowPlans(true)} />
@@ -855,6 +887,7 @@ export default function Picks() {
   })
   const filtered = filter === 'All' ? sortedVisiblePlays : sortedVisiblePlays.filter(p => filterByTrust(p, filter, preferredModel))
   const todayRecord = selectedModelRecord(plays, preferredModel)
+  const todayRoi = formatRecordRoi(todayRecord)
   const counts = {
     Strong: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Strong').length,
     Playable: visiblePlays.filter(p => getPlayTrust(p, preferredModel) === 'Playable').length,
@@ -926,7 +959,7 @@ export default function Picks() {
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8180A', marginBottom: '0.5rem' }}>// Today's Board</div>
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '3rem', letterSpacing: '0.04em', lineHeight: 1 }}>Pitcher K Model</h1>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#22C55E', marginTop: '0.5rem' }}>
-              {recordLabel}: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)})
+              {recordLabel}: {todayRecord.hits}-{todayRecord.misses} ({formatRecordWinPct(todayRecord)}){todayRoi ? ` · ${todayRoi}` : ''}
             </div>
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Updated: {lastUpdated}</div>}
           </div>
