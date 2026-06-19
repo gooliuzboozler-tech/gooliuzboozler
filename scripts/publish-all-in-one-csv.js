@@ -264,6 +264,44 @@ function rememberedBest(play, lookup) {
     null
 }
 
+function buildOutcomeLookup(yesterdayPlays) {
+  return buildRememberedBestLookup(
+    yesterdayPlays.filter(play => String(play['Actual Ks'] || '').trim() || String(play.Result || '').trim())
+  )
+}
+
+function previousTodayDate(previousTodayPlays) {
+  const dates = [...new Set((previousTodayPlays || [])
+    .map(play => String(play['Pick Date'] || '').trim())
+    .filter(Boolean))]
+  return dates.length === 1 ? dates[0] : ''
+}
+
+function buildYesterdayFromPreviousToday(previousTodayPlays, yesterdayPlays) {
+  if (!Array.isArray(previousTodayPlays) || previousTodayPlays.length === 0) return null
+
+  const yesterdayDates = [...new Set((yesterdayPlays || [])
+    .map(play => String(play['Pick Date'] || '').trim())
+    .filter(Boolean))]
+  const previousDate = previousTodayDate(previousTodayPlays)
+  if (yesterdayDates.length === 1 && previousDate && previousDate !== yesterdayDates[0]) return null
+
+  const outcomeLookup = buildOutcomeLookup(yesterdayPlays)
+  return previousTodayPlays.map(previous => {
+    const outcome = rememberedBest(previous, outcomeLookup)
+    const actualKs = firstValue(outcome || {}, ['Actual Ks', 'Actual K', 'Final Ks', 'K Result']) ||
+      firstValue(previous, ['Actual Ks', 'Actual K', 'Final Ks', 'K Result', 'Live Ks'])
+    const next = {
+      ...previous,
+      'Actual Ks': actualKs,
+      Result: inferBetResult(previous['Best Bet'], actualKs) || previous.Result || '',
+      'Live Ks': firstValue(previous, ['Live Ks']) || actualKs,
+      'Live Status': previous['Live Status'] || 'Final',
+    }
+    return next
+  })
+}
+
 function rowToPlay(row, pitcherLogLookup = new Map()) {
   const pitcher = parsePitcher(row.Pitcher)
   const pickDate = String(row['Pick Date'] || '').trim()
@@ -392,7 +430,7 @@ function rowsFromAllInOneCsv(text) {
 
 async function fetchPreviousToday(siteUrl) {
   try {
-    const response = await fetch(`${siteUrl}/api/picks`)
+    const response = await fetch(`${siteUrl}/api/picks?live=${Date.now()}`)
     if (!response.ok) return []
     const data = await response.json()
     return data.plays || []
@@ -424,6 +462,7 @@ async function main() {
   if (!adminKey) throw new Error('ADMIN_KEY is required')
 
   const text = await fs.readFile(csvPath, 'utf8')
+  const previousTodayPlays = await fetchPreviousToday(siteUrl)
   const rows = rowsFromAllInOneCsv(text)
   const pitcherLogLookup = await buildPitcherLogLookup(csvPath, rows)
   const plays = rows.map(row => rowToPlay(row, pitcherLogLookup)).filter(Boolean)
@@ -439,10 +478,20 @@ async function main() {
     }
   }
 
+  const rememberedYesterday = buildYesterdayFromPreviousToday(previousTodayPlays, yesterday)
+  const yesterdayToPublish = rememberedYesterday?.length ? rememberedYesterday : yesterday
+
   const results = {}
   if (today.length) results.today = await postPlays(siteUrl, adminKey, '/api/picks', today)
-  if (yesterday.length) results.yesterday = await postPlays(siteUrl, adminKey, '/api/yesterday-picks', yesterday)
-  console.log(JSON.stringify({ success: true, today: today.length, yesterday: yesterday.length, results }, null, 2))
+  if (yesterdayToPublish.length) results.yesterday = await postPlays(siteUrl, adminKey, '/api/yesterday-picks', yesterdayToPublish)
+  console.log(JSON.stringify({
+    success: true,
+    today: today.length,
+    yesterday: yesterdayToPublish.length,
+    previousToday: previousTodayPlays.length,
+    usedPreviousTodayForYesterday: Boolean(rememberedYesterday?.length),
+    results,
+  }, null, 2))
 }
 
 main().catch(error => {
