@@ -55,7 +55,9 @@ function parsePitcher(rawPitcher) {
     .replace(/^[✅❌✕✓✗\s]+/, '')
     .replace(/^[^A-Za-z0-9]+/, '')
     .trim()
-  const [namePart, metaPart = ''] = raw.split('.')
+  const pitcherMatch = raw.match(/^(.*?)(?:\.([A-Z]{2,3}-(?:RHP|LHP)))?$/)
+  const namePart = pitcherMatch?.[1] || raw
+  const metaPart = pitcherMatch?.[2] || ''
   const teamMatch = metaPart.match(/^([A-Z]{2,3})/)
   return {
     name: namePart || raw,
@@ -429,14 +431,29 @@ function rowsFromAllInOneCsv(text) {
 }
 
 async function fetchPreviousToday(siteUrl) {
+  return fetchPlays(siteUrl, '/api/picks')
+}
+
+async function fetchExistingYesterday(siteUrl) {
+  return fetchPlays(siteUrl, '/api/yesterday-picks')
+}
+
+async function fetchPlays(siteUrl, route) {
   try {
-    const response = await fetch(`${siteUrl}/api/picks?live=${Date.now()}`)
+    const response = await fetch(`${siteUrl}${route}?live=${Date.now()}`)
     if (!response.ok) return []
     const data = await response.json()
     return data.plays || []
   } catch {
     return []
   }
+}
+
+function singlePickDate(plays) {
+  const dates = [...new Set((plays || [])
+    .map(play => String(play['Pick Date'] || '').trim())
+    .filter(Boolean))]
+  return dates.length === 1 ? dates[0] : ''
 }
 
 async function postPlays(siteUrl, adminKey, route, plays) {
@@ -463,6 +480,7 @@ async function main() {
 
   const text = await fs.readFile(csvPath, 'utf8')
   const previousTodayPlays = await fetchPreviousToday(siteUrl)
+  const existingYesterdayPlays = await fetchExistingYesterday(siteUrl)
   const rows = rowsFromAllInOneCsv(text)
   const pitcherLogLookup = await buildPitcherLogLookup(csvPath, rows)
   const plays = rows.map(row => rowToPlay(row, pitcherLogLookup)).filter(Boolean)
@@ -479,7 +497,15 @@ async function main() {
   }
 
   const rememberedYesterday = buildYesterdayFromPreviousToday(previousTodayPlays, yesterday)
-  const yesterdayToPublish = rememberedYesterday?.length ? rememberedYesterday : yesterday
+  const csvYesterdayDate = singlePickDate(yesterday)
+  const existingYesterdayDate = singlePickDate(existingYesterdayPlays)
+  const preservedExistingYesterday = !rememberedYesterday?.length &&
+    existingYesterdayPlays.length &&
+    csvYesterdayDate &&
+    existingYesterdayDate === csvYesterdayDate
+      ? existingYesterdayPlays
+      : null
+  const yesterdayToPublish = rememberedYesterday?.length ? rememberedYesterday : (preservedExistingYesterday || yesterday)
 
   const results = {}
   if (today.length) results.today = await postPlays(siteUrl, adminKey, '/api/picks', today)
@@ -489,7 +515,9 @@ async function main() {
     today: today.length,
     yesterday: yesterdayToPublish.length,
     previousToday: previousTodayPlays.length,
+    existingYesterday: existingYesterdayPlays.length,
     usedPreviousTodayForYesterday: Boolean(rememberedYesterday?.length),
+    usedExistingYesterday: Boolean(preservedExistingYesterday?.length),
     results,
   }, null, 2))
 }
