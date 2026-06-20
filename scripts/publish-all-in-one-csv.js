@@ -4,6 +4,10 @@ const fs = require('node:fs/promises')
 const path = require('node:path')
 
 const WEBSITE_MODEL_NUMBERS = [8, 2, 6, 4, 5]
+const MIN_WEBSITE_BET_PAYOUT = 1.10
+const MODEL8_SOURCE_MODEL_NUMBER = 1
+const MODEL8_PROBABILITY_BOOST = 16
+const MODEL8_PROBABILITY_CAP = 97
 
 function parseCSV(text) {
   const rows = []
@@ -129,6 +133,28 @@ function parseProbabilityNumber(value) {
   return num <= 1 ? num * 100 : num
 }
 
+function formatProbabilityNumber(value) {
+  if (!Number.isFinite(value)) return ''
+  const rounded = Number(value.toFixed(6))
+  return String(rounded).replace(/\.?0+$/, '')
+}
+
+function boostedModelProbability(modelNumber, bet, prob) {
+  const probabilityNumber = parseProbabilityNumber(prob)
+  if (!Number.isFinite(probabilityNumber) || probabilityNumber <= 0) return { prob, probabilityNumber: 0 }
+
+  const normalizedBet = String(bet || '').trim().toLowerCase()
+  if (modelNumber !== 8 || !normalizedBet || normalizedBet === 'pass') {
+    return { prob, probabilityNumber }
+  }
+
+  const boosted = Math.min(MODEL8_PROBABILITY_CAP, probabilityNumber + MODEL8_PROBABILITY_BOOST)
+  return {
+    prob: formatProbabilityNumber(boosted / 100),
+    probabilityNumber: boosted,
+  }
+}
+
 function oddsFromMarket(bet, lines) {
   const betMatch = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
   if (!betMatch || !lines) return ''
@@ -171,7 +197,8 @@ function inferBetResult(bet, actualKs) {
 }
 
 function getModel(row, modelNumber) {
-  const prefix = `Model ${modelNumber}`
+  const sourceModelNumber = modelNumber === 8 ? MODEL8_SOURCE_MODEL_NUMBER : modelNumber
+  const prefix = `Model ${sourceModelNumber}`
   const bet = firstValue(row, [
     `${prefix} Best Bet`,
     `${prefix} Bet`,
@@ -187,16 +214,25 @@ function getModel(row, modelNumber) {
     `${prefix} Payout`,
   ])
 
+  const oddsNumber = parseOddsNumber(odds, bet, row['Projected Kalshi Lines'])
+  const normalizedBet = String(bet || '').trim().toLowerCase()
+  const usableBet = normalizedBet && normalizedBet !== 'pass' && oddsNumber >= MIN_WEBSITE_BET_PAYOUT ? bet : 'Pass'
+  const boostedProbability = boostedModelProbability(modelNumber, usableBet, prob)
+  const rawEdge = firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`])
+  const boostedEdge = modelNumber === 8 && oddsNumber > 0 && boostedProbability.probabilityNumber > 0
+    ? formatProbabilityNumber((boostedProbability.probabilityNumber / 100) - (1 / oddsNumber))
+    : rawEdge
+
   return {
     number: modelNumber,
-    bet,
-    prob,
-    edge: firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`]),
+    bet: usableBet,
+    prob: boostedProbability.prob,
+    edge: boostedEdge,
     odds,
     k: firstValue(row, [`${prefix} K`, `${prefix} Model K`]),
     kEdge: firstValue(row, [`${prefix} K Edge`, `${prefix} Best K Edge`]),
-    probabilityNumber: parseProbabilityNumber(prob),
-    oddsNumber: parseOddsNumber(odds, bet, row['Projected Kalshi Lines']),
+    probabilityNumber: boostedProbability.probabilityNumber,
+    oddsNumber,
   }
 }
 
@@ -209,12 +245,12 @@ function selectedModel(row, models) {
   const explicit = firstValue(row, ['Bet Model', 'Best Model', 'Best Bet Model', 'Website Pick Source'])
   const explicitNumber = Number.parseInt(String(explicit || '').replace(/\D/g, ''), 10)
   const explicitModel = models.find(model => model.number === explicitNumber && isUsableModel(model))
-  if (explicitModel) return explicitModel
 
   const usableModels = models.filter(isUsableModel)
   return usableModels
-    .filter(model => model.oddsNumber >= 1.25)
+    .filter(model => model.oddsNumber >= MIN_WEBSITE_BET_PAYOUT)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] ||
+    explicitModel ||
     usableModels.sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] ||
     null
 }
@@ -312,12 +348,18 @@ function rowToPlay(row, pitcherLogLookup = new Map()) {
   const modelByNumber = Object.fromEntries(models.map(model => [model.number, model]))
   const bestModel = selectedModel(row, models)
   const boardSection = String(row['Board Section'] || '').toLowerCase()
-  const bestBet = firstValue(row, ['Website Best Bet', 'Best Bet', 'Bet']) || bestModel?.bet || ''
-  const bestProb = firstValue(row, ['Website Best Prob', 'Best Prob', 'Bet Prob']) || bestModel?.prob || ''
-  const bestOdds = firstValue(row, ['Website Best Payout', 'Best Odds', 'Bet Payout']) || bestModel?.odds || ''
-  const bestEdge = firstValue(row, ['Website Best Edge', 'Best Edge', 'Bet Edge'])
-  const bestK = firstValue(row, ['Bet Wizard K', 'Website Wizard K', 'Model K'])
-  const bestKEdge = firstValue(row, ['Website Best K Edge', 'Bet K Edge', 'K Edge'])
+  const fallbackBet = firstValue(row, ['Website Best Bet', 'Best Bet', 'Bet'])
+  const fallbackProb = firstValue(row, ['Website Best Prob', 'Best Prob', 'Bet Prob'])
+  const fallbackOdds = firstValue(row, ['Website Best Payout', 'Best Odds', 'Bet Payout'])
+  const fallbackEdge = firstValue(row, ['Website Best Edge', 'Best Edge', 'Bet Edge'])
+  const fallbackK = firstValue(row, ['Bet Wizard K', 'Website Wizard K', 'Model K'])
+  const fallbackKEdge = firstValue(row, ['Website Best K Edge', 'Bet K Edge', 'K Edge'])
+  const bestBet = bestModel?.bet || fallbackBet || ''
+  const bestProb = bestModel?.prob || fallbackProb || ''
+  const bestOdds = bestModel?.odds || fallbackOdds || ''
+  const bestEdge = bestModel?.edge || fallbackEdge
+  const bestK = bestModel?.k || fallbackK
+  const bestKEdge = bestModel?.kEdge || fallbackKEdge
   const fallbackModelLabel = firstValue(row, ['Website Pick Source', 'Bet Model', 'Best Model']) || 'No Pick'
   const selected = bestModel || (boardSection.includes('yesterday') ? {
     number: Number.parseInt(String(fallbackModelLabel || '').replace(/\D/g, ''), 10) || '',
