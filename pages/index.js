@@ -312,6 +312,11 @@ function betSideColor(value) {
   return '#F2EDE3'
 }
 
+function matchupText(play) {
+  const prefix = String(play?.['Matchup Prefix'] || '').trim().toLowerCase() === 'at' ? 'at' : 'vs'
+  return `${prefix} ${play?.Opponent || ''}`.trim()
+}
+
 function FreePickCard({ pick, lastUpdated }) {
   if (!pick) {
     return (
@@ -336,7 +341,7 @@ function FreePickCard({ pick, lastUpdated }) {
             {teamLogo && <img src={teamLogo} alt={`${pick['Pitcher Team']} logo`} style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }} />}
             <h3 className="free-pick-gold-name">{pick.Pitcher}</h3>
           </div>
-          <p>vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
+          <p>{matchupText(pick)}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}</p>
         </div>
         <div className="free-pick-prob" style={{ color: probabilityColor(pick['Best Prob']) }}>{formatProbability(pick['Best Prob'])}</div>
       </div>

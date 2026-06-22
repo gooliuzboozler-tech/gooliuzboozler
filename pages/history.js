@@ -240,6 +240,11 @@ function ResultBadge({ result }) {
   return <span className={`result-badge ${value === 'Hit' ? 'hit' : 'miss'}`}>{value === 'Hit' ? '✓ Hit' : '✕ Miss'}</span>
 }
 
+function matchupText(play) {
+  const prefix = String(play?.['Matchup Prefix'] || '').trim().toLowerCase() === 'at' ? 'at' : 'vs'
+  return `${prefix} ${play?.Opponent || ''}`.trim()
+}
+
 function HistoryCard({ play, preferredModel }) {
   const read = preferredRead(play, preferredModel)
   const result = inferBetResult(read.bet, play['Actual Ks'], preferredModel === 'best' ? play.Result : '')
@@ -253,7 +258,7 @@ function HistoryCard({ play, preferredModel }) {
             {teamLogo && <img src={teamLogo} alt={`${play['Pitcher Team']} logo`} style={{ width: 22, height: 22, objectFit: 'contain', flexShrink: 0 }} />}
             <span>{play.Pitcher}</span>
           </div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>vs {play.Opponent} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>{matchupText(play)} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
         </div>
         <div><ResultBadge result={result} /></div>
         <div>

@@ -1,6 +1,8 @@
 import { Redis } from '@upstash/redis'
+import liveMlb from '../../lib/liveMlb'
 
 const redis = Redis.fromEnv()
+const { enrichPlaysWithLiveMlb } = liveMlb
 
 function parseProbability(value) {
   const raw = String(value || '').replace('%', '').trim()
@@ -22,6 +24,8 @@ function publicPick(play) {
     Pitcher: play.Pitcher || '',
     'Pitcher Team': play['Pitcher Team'] || '',
     Opponent: play.Opponent || '',
+    'Matchup Prefix': play['Matchup Prefix'] || '',
+    'Matchup Label': play['Matchup Label'] || '',
     'Game Time': play['Game Time'] || '',
     Side: play.Side || '',
     Trust: play.Trust || '',
@@ -43,7 +47,7 @@ export default async function handler(req, res) {
 
   try {
     const data = await redis.get('picks:today')
-    const plays = Array.isArray(data?.plays) ? data.plays : []
+    const plays = await enrichPlaysWithLiveMlb(Array.isArray(data?.plays) ? data.plays : [])
     const freePick = pickHighestProbability(plays)
 
     return res.status(200).json({

@@ -450,7 +450,7 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
             )}
             <span>{play.Pitcher}</span>
           </div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>vs {play.Opponent} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: 2 }}>{matchupText(play)} {play['Game Time'] ? `· ${play['Game Time']}` : ''}</div>
         </div>
         <div>
           <LiveResultBadge play={play} read={preferredRead} allowStoredResult={preferredModel === 'best'} />
@@ -555,6 +555,11 @@ function getFreePick(plays) {
     .sort((a, b) => parseProbability(b['Best Prob']) - parseProbability(a['Best Prob']))[0] || null
 }
 
+function matchupText(play) {
+  const prefix = String(play?.['Matchup Prefix'] || '').trim().toLowerCase() === 'at' ? 'at' : 'vs'
+  return `${prefix} ${play?.Opponent || ''}`.trim()
+}
+
 function PublicFreePick({ pick, lastUpdated, onUnlock }) {
   if (!pick) {
     return (
@@ -579,7 +584,7 @@ function PublicFreePick({ pick, lastUpdated, onUnlock }) {
             <div className="free-pick-gold-name" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', lineHeight: 0.95, letterSpacing: '0.04em' }}>{pick.Pitcher}</div>
           </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#5A5448', letterSpacing: '0.08em', marginTop: '0.35rem' }}>
-            vs {pick.Opponent}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}
+            {matchupText(pick)}{pick['Game Time'] ? ` - ${pick['Game Time']}` : ''}
           </div>
         </div>
         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '4rem', color: probabilityColor(pick['Best Prob']), lineHeight: 0.9 }}>{formatProbability(pick['Best Prob'])}</div>
