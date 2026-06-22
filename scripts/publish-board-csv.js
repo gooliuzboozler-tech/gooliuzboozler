@@ -2,18 +2,19 @@
 
 const fs = require('node:fs/promises')
 const path = require('node:path')
+const os = require('node:os')
 
 async function main() {
   const csvPath = process.argv[2]
   const siteUrl = process.env.SITE_URL || 'https://gooliuzboozler.com'
-  const adminKey = process.env.ADMIN_KEY
+  const adminKey = process.env.ADMIN_KEY || String(await fs.readFile(path.join(os.homedir(), '.codex', 'gooliuzboozler_admin_key'), 'utf8').catch(() => '')).trim()
 
   if (!csvPath) {
     throw new Error('Usage: ADMIN_KEY=... node scripts/publish-board-csv.js /path/to/all-in-one.csv')
   }
 
   if (!adminKey) {
-    throw new Error('ADMIN_KEY is required')
+    throw new Error('ADMIN_KEY is required or ~/.codex/gooliuzboozler_admin_key must exist')
   }
 
   const csv = await fs.readFile(path.resolve(csvPath), 'utf8')

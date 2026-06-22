@@ -2,6 +2,7 @@
 
 const fs = require('node:fs/promises')
 const path = require('node:path')
+const os = require('node:os')
 
 const WEBSITE_MODEL_NUMBERS = [8, 12, 2, 6, 4, 5]
 const MIN_WEBSITE_BET_PAYOUT = 1.10
@@ -525,10 +526,10 @@ async function postPlays(siteUrl, adminKey, route, plays) {
 async function main() {
   const csvPath = process.argv[2]
   const siteUrl = (process.env.SITE_URL || 'https://gooliuzboozler.com').replace(/\/$/, '')
-  const adminKey = process.env.ADMIN_KEY
+  const adminKey = process.env.ADMIN_KEY || String(await fs.readFile(path.join(os.homedir(), '.codex', 'gooliuzboozler_admin_key'), 'utf8').catch(() => '')).trim()
 
   if (!csvPath) throw new Error('Usage: ADMIN_KEY=... node scripts/publish-all-in-one-csv.js /path/to/all-in-one.csv')
-  if (!adminKey) throw new Error('ADMIN_KEY is required')
+  if (!adminKey) throw new Error('ADMIN_KEY is required or ~/.codex/gooliuzboozler_admin_key must exist')
 
   const text = await fs.readFile(csvPath, 'utf8')
   const previousTodayPlays = await fetchPreviousToday(siteUrl)
