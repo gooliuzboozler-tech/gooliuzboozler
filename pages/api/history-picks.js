@@ -10,6 +10,45 @@ function parseMember(data) {
   return data
 }
 
+function normalizeResult(value) {
+  const raw = String(value || '').toLowerCase()
+  if (['hit', 'win', 'won', 'cash', 'cashed', 'true', 'yes', 'w'].some(v => raw.includes(v))) return 'Hit'
+  if (['miss', 'loss', 'lost', 'false', 'no', 'l'].some(v => raw.includes(v))) return 'Miss'
+  return ''
+}
+
+function inferBetResult(bet, actualKs, explicitResult) {
+  const normalized = normalizeResult(explicitResult)
+  if (normalized) return normalized
+
+  const actual = Number.parseFloat(String(actualKs || '').replace(/[^0-9.-]/g, ''))
+  const match = String(bet || '').match(/\b(Yes|No)\s+(\d+)\+/i)
+  if (!Number.isFinite(actual) || !match) return ''
+
+  const side = match[1].toLowerCase()
+  const threshold = Number.parseInt(match[2], 10)
+  if (!Number.isFinite(threshold)) return ''
+
+  return side === 'yes' ? (actual >= threshold ? 'Hit' : 'Miss') : (actual < threshold ? 'Hit' : 'Miss')
+}
+
+function historyRecordForPlays(plays) {
+  return (plays || []).reduce((record, play) => {
+    const result = inferBetResult(play['Best Bet'], play['Actual Ks'], play.Result)
+    if (result === 'Hit') record.hits += 1
+    if (result === 'Miss') record.misses += 1
+    return record
+  }, { hits: 0, misses: 0 })
+}
+
+async function buildDateRecords(dates) {
+  const entries = await Promise.all((dates || []).map(async date => {
+    const payload = await redis.get(`picks:history:${date}`).catch(() => null)
+    return [date, historyRecordForPlays(payload?.plays || [])]
+  }))
+  return Object.fromEntries(entries)
+}
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
@@ -55,9 +94,11 @@ export default async function handler(req, res) {
     const requestedDate = cleanDate(req.query.date)
     const selectedDate = requestedDate || availableDates[availableDates.length - 1] || ''
     const payload = selectedDate ? await redis.get(`picks:history:${selectedDate}`).catch(() => null) : null
+    const dateRecords = await buildDateRecords(availableDates)
 
     return res.status(200).json({
       availableDates,
+      dateRecords,
       selectedDate,
       plays: payload?.plays || [],
       lastUpdated: payload?.lastUpdated || null,

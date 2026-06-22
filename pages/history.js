@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
   { value: '8', label: 'Model 8' },
+  { value: '12', label: 'Model 12' },
   { value: '2', label: 'Model 2' },
   { value: '6', label: 'Model 6' },
   { value: '4', label: 'Model 4' },
@@ -121,7 +122,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [8, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [8, 12, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber >= 1.10)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models
@@ -177,7 +178,17 @@ function buildCalendarDays(monthKey) {
   return days
 }
 
-function HistoryCalendar({ dates, selectedDate, onSelect }) {
+function calendarResultClass(record) {
+  const hits = Number(record?.hits || 0)
+  const misses = Number(record?.misses || 0)
+  const decisions = hits + misses
+  if (!decisions) return ''
+  if (hits > misses) return 'above-500'
+  if (hits === misses) return 'at-500'
+  return 'below-500'
+}
+
+function HistoryCalendar({ dates, dateRecords, selectedDate, onSelect }) {
   const available = useMemo(() => new Set(dates), [dates])
   const monthKeys = useMemo(() => [...new Set(dates.map(date => date.slice(0, 7)))].sort(), [dates])
   const selectedMonth = selectedDate ? selectedDate.slice(0, 7) : monthKeys[monthKeys.length - 1]
@@ -204,13 +215,14 @@ function HistoryCalendar({ dates, selectedDate, onSelect }) {
         {days.map((date, i) => {
           const enabled = available.has(date)
           const day = date ? Number(date.slice(-2)) : ''
+          const resultClass = enabled ? calendarResultClass(dateRecords?.[date]) : ''
           return (
             <button
               key={`${date || 'blank'}-${i}`}
               type="button"
               disabled={!enabled}
               onClick={() => enabled && onSelect(date)}
-              className={date === selectedDate ? 'selected' : ''}
+              className={[resultClass, date === selectedDate ? 'selected' : ''].filter(Boolean).join(' ')}
             >
               {day}
             </button>
@@ -272,6 +284,7 @@ export default function History() {
   const [memberEmail, setMemberEmail] = useState('')
   const [memberPlan, setMemberPlan] = useState('')
   const [availableDates, setAvailableDates] = useState([])
+  const [dateRecords, setDateRecords] = useState({})
   const [selectedDate, setSelectedDate] = useState('')
   const [plays, setPlays] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
@@ -300,6 +313,7 @@ export default function History() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Could not load history.')
       setAvailableDates(data.availableDates || [])
+      setDateRecords(data.dateRecords || {})
       setSelectedDate(data.selectedDate || date || '')
       setPlays(data.plays || [])
       setLastUpdated(data.lastUpdated || null)
@@ -348,7 +362,7 @@ export default function History() {
             </div>
             {lastUpdated && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#5A5448', marginTop: '0.4rem', letterSpacing: '0.1em' }}>Archived: {lastUpdated}</div>}
           </div>
-          {!locked && <HistoryCalendar dates={availableDates} selectedDate={selectedDate} onSelect={selectDate} />}
+          {!locked && <HistoryCalendar dates={availableDates} dateRecords={dateRecords} selectedDate={selectedDate} onSelect={selectDate} />}
         </div>
 
         {locked ? (

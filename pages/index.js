@@ -98,6 +98,22 @@ const BACKTEST_STAT_SETS = [
     ],
   },
   {
+    key: 'model12',
+    title: 'Model 12',
+    subtitle: 'Model 11 variant weighted toward pitcher and hitter recent-form strikeouts',
+    stats: [
+      ['139-29', 'Record', 'g'],
+      ['82.74%', 'Win Rate', 'g'],
+      ['30.82%', 'ROI', ''],
+      ['168', 'Tracked Plays', ''],
+    ],
+    bars: [
+      ['Avg Probability', '79.70%', '79.70%'],
+      ['Avg Edge', '+11.97', '59.85%'],
+      ['Avg K Edge', '+1.91', '95.5%'],
+    ],
+  },
+  {
     key: 'model5',
     title: 'Model 5',
     subtitle: 'Ensemble read built from agreement across model inputs',
@@ -117,6 +133,7 @@ const BACKTEST_STAT_SETS = [
 
 const MODEL_BACKTEST_FALLBACKS = {
   8: { record: '304-33', winRate: '0.9021', roi: '', plays: '337' },
+  12: { record: '139-29', winRate: '0.8274', roi: '0.3082', plays: '168' },
   2: { record: '394-132', winRate: '0.749', roi: '0.338', plays: '526' },
   6: { record: '634-96', winRate: '0.8685', roi: '0.737', plays: '730' },
   4: { record: '185-32', winRate: '0.8525', roi: '0.3604', plays: '217' },
@@ -184,7 +201,7 @@ function backtestValue(value, fallback) {
 function getModelBacktestsFromPlays(plays) {
   const source = (plays || []).find(play => play['Model 8 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
   const out = {}
-  ;[8, 2, 6, 4, 5].forEach(modelNumber => {
+  ;[8, 12, 2, 6, 4, 5].forEach(modelNumber => {
     const fallback = MODEL_BACKTEST_FALLBACKS[modelNumber] || {}
     const record = backtestValue(source[`Model ${modelNumber} Backtest Record`], fallback.record)
     const winRate = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest Win Rate`], fallback.winRate))

@@ -34,6 +34,7 @@ const MLB_TEAM_IDS = {
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
   { value: '8', label: 'Model 8' },
+  { value: '12', label: 'Model 12' },
   { value: '2', label: 'Model 2' },
   { value: '6', label: 'Model 6' },
   { value: '4', label: 'Model 4' },
@@ -386,12 +387,13 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
   const legacyModel2Edge = play[['Conserv', 'ative Edge'].join('')] || ''
   const modelStyles = {
     8: { bg: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' },
+    12: { bg: 'rgba(20,184,166,0.07)', border: '1px solid rgba(45,212,191,0.24)', color: '#2DD4BF' },
     2: { bg: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', color: '#EAB308' },
     6: { bg: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', color: '#C084FC' },
     4: { bg: 'rgba(14,165,233,0.07)', border: '1px solid rgba(56,189,248,0.24)', color: '#38BDF8' },
     5: { bg: 'rgba(236,72,153,0.07)', border: '1px solid rgba(244,114,182,0.24)', color: '#F472B6' },
   }
-  const modelRows = [8, 2, 6, 4, 5].map(modelNumber => {
+  const modelRows = [8, 12, 2, 6, 4, 5].map(modelNumber => {
     const fallbackBest = play['Best Model'] === `Model ${modelNumber}`
     const selected = preferredModel === String(modelNumber)
     const bet = firstValue(play, [
