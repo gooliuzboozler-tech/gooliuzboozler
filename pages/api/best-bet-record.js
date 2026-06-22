@@ -7,9 +7,10 @@ const { enrichPlaysWithLiveMlb } = liveMlb
 const { cleanDate } = historyArchive
 
 function normalizeResult(value) {
-  const raw = String(value || '').toLowerCase()
-  if (['hit', 'win', 'won', 'cash', 'cashed', 'true', 'yes', 'w'].some(v => raw.includes(v))) return 'Hit'
-  if (['miss', 'loss', 'lost', 'false', 'no', 'l'].some(v => raw.includes(v))) return 'Miss'
+  const raw = String(value || '').trim().toLowerCase()
+  if (!raw || /^(no\s*pick|pass|void|push|pending|n\/a|na)$/i.test(raw)) return ''
+  if (/^(hit|win|won|cash|cashed|true|w)$/i.test(raw)) return 'Hit'
+  if (/^(miss|loss|lost|lose|false|l)$/i.test(raw)) return 'Miss'
   return ''
 }
 
