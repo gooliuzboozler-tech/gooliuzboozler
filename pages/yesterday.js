@@ -13,6 +13,7 @@ const MLB_TEAM_IDS = {
 
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
+  { value: '13', label: 'Model 13' },
   { value: '8', label: 'Model 8' },
   { value: '12', label: 'Model 12' },
   { value: '2', label: 'Model 2' },
@@ -84,7 +85,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [8, 12, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [13, 8, 12, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber > 1.16)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models
@@ -226,7 +227,7 @@ function ResultCard({ play, preferredModel = 'best' }) {
   const bestRead = getPreferredModelRead(play, preferredModel)
   const result = inferBetResult(bestRead.bet, play['Actual Ks'], preferredModel === 'best' ? play.Result : '')
   const bestModelLabel = bestRead.label
-  const modelOutcomes = [8, 12, 2, 6, 4, 5]
+  const modelOutcomes = [13, 8, 12, 2, 6, 4, 5]
     .map(modelNumber => ({
       modelNumber,
       selected: preferredModel === String(modelNumber),
