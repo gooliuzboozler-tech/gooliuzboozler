@@ -380,6 +380,7 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
   const ts = TRUST_STYLES[trust] || TRUST_STYLES.Likely
   const bestModelLabel = preferredRead.modelLabel || 'Best Model'
   const modelStyles = {
+    13: { bg: 'rgba(249,115,22,0.07)', border: '1px solid rgba(251,146,60,0.24)', color: '#FB923C' },
     8: { bg: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' },
     12: { bg: 'rgba(20,184,166,0.07)', border: '1px solid rgba(45,212,191,0.24)', color: '#2DD4BF' },
     6: { bg: 'rgba(126,34,206,0.08)', border: '1px solid rgba(168,85,247,0.24)', color: '#C084FC' },
@@ -408,7 +409,15 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
       `Model ${modelNumber} Best Odds`,
       fallbackBest ? 'Best Odds' : '',
     ]), bet, play['Kalshi Lines'])
-    return { modelNumber, bet, prob, edge, odds, selected, style: modelStyles[modelNumber] }
+    return {
+      modelNumber,
+      bet,
+      prob,
+      edge,
+      odds,
+      selected,
+      style: modelStyles[modelNumber] || { bg: 'rgba(242,237,227,0.04)', border: '1px solid rgba(242,237,227,0.14)', color: '#BFB090' },
+    }
   })
   const bestOdds = formatOdds(preferredRead.odds, preferredRead.bet, play['Kalshi Lines'])
   const parlayPick = play['Parlay Pick'] || ''
