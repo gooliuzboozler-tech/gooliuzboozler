@@ -33,9 +33,9 @@ const MLB_TEAM_IDS = {
 
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
+  { value: '13', label: 'Model 13' },
   { value: '8', label: 'Model 8' },
   { value: '12', label: 'Model 12' },
-  { value: '2', label: 'Model 2' },
   { value: '6', label: 'Model 6' },
   { value: '4', label: 'Model 4' },
   { value: '5', label: 'Model 5' },
@@ -394,7 +394,7 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
     4: { bg: 'rgba(14,165,233,0.07)', border: '1px solid rgba(56,189,248,0.24)', color: '#38BDF8' },
     5: { bg: 'rgba(236,72,153,0.07)', border: '1px solid rgba(244,114,182,0.24)', color: '#F472B6' },
   }
-  const modelRows = [8, 12, 2, 6, 4, 5].map(modelNumber => {
+  const modelRows = [13, 8, 12, 6, 4, 5].map(modelNumber => {
     const fallbackBest = play['Best Model'] === `Model ${modelNumber}`
     const selected = preferredModel === String(modelNumber)
     const bet = firstValue(play, [

@@ -4,8 +4,9 @@ const fs = require('node:fs/promises')
 const path = require('node:path')
 const os = require('node:os')
 
-const WEBSITE_MODEL_NUMBERS = [8, 12, 2, 6, 4, 5]
+const WEBSITE_MODEL_NUMBERS = [13, 8, 12, 6, 4, 5]
 const MIN_WEBSITE_BET_PAYOUT = 1.10
+const MODEL13_MIN_DISPLAY_PAYOUT = 1.05
 const MODEL8_SOURCE_MODEL_NUMBER = 1
 const MODEL8_PROBABILITY_BOOST = 16
 const MODEL8_PROBABILITY_CAP = 97
@@ -217,7 +218,8 @@ function getModel(row, modelNumber) {
 
   const oddsNumber = parseOddsNumber(odds, bet, row['Projected Kalshi Lines'])
   const normalizedBet = String(bet || '').trim().toLowerCase()
-  const usableBet = normalizedBet && normalizedBet !== 'pass' && oddsNumber >= MIN_WEBSITE_BET_PAYOUT ? bet : 'Pass'
+  const minDisplayPayout = modelNumber === 13 ? MODEL13_MIN_DISPLAY_PAYOUT : MIN_WEBSITE_BET_PAYOUT
+  const usableBet = normalizedBet && normalizedBet !== 'pass' && oddsNumber >= minDisplayPayout ? bet : 'Pass'
   const boostedProbability = boostedModelProbability(modelNumber, usableBet, prob)
   const rawEdge = firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`])
   const boostedEdge = modelNumber === 8 && oddsNumber > 0 && boostedProbability.probabilityNumber > 0
@@ -387,34 +389,36 @@ function rowToPlay(row, pitcherLogLookup = new Map()) {
     Trust: row.Trust || (selected.bet ? trustFromProbability(bestProb) : 'No Pick'),
     'Best Model': selected.number ? `Model ${selected.number}` : fallbackModelLabel,
     'Best Bet': bestBet,
+    'Model 13 Bet': modelByNumber[13]?.bet || '',
     'Model 8 Bet': modelByNumber[8]?.bet || '',
     'Model 12 Bet': modelByNumber[12]?.bet || '',
-    'Model 2 Bet': modelByNumber[2]?.bet || '',
     'Model 6 Bet': modelByNumber[6]?.bet || '',
     'Model 4 Bet': modelByNumber[4]?.bet || '',
     'Model 5 Bet': modelByNumber[5]?.bet || '',
     'Parlay Pick': row['Best Parlay Pick'] || row['Parlay Pick'] || row['Parlay Bets'] || '',
     'Best Prob': bestProb,
+    'Model 13 Prob': modelByNumber[13]?.prob || '',
     'Model 8 Prob': modelByNumber[8]?.prob || '',
     'Model 12 Prob': modelByNumber[12]?.prob || '',
-    'Model 2 Prob': modelByNumber[2]?.prob || '',
     'Model 6 Prob': modelByNumber[6]?.prob || '',
     'Model 4 Prob': modelByNumber[4]?.prob || '',
     'Model 5 Prob': modelByNumber[5]?.prob || '',
     'Best Edge': bestEdge || selected.edge,
+    'Model 13 Edge': modelByNumber[13]?.edge || '',
     'Model 8 Edge': modelByNumber[8]?.edge || '',
     'Model 12 Edge': modelByNumber[12]?.edge || '',
-    'Model 2 Edge': modelByNumber[2]?.edge || '',
     'Model 6 Edge': modelByNumber[6]?.edge || '',
     'Model 4 Edge': modelByNumber[4]?.edge || '',
     'Model 5 Edge': modelByNumber[5]?.edge || '',
     'Best Odds': bestOdds,
+    'Model 13 Odds': modelByNumber[13]?.odds || '',
     'Model 8 Odds': modelByNumber[8]?.odds || '',
     'Model 12 Odds': modelByNumber[12]?.odds || '',
-    'Model 2 Odds': modelByNumber[2]?.odds || '',
     'Model 6 Odds': modelByNumber[6]?.odds || '',
     'Model 4 Odds': modelByNumber[4]?.odds || '',
     'Model 5 Odds': modelByNumber[5]?.odds || '',
+    'Model 13 K': modelByNumber[13]?.k || '',
+    'Model 13 K Edge': modelByNumber[13]?.kEdge || '',
     'Model 12 K': modelByNumber[12]?.k || '',
     'Model 12 K Edge': modelByNumber[12]?.kEdge || '',
     'Model K': bestK || selected.k,
@@ -435,10 +439,10 @@ function rowToPlay(row, pitcherLogLookup = new Map()) {
     'Model 12 Backtest Win Rate': row['Model 12 Backtest Win Rate'] || '',
     'Model 12 Backtest Plays': row['Model 12 Backtest Plays'] || '',
     'Model 12 Backtest ROI': row['Model 12 Backtest ROI'] || '',
-    'Model 2 Backtest Record': row['Model 2 Backtest Record'] || '',
-    'Model 2 Backtest Win Rate': row['Model 2 Backtest Win Rate'] || '',
-    'Model 2 Backtest Plays': row['Model 2 Backtest Plays'] || '',
-    'Model 2 Backtest ROI': row['Model 2 Backtest ROI'] || '',
+    'Model 13 Backtest Record': row['Model 13 Backtest Record'] || '',
+    'Model 13 Backtest Win Rate': row['Model 13 Backtest Win Rate'] || '',
+    'Model 13 Backtest Plays': row['Model 13 Backtest Plays'] || '',
+    'Model 13 Backtest ROI': row['Model 13 Backtest ROI'] || '',
     'Model 6 Backtest Record': row['Model 6 Backtest Record'] || '',
     'Model 6 Backtest Win Rate': row['Model 6 Backtest Win Rate'] || '',
     'Model 6 Backtest Plays': row['Model 6 Backtest Plays'] || '',

@@ -50,19 +50,19 @@ const BACKTEST_STAT_SETS = [
     ],
   },
   {
-    key: 'model2',
-    title: 'Model 2',
-    subtitle: 'Alternate line read used for monthly and season-pass boards',
+    key: 'model13',
+    title: 'Model 13',
+    subtitle: 'Conglomerate research model with a payout-stability guardrail',
     stats: [
-      ['354-97', 'Record', 'g'],
-      ['78.49%', 'Win Rate', 'g'],
-      ['82.01%', 'ROI', ''],
-      ['451', 'Tracked Plays', ''],
+      ['246-56', 'Record', 'g'],
+      ['81.46%', 'Win Rate', 'g'],
+      ['3.92%', 'ROI', ''],
+      ['302', 'Tracked Plays', ''],
     ],
     bars: [
-      ['Avg Probability', '70.89%', '70.89%'],
-      ['Avg Edge', '+15.36', '76.8%'],
-      ['Avg K Edge', '+1.21', '60.5%'],
+      ['Avg Probability', '87.92%', '87.92%'],
+      ['Avg Edge', '+10.71', '53.55%'],
+      ['Avg K Edge', '+4.23', '100%'],
     ],
   },
   {
@@ -132,9 +132,9 @@ const BACKTEST_STAT_SETS = [
 ]
 
 const MODEL_BACKTEST_FALLBACKS = {
+  13: { record: '246-56', winRate: '0.8146', roi: '0.0392', plays: '302' },
   8: { record: '304-33', winRate: '0.9021', roi: '', plays: '337' },
   12: { record: '139-29', winRate: '0.8274', roi: '0.3082', plays: '168' },
-  2: { record: '394-132', winRate: '0.749', roi: '0.338', plays: '526' },
   6: { record: '634-96', winRate: '0.8685', roi: '0.737', plays: '730' },
   4: { record: '185-32', winRate: '0.8525', roi: '0.3604', plays: '217' },
   5: { record: '160-17', winRate: '0.904', roi: '0.4552', plays: '177' },
@@ -201,7 +201,7 @@ function backtestValue(value, fallback) {
 function getModelBacktestsFromPlays(plays) {
   const source = (plays || []).find(play => play['Model 8 Backtest Record'] || play['Model 6 Backtest Record'] || play['Model 5 Backtest Record']) || {}
   const out = {}
-  ;[8, 12, 2, 6, 4, 5].forEach(modelNumber => {
+  ;[13, 8, 12, 6, 4, 5].forEach(modelNumber => {
     const fallback = MODEL_BACKTEST_FALLBACKS[modelNumber] || {}
     const record = backtestValue(source[`Model ${modelNumber} Backtest Record`], fallback.record)
     const winRate = formatPercentLike(backtestValue(source[`Model ${modelNumber} Backtest Win Rate`], fallback.winRate))

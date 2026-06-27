@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 
 const MODEL_OPTIONS = [
   { value: 'best', label: 'Best Model' },
+  { value: '13', label: 'Model 13' },
   { value: '8', label: 'Model 8' },
   { value: '12', label: 'Model 12' },
-  { value: '2', label: 'Model 2' },
   { value: '6', label: 'Model 6' },
   { value: '4', label: 'Model 4' },
   { value: '5', label: 'Model 5' },
@@ -123,7 +123,7 @@ function usableModelRead(model) {
 }
 
 function bestReadForPlay(play) {
-  const models = [8, 12, 2, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
+  const models = [13, 8, 12, 6, 4, 5].map(modelNumber => modelRead(play, modelNumber)).filter(usableModelRead)
   const best = models
     .filter(model => model.oddsNumber >= 1.10)
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] || models
