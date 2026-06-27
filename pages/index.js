@@ -36,7 +36,7 @@ const BACKTEST_STAT_SETS = [
   {
     key: 'model8',
     title: 'Model 8',
-    subtitle: 'Model 2 cushion filter with top-100 career strikeout Yes tilt',
+    subtitle: 'Cushion filter with a top-100 career strikeout Yes tilt',
     stats: [
       ['304-33', 'Record', 'g'],
       ['90.21%', 'Win Rate', 'g'],
