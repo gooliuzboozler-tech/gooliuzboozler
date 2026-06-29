@@ -1237,3 +1237,41 @@ footer {
 .board-guide p:last-child {
   margin-bottom: 0;
 }
+
+.workload-stats-grid {
+  grid-template-columns: minmax(110px, 0.7fr) minmax(110px, 0.7fr) minmax(240px, 2fr);
+  margin-bottom: 0.9rem;
+}
+
+.workload-stat {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  background: rgba(242, 237, 227, 0.03);
+}
+
+.workload-stat-label {
+  margin-bottom: 0.25rem;
+  color: #5a5448;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.workload-stat-value {
+  color: #f2ede3;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  .workload-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workload-stat-wide {
+    grid-column: 1 / -1;
+  }
+}

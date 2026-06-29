@@ -489,6 +489,8 @@ function rowToPlay(row, pitcherLogLookup = new Map()) {
     'Board Guide': boardGuide(row, pitcher.name),
     'Opp K Rank': row['Opp K Rank'] || '',
     'K/G': row['K/G'] || logStats?.kg || '',
+    'Pitches/G': row['Pitches/G'] || '',
+    'IP/G': row['IP/G'] || '',
     'Recent Last 2 K/G': row['K/G'] || logStats?.kg || '',
     'Last 5 K/G': row['Last 5 K/G'] || logStats?.last5Kg || '',
     'Last 5 Ks': row['Last 5 Ks'] || logStats?.last5Ks || '',

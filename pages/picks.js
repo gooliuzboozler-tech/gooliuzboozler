@@ -43,6 +43,7 @@ const MODEL_OPTIONS = [
 
 const SORT_OPTIONS = [
   { value: 'probability', label: 'Probability' },
+  { value: 'kEdge', label: 'K Edge' },
   { value: 'startTime', label: 'Start Time' },
 ]
 
@@ -76,6 +77,11 @@ function parseGameStartMinutes(gameTime) {
   if (meridiem === 'AM' && hours === 12) hours = 0
   if (meridiem === 'PM' && hours !== 12) hours += 12
   return hours * 60 + minutes
+}
+
+function parseSortableNumber(value) {
+  const num = Number.parseFloat(String(value ?? '').replace(/[%,$+]/g, '').replace(/,/g, ''))
+  return Number.isFinite(num) ? num : -1e9
 }
 
 function formatRoundedNumber(value, { signed = false } = {}) {
@@ -519,6 +525,19 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
             </section>
           )}
 
+          <div className="pick-stats-grid workload-stats-grid">
+            {[
+              ['Pitches / Game', play['Pitches/G']],
+              ['Innings / Game', play['IP/G']],
+              ['Bullpen', play['Bullpen Data'] && play['Bullpen Data'] !== 'none' ? play['Bullpen Data'] : 'No recent bullpen data'],
+            ].map(([label, val]) => (
+              <div key={label} className={label === 'Bullpen' ? 'workload-stat workload-stat-wide' : 'workload-stat'}>
+                <div className="workload-stat-label">{label}</div>
+                <div className="workload-stat-value">{label === 'Bullpen' ? val : formatRoundedNumber(val)}</div>
+              </div>
+            ))}
+          </div>
+
           {showAllModels && (
             <>
               <div className="pick-stats-grid">
@@ -543,11 +562,6 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
                 </div>
               )}
 
-              {play['Bullpen Data'] && play['Bullpen Data'] !== 'none' && (
-                <div style={{ marginTop: '0.5rem', fontFamily: 'DM Mono, monospace', fontSize: '0.65rem', color: '#5A5448' }}>
-                  <span style={{ color: '#F97316' }}>⚡ Bullpen: </span>{play['Bullpen Data']}
-                </div>
-              )}
             </>
           )}
         </div>
@@ -894,6 +908,10 @@ export default function Picks() {
   const visiblePlays = planHasFullBoard(memberPlan) ? modelQualifiedPlays : modelQualifiedPlays.filter(play => isCorePlay(play, preferredModel))
   const tabs = planHasFullBoard(memberPlan) ? ['All', 'Likely', 'Playable', 'Thin'] : ['All', 'Likely', 'Playable']
   const sortedVisiblePlays = [...visiblePlays].sort((a, b) => {
+    if (sortMode === 'kEdge') {
+      const edgeDiff = parseSortableNumber(getPreferredModelRead(b, preferredModel).kEdge) - parseSortableNumber(getPreferredModelRead(a, preferredModel).kEdge)
+      if (edgeDiff !== 0) return edgeDiff
+    }
     if (sortMode === 'startTime') {
       const timeDiff = parseGameStartMinutes(a['Game Time']) - parseGameStartMinutes(b['Game Time'])
       if (timeDiff !== 0) return timeDiff
