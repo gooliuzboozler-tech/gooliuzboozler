@@ -1211,3 +1211,29 @@ footer {
   }
   .price-amt { font-size: 3.75rem; }
 }
+.board-guide {
+  margin: 0 0 0.9rem;
+  padding: 1rem;
+  border-left: 3px solid #f97316;
+  background: rgba(249, 115, 22, 0.055);
+}
+
+.board-guide-title {
+  margin-bottom: 0.65rem;
+  color: #fb923c;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+}
+
+.board-guide p {
+  margin: 0 0 0.65rem;
+  color: #bfb090;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.board-guide p:last-child {
+  margin-bottom: 0;
+}

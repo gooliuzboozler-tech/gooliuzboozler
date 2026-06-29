@@ -510,6 +510,15 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
             </div>
           )}
 
+          {play['Board Guide'] && (
+            <section className="board-guide">
+              <div className="board-guide-title">BOARD GUIDE</div>
+              {String(play['Board Guide']).split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </section>
+          )}
+
           {showAllModels && (
             <>
               <div className="pick-stats-grid">
