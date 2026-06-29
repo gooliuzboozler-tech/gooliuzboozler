@@ -58,22 +58,40 @@ function firstValue(source, keys) {
   return ''
 }
 
+function roundedNumber(value, fallback = 'n/a') {
+  const num = Number.parseFloat(String(value ?? '').replace(/[%,$]/g, '').replace(/,/g, ''))
+  if (!Number.isFinite(num)) return fallback
+  return num.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
+}
+
+function roundedPercent(value, fallback = 'n/a') {
+  const raw = String(value ?? '').trim()
+  const num = Number.parseFloat(raw.replace('%', ''))
+  if (!Number.isFinite(num)) return fallback
+  const percent = raw.includes('%') || num > 1 ? num : num * 100
+  return `${percent.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}%`
+}
+
+function roundLongDecimals(text) {
+  return String(text || '').replace(/-?\d+\.\d{3,}/g, match => roundedNumber(match, match))
+}
+
 function boardGuide(row, pitcherName) {
   const existing = firstValue(row, ['Board Guide', 'Board Guide Paragraphs', 'Pitcher Description'])
-  if (existing) return existing
+  if (existing) return roundLongDecimals(existing)
   const pitcher = pitcherName || row.Pitcher || 'This pitcher'
   const opponent = row.Opponent || 'the opponent'
-  const projection = firstValue(row, ['Model K', 'Model 1 K']) || 'n/a'
+  const projection = roundedNumber(firstValue(row, ['Model K', 'Model 1 K']))
   const bet = firstValue(row, ['Website Best Bet', 'Best Bet', 'Bet', 'Model 1 Best Bet']) || 'Pass'
-  const probability = firstValue(row, ['Website Best Prob', 'Best Prob', 'Bet Prob', 'Model 1 Best Prob']) || 'n/a'
-  const edge = firstValue(row, ['Website Best Edge', 'Best Edge', 'Bet Edge', 'Model 1 Best Edge']) || 'n/a'
+  const probability = roundedPercent(firstValue(row, ['Website Best Prob', 'Best Prob', 'Bet Prob', 'Model 1 Best Prob']))
+  const edge = roundedNumber(firstValue(row, ['Website Best Edge', 'Best Edge', 'Bet Edge', 'Model 1 Best Edge']))
   const paragraphs = [
     `${pitcher} projects for ${projection} strikeouts against ${opponent}. The current board recommendation is ${bet} at a ${probability} model probability with ${edge} price edge.`,
-    `Opponent context: ${opponent} ranks ${row['Opp K Rank'] || 'n/a'} in strikeouts, with a ${row['Opp K% vs SP'] || 'n/a'} strikeout rate against starting pitchers. Recent workload is ${row['K/G'] || 'n/a'} K/G and ${row['Pitches/G'] || 'n/a'} pitches per game.`,
+    `Opponent context: ${opponent} ranks ${roundedNumber(row['Opp K Rank'])} in strikeouts, with a ${roundedPercent(row['Opp K% vs SP'])} strikeout rate against starting pitchers. Recent workload is ${roundedNumber(row['K/G'])} K/G and ${roundedNumber(row['Pitches/G'])} pitches per game.`,
     `Pitch-mix context: ${row['Pitch Mix Matchup Detail'] || 'Detailed pitch-mix data is not available yet.'} Active hitter notes: ${row['Hitter Pitch-Type Standouts'] || row['Individual BvP Standouts'] || 'No notable hitter split is available yet.'}`,
     `Game environment: ${row['Weather/Wind'] || 'Weather is not available yet.'} Player-weather detail: ${row['Player Weather Detail'] || 'No additional weather adjustment is available.'}`,
   ]
-  return paragraphs.join('\n\n')
+  return roundLongDecimals(paragraphs.join('\n\n'))
 }
 
 function parsePitcher(rawPitcher) {

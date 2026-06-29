@@ -525,19 +525,6 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
             </section>
           )}
 
-          <div className="pick-stats-grid workload-stats-grid">
-            {[
-              ['Pitches / Game', play['Pitches/G']],
-              ['Innings / Game', play['IP/G']],
-              ['Bullpen', play['Bullpen Data'] && play['Bullpen Data'] !== 'none' ? play['Bullpen Data'] : 'No recent bullpen data'],
-            ].map(([label, val]) => (
-              <div key={label} className={label === 'Bullpen' ? 'workload-stat workload-stat-wide' : 'workload-stat'}>
-                <div className="workload-stat-label">{label}</div>
-                <div className="workload-stat-value">{label === 'Bullpen' ? val : formatRoundedNumber(val)}</div>
-              </div>
-            ))}
-          </div>
-
           {showAllModels && (
             <>
               <div className="pick-stats-grid">
@@ -545,6 +532,19 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
                   <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>{label === 'Last 5 Ks' ? (val || '-') : formatRoundedNumber(val)}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pick-stats-grid workload-stats-grid">
+                {[
+                  ['Pitches / Game', play['Pitches/G']],
+                  ['Innings / Game', play['IP/G']],
+                  ['Bullpen', play['Bullpen Data'] && play['Bullpen Data'] !== 'none' ? play['Bullpen Data'] : 'No recent bullpen data'],
+                ].map(([label, val]) => (
+                  <div key={label} className={label === 'Bullpen' ? 'workload-stat workload-stat-wide' : 'workload-stat'}>
+                    <div className="workload-stat-label">{label}</div>
+                    <div className="workload-stat-value">{label === 'Bullpen' ? val : formatRoundedNumber(val)}</div>
                   </div>
                 ))}
               </div>
