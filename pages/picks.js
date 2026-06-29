@@ -84,6 +84,15 @@ function parseSortableNumber(value) {
   return Number.isFinite(num) ? num : -1e9
 }
 
+function compactBullpenData(value) {
+  const raw = String(value || '').trim()
+  if (!raw || raw.toLowerCase() === 'none') return 'No recent data'
+  const relievers = raw.match(/(\d+)\s+relievers?/i)?.[1]
+  const factor = raw.match(/factor\s+([0-9.]+)/i)?.[1]
+  if (relievers || factor) return [relievers ? `${relievers} relievers` : '', factor ? `${formatRoundedNumber(factor)}x` : ''].filter(Boolean).join(' · ')
+  return raw
+}
+
 function formatRoundedNumber(value, { signed = false } = {}) {
   const raw = String(value ?? '').trim()
   if (!raw || raw === '—' || raw === '-') return '-'
@@ -527,24 +536,22 @@ function PickCard({ play, plan, preferredModel = 'best' }) {
 
           {showAllModels && (
             <>
-              <div className="pick-stats-grid">
-                {[['Model K', play['Model K']], ['K Edge', play['K Edge']], ['Opp K Rank', play['Opp K Rank']], ['K/G', play['Recent Last 2 K/G']], ['Last 5 Ks', play['Last 5 Ks']]].map(([label, val]) => (
-                  <div key={label} style={{ background: 'rgba(242,237,227,0.03)', padding: '0.6rem 0.75rem' }}>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', color: '#5A5448', letterSpacing: '0.12em', marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>{label === 'Last 5 Ks' ? (val || '-') : formatRoundedNumber(val)}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pick-stats-grid workload-stats-grid">
+              <div className="pick-stats-grid pitcher-detail-stats-grid">
                 {[
+                  ['Model K', play['Model K']],
+                  ['K Edge', play['K Edge']],
+                  ['Opp K Rank', play['Opp K Rank']],
+                  ['K/G', play['Recent Last 2 K/G']],
+                  ['Last 5 Ks', play['Last 5 Ks']],
                   ['Pitches / Game', play['Pitches/G']],
                   ['Innings / Game', play['IP/G']],
-                  ['Bullpen', play['Bullpen Data'] && play['Bullpen Data'] !== 'none' ? play['Bullpen Data'] : 'No recent bullpen data'],
+                  ['Bullpen', compactBullpenData(play['Bullpen Data'])],
                 ].map(([label, val]) => (
-                  <div key={label} className={label === 'Bullpen' ? 'workload-stat workload-stat-wide' : 'workload-stat'}>
+                  <div key={label} className="workload-stat">
                     <div className="workload-stat-label">{label}</div>
-                    <div className="workload-stat-value">{label === 'Bullpen' ? val : formatRoundedNumber(val)}</div>
+                    <div className="workload-stat-value" style={{ color: label === 'Opp K Rank' ? oppKRankColor(val) : '#F2EDE3' }}>
+                      {label === 'Last 5 Ks' || label === 'Bullpen' ? (val || '-') : formatRoundedNumber(val)}
+                    </div>
                   </div>
                 ))}
               </div>
