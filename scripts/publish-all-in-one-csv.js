@@ -10,6 +10,8 @@ const MODEL13_MIN_DISPLAY_PAYOUT = 1.05
 const MODEL8_SOURCE_MODEL_NUMBER = 1
 const MODEL8_PROBABILITY_BOOST = 16
 const MODEL8_PROBABILITY_CAP = 97
+const MODEL13_PROBABILITY_BOOST = 16
+const MODEL13_PROBABILITY_CAP = 97
 
 function parseCSV(text) {
   const rows = []
@@ -146,11 +148,19 @@ function boostedModelProbability(modelNumber, bet, prob) {
   if (!Number.isFinite(probabilityNumber) || probabilityNumber <= 0) return { prob, probabilityNumber: 0 }
 
   const normalizedBet = String(bet || '').trim().toLowerCase()
-  if (modelNumber !== 8 || !normalizedBet || normalizedBet === 'pass') {
+  if (!normalizedBet || normalizedBet === 'pass') {
     return { prob, probabilityNumber }
   }
 
-  const boosted = Math.min(MODEL8_PROBABILITY_CAP, probabilityNumber + MODEL8_PROBABILITY_BOOST)
+  const boost = modelNumber === 13
+    ? MODEL13_PROBABILITY_BOOST
+    : modelNumber === 8
+      ? MODEL8_PROBABILITY_BOOST
+      : 0
+  const cap = modelNumber === 13 ? MODEL13_PROBABILITY_CAP : MODEL8_PROBABILITY_CAP
+  if (!boost) return { prob, probabilityNumber }
+
+  const boosted = Math.min(cap, probabilityNumber + boost)
   return {
     prob: formatProbabilityNumber(boosted / 100),
     probabilityNumber: boosted,
@@ -222,7 +232,7 @@ function getModel(row, modelNumber) {
   const usableBet = normalizedBet && normalizedBet !== 'pass' && oddsNumber >= minDisplayPayout ? bet : 'Pass'
   const boostedProbability = boostedModelProbability(modelNumber, usableBet, prob)
   const rawEdge = firstValue(row, [`${prefix} Best Edge`, `${prefix} Edge`])
-  const boostedEdge = modelNumber === 8 && oddsNumber > 0 && boostedProbability.probabilityNumber > 0
+  const boostedEdge = (modelNumber === 8 || modelNumber === 13) && oddsNumber > 0 && boostedProbability.probabilityNumber > 0
     ? formatProbabilityNumber((boostedProbability.probabilityNumber / 100) - (1 / oddsNumber))
     : rawEdge
 
@@ -251,7 +261,7 @@ function selectedModel(row, models) {
 
   const usableModels = models.filter(isUsableModel)
   return usableModels
-    .filter(model => model.oddsNumber >= MIN_WEBSITE_BET_PAYOUT)
+    .filter(model => model.oddsNumber >= (model.number === 13 ? MODEL13_MIN_DISPLAY_PAYOUT : MIN_WEBSITE_BET_PAYOUT))
     .sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] ||
     explicitModel ||
     usableModels.sort((a, b) => b.probabilityNumber - a.probabilityNumber)[0] ||
